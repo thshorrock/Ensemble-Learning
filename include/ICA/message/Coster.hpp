@@ -1,34 +1,57 @@
 
 #include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
-#include <boost/thread/condition.hpp>
 
 namespace ICR {
   namespace ICA {
     
+    
+    /** Store the current (global) evidence bound in a thread safe way.
+     *   The evidence is evaluated at each iteration of the algorithm.
+     *   This class is passed to every VariableNode, potentially in parallel.
+     *   Coster guaranees that the cost is handled in a thread safe way.
+     */
     class Coster
     {
     public:
-      Coster() 
-	: m_Cost() 
+      /** Constructor. 
+       *  @param cost The initial cost (default 0).
+       */
+      Coster(const double cost = 0.0) 
+	: m_Cost(cost) 
       {}
       
+      /** Copy Constructor. 
+       */
+      Coster(const Coster& other) 
+	: m_Cost(other.m_Cost) 
+      {}
+      
+      /** Add a double to the cost.
+       * @param local The local cost on a variable node that is to be added to the global cost.
+       */
       void
-      operator+=(const double& d)
-      {
-	boost::mutex::scoped_lock lock(m_mutex);
-	m_Cost+=d;
+      operator+=(const double local)
+      { 
+	boost::lock_guard<boost::mutex> lock(m_mutex); 
+	m_Cost+=local;
       }
 
+      /** Assign the cost.
+       * @param cost The new cost stored.
+       */
       void 
-      operator=(const double& d)
+      operator=(const double cost)
       {
-	m_Cost = d;
+	boost::lock_guard<boost::mutex> lock(m_mutex); 
+	m_Cost = cost;
       }
 
+      /** Implicitly convert the stored global evidence to a double.
+       */
       operator double() const
       {
-	boost::mutex::scoped_lock lock(m_mutex);
+	boost::lock_guard<boost::mutex> lock(m_mutex); 
 	return m_Cost;
       }
     private:
