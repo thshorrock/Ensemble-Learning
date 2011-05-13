@@ -13,12 +13,12 @@ namespace ICR {
      */
     class Coster
     {
-      typedef boost::call_traits<double>::param_type DoubleParameter;
+      typedef boost::call_traits<double>::param_type pDouble;
     public:
       /** Constructor. 
        *  @param cost The initial cost (default 0).
        */
-      Coster(DoubleParameter cost = 0.0) 
+      Coster(pDouble cost = 0.0) 
 	: m_Cost(cost) 
       {}
       
@@ -32,7 +32,7 @@ namespace ICR {
        * @param local The local cost on a variable node that is to be added to the global cost.
        */
       void
-      operator+=(DoubleParameter local)
+      operator+=(pDouble local)
       { 
 	boost::lock_guard<boost::mutex> lock(m_mutex); 
 	m_Cost+=local;
@@ -42,7 +42,7 @@ namespace ICR {
        * @param cost The new cost stored.
        */
       void 
-      operator=(DoubleParameter cost)
+      operator=(pDouble cost)
       {
 	boost::lock_guard<boost::mutex> lock(m_mutex); 
 	m_Cost = cost;
