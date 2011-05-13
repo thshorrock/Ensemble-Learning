@@ -5,7 +5,6 @@
 namespace ICR {
   namespace ICA {
     
-    
     /** Store the current (global) evidence bound in a thread safe way.
      *   The evidence is evaluated at each iteration of the algorithm.
      *   This class is passed to every VariableNode, potentially in parallel.
@@ -13,11 +12,12 @@ namespace ICR {
      */
     class Coster
     {
+      typedef boost::call_traits<double>::param_type DoubleParameter;
     public:
       /** Constructor. 
        *  @param cost The initial cost (default 0).
        */
-      Coster(const double cost = 0.0) 
+      Coster(DoubleParameter cost = 0.0) 
 	: m_Cost(cost) 
       {}
       
@@ -31,7 +31,7 @@ namespace ICR {
        * @param local The local cost on a variable node that is to be added to the global cost.
        */
       void
-      operator+=(const double local)
+      operator+=(DoubleParameter local)
       { 
 	boost::lock_guard<boost::mutex> lock(m_mutex); 
 	m_Cost+=local;
@@ -41,7 +41,7 @@ namespace ICR {
        * @param cost The new cost stored.
        */
       void 
-      operator=(const double cost)
+      operator=(DoubleParameter cost)
       {
 	boost::lock_guard<boost::mutex> lock(m_mutex); 
 	m_Cost = cost;
