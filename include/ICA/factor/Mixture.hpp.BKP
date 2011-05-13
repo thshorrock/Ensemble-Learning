@@ -1,0 +1,162 @@
+#pragma once
+
+#include "ICA/Node.hpp"
+#include "ICA/NaturalParameters.hpp"
+#include "ICA/Moments.hpp"
+
+namespace ICR{
+  namespace ICA{
+    
+ 
+    template<class Model, class T = double>
+    class Mixture : public FactorNode<T>
+    {
+    public:
+      typedef HiddenNode<Model> ParentNode;
+      typedef HiddenNode<DiscreteModel<T> > WeightsNode;
+      //typedef VariableNode<T> ParentNode;
+      typedef VariableNode<T> ChildNode;
+      
+      Mixture(const std::vector<ParentNode*> parents,
+	      WeightsNode* weights, 
+	      ChildNode* child);
+      
+      T
+      GetFFunction() const;
+      
+      T
+      GetNormalisation() const;
+
+
+      NaturalParameters<T>
+      GetNaturalNot(const ChildNode* v) const;
+
+      void 
+      Iterate();
+    private:
+      std::vector<ParentNode*> m_parents;
+      WeightsNode* m_weights;
+      ChildNode* m_child;
+      
+      T m_FFunction, m_Normalisation;
+      NaturalParameters<T> m_NP2Child;
+      NaturalParameters<T> m_NP2Weight;
+      std::vector<NaturalParameters<T> > m_NP2Parent;
+    private:
+      mutable boost::mutex m_mutex;
+    };
+
+  }
+  }
+
+template<class Model,class T>
+ICR::ICA::Mixture<Model,T>::Mixture(const std::vector<ParentNode*> parents, WeightsNode* weights, ChildNode* child)
+  : m_parents(parents),m_weights(weights), m_child(child)
+{
+  PARALLEL_FOREACH(parents.begin(), parents.end(), 
+		   boost::bind(&ParentNode::AddChildFactor, _1, this)
+		   );
+  weights->AddChildFactor(this);
+  child->SetParentFactor(this);
+}
+
+template<class Model,class T>
+T
+ICR::ICA::Mixture<Model,T>::GetNormalisation() const
+{
+  return m_Normalisation;
+}
+
+template<class Model,class T>
+ICR::ICA::NaturalParameters<T>
+ICR::ICA::Mixture<Model,T>::GetNaturalNot(const ChildNode* v) const
+{
+  if (v == m_child) 
+    {
+      return m_NP2Child;
+    }
+  else if ( v == m_weights ) 
+    {
+      return m_NP2Weight;
+    }
+  else
+    {
+      typename std::vector<ParentNode*>::const_iterator it = PARALLEL_FIND(m_parents.begin(), m_parents.end(), static_cast<const ParentNode*>(v) );;
+      // const ParentNode* Pv = static_cast<const ParentNode*>(v);
+      //      it = 
+      size_t index = it - m_parents.begin();
+      return m_NP2Parent[index];
+    }
+}
+
+namespace{
+  template<class T>
+  class ScaleMoments {
+  public:
+    ScaleMoments(const ICR::ICA::Moments<T>& m) : m_NP(m) {}
+    ICR::ICA::NaturalParameters<T>
+    operator()(const T d)
+    {
+      return ICR::ICA::Moments<T>(d,d)*m_NP;
+    }
+  private:
+    const ICR::ICA::NaturalParameters<T>& m_NP;
+  };
+
+  
+}
+
+template<class Model,class T>
+void 
+ICR::ICA::Mixture<Model,T>::Iterate()
+{
+  std::vector<Moments<T> > parents(m_parents.size());
+      
+  //get the moments
+  PARALLEL_TRANSFORM(m_parents.begin(), m_parents.end(), parents.begin(), 
+		     boost::bind(&ParentNode::GetMoments, _1));
+      
+      
+  Moments<T> child   = m_child->GetMoments();
+  Moments<T> weight  = m_weights->GetMoments();
+  
+  
+  std::vector<Model<T> > models;
+
+  models.
+
+  //Calculate the FFactor (sum of all the mixture)
+  m_FFunction = 0;
+  std::vector<T> FF(m_parents.size());
+  PARALLEL_TRANSFORM(m_parents.begin(), m_parents.end(), FF.begin(),
+		     boost::bind(&Model::GetFFunction, _1));
+
+  PARALLEL_ACCUMULATE(FF.begin(), FF.end(),m_FFunction );
+
+  //Calculate the Normalisation (sum of all the mixture)
+  m_Normalisation = 0;
+  std::vector<T> normalisations(m_parents.size());
+  PARALLEL_TRANSFORM(m_parents.begin(), m_parents.end(), normalisations.begin(),
+		     boost::bind(&Model::GetNormalisation, _1));
+  
+  PARALLEL_ACCUMULATE(normalisations.begin(), normalisations.end(),m_Normalisation );
+
+  //Caluculate the NPs to send to the various nodes
+
+  std::vector<T> the_weights(m_parents.size());
+  
+  PARALLEL_TRANSFORM(m_parents.begin(), m_parents.end(), the_weights.begin(),
+		     boost::bind(&ParentNode::GetAvLog, _1));
+  
+  m_NP2Weight = NaturalParameters<T>(the_weights); //Discrete Node
+  
+  m_NP2Child = NaturalParameters<T>(PARALLEL_ACCUMULATE(parents.begin(),parents.end(), Moments<T>(0,0)));
+      
+  std::vector<T> scale; //need to get these from Discrete Node;
+
+  m_NP2Parent.reserve(m_parents.size());
+  PARALLEL_TRANSFORM(weight.begin(), weight.end(), m_NP2Parent.begin(), ScaleMoments<T>(child));
+      
+}
+ 
+

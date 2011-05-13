@@ -1,0 +1,91 @@
+#pragma once
+
+#include "ICA/Node.hpp"
+#include "ICA/NaturalParameters.hpp"
+#include "ICA/Moments.hpp"
+#include "ICA/Deterministic/Expression.hpp"
+#include "ICA/Deterministic/Context.hpp"
+
+// #include "ICA/Message.hpp"
+
+//#include "ICA/piping/Piping.hpp"
+#include "ICA/variable/DirichletNode.hpp"
+#include "ICA/variable/HiddenNode.hpp"
+#include "ICA/variable/DeterministicNode.hpp"
+#include "ICA/exponential_models/GaussianModel.hpp"
+#include "ICA/exponential_models/GammaModel.hpp"
+#include "ICA/exponential_models/DiscreteModel.hpp"
+#include <boost/shared_ptr.hpp>
+#include <boost/none.hpp>
+#include <vector>
+#include <boost/assert.hpp> 
+#include "rng.hpp"
+
+
+namespace ICR{
+  namespace ICA{
+    namespace Details{
+
+      template<template<class> class Model,  class T>
+      class CalcGaussianFactor : public FactorNode<double>
+      {
+      public:
+      
+	CalcGaussianFactor( Expression<T>* Expr, const Context<T>& context,
+			    DeterministicNode<Model<T>,T>* Child)
+	  : m_expr(Expr),
+	    m_context(context),
+	    m_child_node(Child)
+	{
+	  
+	  for(typename Context<T>::const_iterator it = context.begin();
+	      it!= context.end();
+	      ++it)
+	    {
+	      //YUK, need to sort this...
+	      const VariableNode<T>* const CV = it->first;
+	      VariableNode<T>* V = const_cast<VariableNode<T>*>(CV);
+	      V->AddChildFactor(this);
+	    }
+	  
+	  Child->SetParentFactor(this);
+	  
+	  // std::cout<<"Moments = "<<context<<std::endl;
+
+	};
+      
+      Moments<T>
+      InitialiseMoments() const
+      {
+	return Model<T>::CalcMoments(Model<T>::CalcNP2Deterministic(m_expr,m_context));
+      }
+      
+	NaturalParameters<T>
+	GetNaturalNot(const VariableNode<T>* v) const
+	{
+	  // std::cout<<"v"<<v<<std::endl;
+
+	  if (v == m_child_node) 
+	    {
+	      return Model<T>::CalcNP2Deterministic(m_expr,m_context);
+	    }
+	  else
+	    {
+	      //parent node
+	      return Model<T>::CalcNP2Parent(v,m_child_node,m_context);
+	    }
+	}
+	T
+	CalcLogNorm() const {return 0;}
+      private: 
+	Expression<T>* m_expr;
+	Context<T> m_context;
+	DeterministicNode<Model<T>,T> *m_child_node;
+      
+      };
+    
+
+    }
+    
+  }
+}

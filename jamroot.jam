@@ -1,0 +1,107 @@
+
+using testing ;
+#Name this location $(TOP),
+path-constant TOP : . ;
+
+##Use the boost-libraries as they came...
+path-constant BOOST_ROOT : ./boost/ ;
+path-constant BOOST_BASE : ./boost/ ; 
+
+
+
+alias testing-library     
+      :  $(BOOST_BASE)/libs/test/build//boost_prg_exec_monitor
+       	 $(BOOST_BASE)/libs/test/build//boost_test_exec_monitor
+	 $(BOOST_BASE)/libs/test/build//boost_unit_test_framework
+      :  <include>$(BOOST_BASE)
+      	 <define>BOOST_TEST_DYN_LINK 
+         <toolset>msvc:<link>static ;
+
+alias units-library  
+      	: /home/tommy/progs/units/build
+	: <include>/home/tommy/progs/units/include/ ;
+
+alias threaded-library     
+      : $(BOOST_BASE)/libs/thread/build//boost_thread
+      : <include>$(BOOST_BASE) 	 
+	<toolset>msvc:<link>static ;
+
+alias asio-library
+     : $(BOOST_BASE)/libs/system/build//boost_system	
+     $(BOOST_BASE)/libs/regex/build//boost_regex
+      $(BOOST_BASE)/libs/date_time/build
+     : <include>$(BOOST_BASE) <toolset>msvc:<link>static
+     ;
+
+lib maths-vec-lib
+    : 
+    : <name>maths_vec <search>/home/tommy/progs/cpp_maths/lib
+    ;
+
+lib maths-complex-lib
+    : 
+    : <name>maths_complex <search>/home/tommy/progs/cpp_maths/lib
+    ;
+
+lib maths-mat-lib
+    : 
+    : <name>maths_mat <search>/home/tommy/progs/cpp_maths/lib
+    ;
+
+lib maths-interpolate-lib
+    : 
+    : <name>maths_interpolate <search>/home/tommy/progs/cpp_maths/lib
+    ;
+lib maths-root-finder-lib
+    : 
+    : <name>maths_root_finder <search>/home/tommy/progs/cpp_maths/lib
+    ;
+
+lib maths-rng-lib
+    : 
+    : <name>maths_rng <search>/home/tommy/progs/cpp_maths/lib
+    ;
+
+lib maths-integrate-lib
+    : 
+    : <name>maths_integrate <search>/home/tommy/progs/cpp_maths/lib
+    ;
+lib maths-differentiate-lib
+    : 
+    : <name>maths_differentiate <search>/home/tommy/progs/cpp_maths/lib
+    ;
+
+alias maths-library
+    : $(TOP)//maths-vec-lib
+       $(TOP)//maths-mat-lib
+      $(TOP)//maths-complex-lib
+      $(TOP)//maths-mat-lib
+      $(TOP)//maths-rng-lib
+      $(TOP)//maths-interpolate-lib
+      $(TOP)//maths-root-finder-lib
+      /site-config//gsl-library
+    : <include>/home/tommy/progs/cpp_maths/include 
+    :
+    : <include>/home/tommy/progs/cpp_maths/include 
+    ;
+
+
+
+#Name the directory structure
+use-project /lib/ICA : ./build ;
+
+
+
+
+#build libraries
+build-project ./build ;
+
+#test libraries
+build-project ./build/test ;
+
+
+#build app
+#build-project ./src/apps/maths/build ;
+
+
+
