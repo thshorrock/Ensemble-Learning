@@ -1,23 +1,23 @@
 #ifndef BUILDER_HPP
 #define BUILDER_HPP
 
-#include "ICA/variable/ConstantNode.hpp"
-#include "ICA/variable/DataNode.hpp"
-#include "ICA/variable/HiddenNode.hpp"
-#include "ICA/variable/DirichletNode.hpp"
-#include "ICA/variable/DeterministicNode.hpp"
-// #include "ICA/variable/ForwardingNode.hpp"
+#include "ICA/node/variable/Constant.hpp"
+#include "ICA/node/variable/Data.hpp"
+#include "ICA/node/variable/Hidden.hpp"
+#include "ICA/node/variable/Dirichlet.hpp"
+#include "ICA/node/variable/Calculation.hpp"
+// #include "ICA/variable/Forwarding.hpp"
 
-#include "ICA/factor/CalcGaussian.hpp"
-#include "ICA/factor/Factor.hpp"
-#include "ICA/factor/Mixture.hpp"
+#include "ICA/node/factor/Calculation.hpp"
+#include "ICA/node/factor/Factor.hpp"
+#include "ICA/node/factor/Mixture.hpp"
 // #include "ICA/factor/DeterministicFactor.hpp"
 
-#include "ICA/exponential_models/RectifiedGaussianModel.hpp"
+#include "ICA/exponential_model/RectifiedGaussian.hpp"
 
 #include <fstream>
 
-#include "ICA/parallel_algorithms.hpp"
+#include "ICA/detail/parallel_algorithms.hpp"
 
 namespace ICR{
   namespace ICA{

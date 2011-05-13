@@ -5,10 +5,6 @@
 #include <gsl/gsl_sf_psi.h> //for Digamma function gsl_sf_psi
 #include <gsl/gsl_sf_gamma.h> //for gamma function
 
-#include "ICA/exponential_models/GaussianModel.hpp"
-#include "ICA/exponential_models/GammaModel.hpp"
-#include "ICA/exponential_models/DirichletModel.hpp"
-#include "ICA/exponential_models/DiscreteModel.hpp"
 #include "ICA.hpp"
 #include "rng.hpp"
 #include <boost/test/unit_test.hpp>
