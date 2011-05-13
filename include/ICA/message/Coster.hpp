@@ -1,6 +1,7 @@
 
 #include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
+#include <boost/call_traits.hpp>
 
 namespace ICR {
   namespace ICA {
