@@ -399,8 +399,12 @@ BOOST_AUTO_TEST_CASE( maths_op_test  )
   //check not pushed to the front or anyting silly
   BOOST_CHECK_EQUAL(NP4.size(), (size_t) 3);  
 
-  // //times
-  // // NaturalParameters<double> NP4 = NP1*NP2;
+   //times double
+  NaturalParameters<double> NP5 =  NaturalParameters<double>(v1)*-2.0;
+  BOOST_CHECK_CLOSE(NP5[0], -4.0, 0.0001);
+  BOOST_CHECK_CLOSE(NP5[1], -3.0, 0.0001);
+  BOOST_CHECK_CLOSE(NP5[2], -8.0, 0.0001);
+  BOOST_CHECK_EQUAL(NP5.size(), (size_t) 3);  
   
   //INNER PRODUCT
   NaturalParameters<double> NPIP = NaturalParameters<double>(v1);

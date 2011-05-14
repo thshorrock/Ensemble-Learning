@@ -197,6 +197,16 @@ namespace ICR{
     }  
 
 
+    template<class T>
+    inline
+    const NaturalParameters<T>
+    operator*(const NaturalParameters<T>& n,const T  d)
+    {
+      NaturalParameters<T> tmp(n);
+      return tmp*=d;
+    }  
+
+
     // template<class T>
     // inline
     // typename NaturalParameters<T>::data_type
