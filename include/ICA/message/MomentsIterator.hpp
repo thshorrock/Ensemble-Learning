@@ -157,7 +157,7 @@ namespace ICR{
       equal(const MomentsIterator<Othermoments,other_type>& other) const
       {
       	boost::lock_guard<boost::mutex> lock(m_mutex); 
-      	return (other->m_index - m_index && m_Moments==other.m_Moments);
+      	return (other.m_index == m_index && m_Moments==other.m_Moments);
       }
       
       data_reference dereference() const

@@ -271,6 +271,12 @@ BOOST_AUTO_TEST_CASE( iterator_test  )
   *it1 = 3.3;
   BOOST_CHECK_CLOSE(M1[2], 3.3, 0.0001);
   
+
+  it1 = M1.end();
+  //Equality
+  BOOST_CHECK(M1.end() == it1);
+  BOOST_CHECK(M1.begin() != it1);
+  
   
 }
 
