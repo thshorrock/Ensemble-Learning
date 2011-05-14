@@ -204,6 +204,8 @@ namespace ICR{
       Moments<T> tmp = m;
       return tmp*=d;
     }
+    //typename Moments<T>::data_parameter d, 
+    //typename Moments<T>::parameter m)
     
     // typedef  MomentsIterator< Moments<double>, double>       DoubleMomentsIterator ;
     // // typedef  typename MomentsIterator<const Moments<T>, T> const_iterator ;
