@@ -5,7 +5,8 @@
 #include <gsl/gsl_sf_psi.h> //for Digamma function gsl_sf_psi
 #include <gsl/gsl_sf_gamma.h> //for gamma function
 
-#include "ICA.hpp"
+#include "ICA/message/Coster.hpp"
+#include "ICA/message/Moments.hpp"
 #include "rng.hpp"
 #include <boost/test/unit_test.hpp>
 #include <iostream>
@@ -17,7 +18,10 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include<boost/assign/list_of.hpp>
+#include <boost/assign/std/vector.hpp>
 using namespace ICR::ICA;
+using namespace boost::assign;
 //____________________________________________________________________________//
 
 typedef ICR::maths::vector<boost::units::si::dimensionless> vec;
@@ -74,6 +78,173 @@ BOOST_AUTO_TEST_CASE( incr_test  )
 
 BOOST_AUTO_TEST_SUITE_END()
 
+
+/*****************************************************
+ *****************************************************
+ *****               Moments TEST               *******
+ *****************************************************
+ *****************************************************/
+
+BOOST_AUTO_TEST_SUITE( Moments_test )
+
+BOOST_AUTO_TEST_CASE( constr_test  )
+{
+  Moments<double> M1;
+  Moments<double> M2(2);
+  std::vector<double> v = boost::assign::list_of(2.0)(1.5)(4.0);
+  Moments<double> M3(v);
+  Moments<double> M4(2,2.5);
+  Moments<double> M5(M3);
+  
+  Moments<double> M6;
+  M6 = M3;
+  
+  //also tests size
+  BOOST_CHECK_EQUAL(M1.size(), (size_t) 0);  
+  BOOST_CHECK_EQUAL(M2.size(), (size_t) 2);  
+  BOOST_CHECK_EQUAL(M3.size(), (size_t) 3);  
+  BOOST_CHECK_EQUAL(M4.size(), (size_t) 2);  
+  BOOST_CHECK_EQUAL(M5.size(), (size_t) 3); 
+  BOOST_CHECK_EQUAL(M5.size(), (size_t) 3);  
+  
+  //also tests operator[] const
+  BOOST_CHECK_CLOSE(M2[0], 0.0, 0.0001);
+  BOOST_CHECK_CLOSE(M2[1], 0.0, 0.0001);
+  BOOST_CHECK_CLOSE(M3[0], 2.0, 0.0001);
+  BOOST_CHECK_CLOSE(M3[1], 1.5, 0.0001);
+  BOOST_CHECK_CLOSE(M3[2], 4.0, 0.0001);
+  BOOST_CHECK_CLOSE(M4[0], 2.0, 0.0001);
+  BOOST_CHECK_CLOSE(M4[1], 2.5, 0.0001);
+  BOOST_CHECK_CLOSE(M5[0], 2.0, 0.0001);
+  BOOST_CHECK_CLOSE(M5[1], 1.5, 0.0001);
+  BOOST_CHECK_CLOSE(M5[2], 4.0, 0.0001);
+  BOOST_CHECK_CLOSE(M6[0], 2.0, 0.0001);
+  BOOST_CHECK_CLOSE(M6[1], 1.5, 0.0001);
+  BOOST_CHECK_CLOSE(M6[2], 4.0, 0.0001);
+}
+
+BOOST_AUTO_TEST_CASE( op_square_test  )
+{
+  std::vector<double> v = boost::assign::list_of(2.0)(1.5)(4.0);
+  Moments<double> M1(v);
+  BOOST_CHECK_CLOSE(M1[0], 2.0, 0.0001);
+  BOOST_CHECK_CLOSE(M1[1], 1.5, 0.0001);
+  BOOST_CHECK_CLOSE(M1[2], 4.0, 0.0001);
+  
+  M1[0] = 3.0;
+  M1[1] = 3.5;
+  M1[2] = 3.7;
+
+  BOOST_CHECK_CLOSE(M1[0], 3.0, 0.0001);
+  BOOST_CHECK_CLOSE(M1[1], 3.5, 0.0001);
+  BOOST_CHECK_CLOSE(M1[2], 3.7, 0.0001);
+  
+  //check not pushed to the front or anyting silly
+  BOOST_CHECK_EQUAL(M1.size(),  (size_t) 3);  
+}
+
+BOOST_AUTO_TEST_CASE( maths_op_test  )
+{
+  std::vector<double> v1 = boost::assign::list_of(2.0)(1.5)(4.0);
+  std::vector<double> v2 = boost::assign::list_of(2.0)(-3.0)(4.0);
+  Moments<double> M1(v1);
+  BOOST_CHECK_CLOSE(M1[0], 2.0, 0.0001);
+  BOOST_CHECK_CLOSE(M1[1], 1.5, 0.0001);
+  BOOST_CHECK_CLOSE(M1[2], 4.0, 0.0001);
+
+  Moments<double> M2(v2);
+
+  //Plus
+  M1+=M2;
+  BOOST_CHECK_CLOSE(M1[0], 4.0, 0.0001);
+  BOOST_CHECK_CLOSE(M1[1], -1.5, 0.0001);
+  BOOST_CHECK_CLOSE(M1[2], 8.0, 0.0001);
+  //check not pushed to the front or anyting silly
+  BOOST_CHECK_EQUAL(M1.size(), (size_t) 3);  
+
+  //Times double
+  M1 = Moments<double>(v1);  //reset
+  M1*=-2.0;
+  BOOST_CHECK_CLOSE(M1[0], -4.0, 0.0001);
+  BOOST_CHECK_CLOSE(M1[1], -3.0, 0.0001);
+  BOOST_CHECK_CLOSE(M1[2], -8.0, 0.0001);
+  BOOST_CHECK_EQUAL(M1.size(), (size_t) 3);  
+  
+  //Times Momenst
+  M1 = Moments<double>(v1);  //reset
+  Moments<double> M3(v2);
+  M1*= M3;
+  BOOST_CHECK_CLOSE(M1[0], 4.0, 0.0001);
+  BOOST_CHECK_CLOSE(M1[1], -4.5, 0.0001);
+  BOOST_CHECK_CLOSE(M1[2], 16, 0.0001);
+  BOOST_CHECK_EQUAL(M1.size(), (size_t) 3);  
+}
+
+BOOST_AUTO_TEST_CASE( iterator_test  )
+{
+  typedef Moments<double>::iterator iterator;
+  typedef Moments<double>::const_iterator const_iterator;
+  
+  std::vector<double> v1 = boost::assign::list_of(2.0)(1.5)(4.0);
+  Moments<double> M1(v1);
+  const Moments<double> cM1(v1);
+  
+
+  //check end
+  BOOST_CHECK_EQUAL(M1.end() - M1.begin(), 3);
+
+  iterator it1 = M1.begin();
+  BOOST_CHECK_CLOSE(*it1, 2.0, 0.0001);
+  it1++;
+  BOOST_CHECK_CLOSE(*it1, 1.5, 0.0001);
+  BOOST_CHECK_CLOSE(*(++it1), 4.0, 0.0001);
+  BOOST_CHECK_EQUAL(it1 - M1.begin(), 2);
+  it1--;
+  BOOST_CHECK_CLOSE(*it1, 1.5, 0.0001);
+  BOOST_CHECK_CLOSE(*(--it1), 2.0, 0.0001);
+
+  //check end
+  BOOST_CHECK_EQUAL(cM1.end() - cM1.begin(), 3);
+
+  const_iterator cit1 = cM1.begin();
+  BOOST_CHECK_CLOSE(*cit1, 2.0, 0.0001);
+  cit1++;
+  BOOST_CHECK_CLOSE(*cit1, 1.5, 0.0001);
+  BOOST_CHECK_CLOSE(*(++cit1), 4.0, 0.0001);
+  BOOST_CHECK_EQUAL(cit1 - cM1.begin(), 2);
+  cit1--;
+  BOOST_CHECK_CLOSE(*cit1, 1.5, 0.0001);
+  BOOST_CHECK_CLOSE(*(--cit1), 2.0, 0.0001);
+
+  Moments<double>::const_iterator it2 = M1.begin();
+  BOOST_CHECK_CLOSE(*it2, 2.0, 0.0001);
+  it2++;
+  BOOST_CHECK_CLOSE(*(it2), 1.5, 0.0001);
+  BOOST_CHECK_CLOSE(*(++it2), 4.0, 0.0001);
+  BOOST_CHECK_EQUAL(it2 - M1.begin(), 2);
+  BOOST_CHECK_EQUAL(it2 - cM1.begin(), 2);
+  BOOST_CHECK_EQUAL(it2 - it1, 2);
+  it2--;
+  BOOST_CHECK_CLOSE(*(it2), 1.5, 0.0001);
+  BOOST_CHECK_CLOSE(*(--it2), 2.0, 0.0001);
+
+  
+  it1 = M1.end();
+  it2 = cM1.begin();
+  it1--;
+  //it1 = cit1; //test const conversion
+  it2 = it1; //test const conversion
+  BOOST_CHECK_CLOSE(*it1, 4.0, 0.0001);
+  BOOST_CHECK_CLOSE(*it2, 4.0, 0.0001);
+  
+  *it1 = 3.3;
+  BOOST_CHECK_CLOSE(M1[2], 3.3, 0.0001);
+  
+  
+}
+
+
+BOOST_AUTO_TEST_SUITE_END()
 
 // BOOST_AUTO_TEST_SUITE( ExpModels_test )
   
