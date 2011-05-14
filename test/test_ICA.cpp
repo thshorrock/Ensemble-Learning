@@ -8,7 +8,7 @@
 #include "ICA/message/Coster.hpp"
 #include "ICA/message/Moments.hpp"
 #include "ICA/message/NaturalParameters.hpp"
-//#include "ICA/Builder.hpp"
+#include "ICA/Builder.hpp"
 #include "rng.hpp"
 #include <boost/test/unit_test.hpp>
 #include <iostream>
