@@ -7,6 +7,7 @@
 
 #include "ICA/message/Coster.hpp"
 #include "ICA/message/Moments.hpp"
+#include "ICA/message/NaturalParameters.hpp"
 #include "rng.hpp"
 #include <boost/test/unit_test.hpp>
 #include <iostream>
@@ -21,7 +22,7 @@
 #include<boost/assign/list_of.hpp>
 #include <boost/assign/std/vector.hpp>
 using namespace ICR::ICA;
-using namespace boost::assign;
+// using namespace boost::assign;
 //____________________________________________________________________________//
 
 typedef ICR::maths::vector<boost::units::si::dimensionless> vec;
@@ -273,6 +274,205 @@ BOOST_AUTO_TEST_CASE( iterator_test  )
   
   
 }
+
+
+BOOST_AUTO_TEST_SUITE_END()
+
+
+/*****************************************************
+ *****************************************************
+ *****      NaturalParameters     TEST         *******
+ *****************************************************
+ *****************************************************/
+
+BOOST_AUTO_TEST_SUITE( NaturalParameters_test )
+
+
+BOOST_AUTO_TEST_CASE( constr_test  )
+{
+  NaturalParameters<double> NP1;
+  NaturalParameters<double> NP2(2);
+  std::vector<double> v = boost::assign::list_of(2.0)(1.5)(4.0);
+  NaturalParameters<double> NP3(v);
+  NaturalParameters<double> NP4(2,2.5);
+  NaturalParameters<double> NP5(NP3);
+  
+  NaturalParameters<double> NP6;
+  NP6 = NP3;
+  
+  //also tests size
+  BOOST_CHECK_EQUAL(NP1.size(), (size_t) 0);  
+  BOOST_CHECK_EQUAL(NP2.size(), (size_t) 2);  
+  BOOST_CHECK_EQUAL(NP3.size(), (size_t) 3);  
+  BOOST_CHECK_EQUAL(NP4.size(), (size_t) 2);  
+  BOOST_CHECK_EQUAL(NP5.size(), (size_t) 3); 
+  BOOST_CHECK_EQUAL(NP5.size(), (size_t) 3);  
+  
+  //also tests operator[] const
+  BOOST_CHECK_CLOSE(NP2[0], 0.0, 0.0001);
+  BOOST_CHECK_CLOSE(NP2[1], 0.0, 0.0001);
+  BOOST_CHECK_CLOSE(NP3[0], 2.0, 0.0001);
+  BOOST_CHECK_CLOSE(NP3[1], 1.5, 0.0001);
+  BOOST_CHECK_CLOSE(NP3[2], 4.0, 0.0001);
+  BOOST_CHECK_CLOSE(NP4[0], 2.0, 0.0001);
+  BOOST_CHECK_CLOSE(NP4[1], 2.5, 0.0001);
+  BOOST_CHECK_CLOSE(NP5[0], 2.0, 0.0001);
+  BOOST_CHECK_CLOSE(NP5[1], 1.5, 0.0001);
+  BOOST_CHECK_CLOSE(NP5[2], 4.0, 0.0001);
+  BOOST_CHECK_CLOSE(NP6[0], 2.0, 0.0001);
+  BOOST_CHECK_CLOSE(NP6[1], 1.5, 0.0001);
+  BOOST_CHECK_CLOSE(NP6[2], 4.0, 0.0001);
+}
+
+BOOST_AUTO_TEST_CASE( op_square_test  )
+{
+  std::vector<double> v = boost::assign::list_of(2.0)(1.5)(4.0);
+  NaturalParameters<double> NP1(v);
+  BOOST_CHECK_CLOSE(NP1[0], 2.0, 0.0001);
+  BOOST_CHECK_CLOSE(NP1[1], 1.5, 0.0001);
+  BOOST_CHECK_CLOSE(NP1[2], 4.0, 0.0001);
+  
+  NP1[0] = 3.0;
+  NP1[1] = 3.5;
+  NP1[2] = 3.7;
+
+  BOOST_CHECK_CLOSE(NP1[0], 3.0, 0.0001);
+  BOOST_CHECK_CLOSE(NP1[1], 3.5, 0.0001);
+  BOOST_CHECK_CLOSE(NP1[2], 3.7, 0.0001);
+  
+  //check not pushed to the front or anyting silly
+  BOOST_CHECK_EQUAL(NP1.size(),  (size_t) 3);  
+}
+
+BOOST_AUTO_TEST_CASE( maths_op_test  )
+{
+  std::vector<double> v1 = boost::assign::list_of(2.0)(1.5)(4.0);
+  std::vector<double> v2 = boost::assign::list_of(2.0)(-3.0)(4.0);
+  NaturalParameters<double> NP1(v1);
+  BOOST_CHECK_CLOSE(NP1[0], 2.0, 0.0001);
+  BOOST_CHECK_CLOSE(NP1[1], 1.5, 0.0001);
+  BOOST_CHECK_CLOSE(NP1[2], 4.0, 0.0001);
+
+  NaturalParameters<double> NP2(v2);
+
+  //Plus
+  NP1+=NP2;
+  BOOST_CHECK_CLOSE(NP1[0], 4.0, 0.0001);
+  BOOST_CHECK_CLOSE(NP1[1], -1.5, 0.0001);
+  BOOST_CHECK_CLOSE(NP1[2], 8.0, 0.0001);
+  //check not pushed to the front or anyting silly
+  BOOST_CHECK_EQUAL(NP1.size(), (size_t) 3);  
+
+  //Minus
+  NP1-=NP2;
+  BOOST_CHECK_CLOSE(NP1[0], 2.0, 0.0001);
+  BOOST_CHECK_CLOSE(NP1[1], 1.5, 0.0001);
+  BOOST_CHECK_CLOSE(NP1[2], 4.0, 0.0001);
+  //check not pushed to the front or anyting silly
+  BOOST_CHECK_EQUAL(NP1.size(), (size_t) 3);  
+
+  //Times double
+  NP1 = NaturalParameters<double>(v1);  //reset
+  NP1*=-2.0;
+  BOOST_CHECK_CLOSE(NP1[0], -4.0, 0.0001);
+  BOOST_CHECK_CLOSE(NP1[1], -3.0, 0.0001);
+  BOOST_CHECK_CLOSE(NP1[2], -8.0, 0.0001);
+  BOOST_CHECK_EQUAL(NP1.size(), (size_t) 3);  
+  
+  
+  //FREE FUNCTIONS TEST
+  //plus
+  // NaturalParameters<double> NP3 = NP1+NP2;
+  // BOOST_CHECK_CLOSE(NP3[0], 4.0, 0.0001);
+  // BOOST_CHECK_CLOSE(NP3[1], -1.5, 0.0001);
+  // BOOST_CHECK_CLOSE(NP3[2], 8.0, 0.0001);
+  // //check not pushed to the front or anyting silly
+  // BOOST_CHECK_EQUAL(NP3.size(), (size_t) 3); 
+  
+  // //Minus
+  // NaturalParameters<double> NP4 = NP3-NP2;
+  // BOOST_CHECK_CLOSE(NP4[0], 2.0, 0.0001);
+  // BOOST_CHECK_CLOSE(NP4[1], 1.5, 0.0001);
+  // BOOST_CHECK_CLOSE(NP4[2], 4.0, 0.0001);
+  // //check not pushed to the front or anyting silly
+  // BOOST_CHECK_EQUAL(NP4.size(), (size_t) 3);  
+
+  // //times
+  // // NaturalParameters<double> NP4 = NP1*NP2;
+  
+  // //INNER PRODUCT
+  // NaturalParameters<double> NPIP = NP1;
+  // Moments<double> MIP(v2);
+  // BOOST_CHECK_CLOSE(NPIP*MIP,4.0-4.5+ 16.0 , 0.0001);
+  // BOOST_CHECK_CLOSE(MIP*NP,4.0-4.5+ 16.0 , 0.0001);
+  
+  
+
+}
+
+BOOST_AUTO_TEST_CASE( iterator_test  )
+{
+  typedef NaturalParameters<double>::iterator iterator;
+  typedef NaturalParameters<double>::const_iterator const_iterator;
+  
+  std::vector<double> v1 = boost::assign::list_of(2.0)(1.5)(4.0);
+  NaturalParameters<double> M1(v1);
+  const NaturalParameters<double> cM1(v1);
+  
+
+  //check end
+  BOOST_CHECK_EQUAL(M1.end() - M1.begin(), 3);
+
+  iterator it1 = M1.begin();
+  BOOST_CHECK_CLOSE(*it1, 2.0, 0.0001);
+  it1++;
+  BOOST_CHECK_CLOSE(*it1, 1.5, 0.0001);
+  BOOST_CHECK_CLOSE(*(++it1), 4.0, 0.0001);
+  BOOST_CHECK_EQUAL(it1 - M1.begin(), 2);
+  it1--;
+  BOOST_CHECK_CLOSE(*it1, 1.5, 0.0001);
+  BOOST_CHECK_CLOSE(*(--it1), 2.0, 0.0001);
+
+  //check end
+  BOOST_CHECK_EQUAL(cM1.end() - cM1.begin(), 3);
+
+  const_iterator cit1 = cM1.begin();
+  BOOST_CHECK_CLOSE(*cit1, 2.0, 0.0001);
+  cit1++;
+  BOOST_CHECK_CLOSE(*cit1, 1.5, 0.0001);
+  BOOST_CHECK_CLOSE(*(++cit1), 4.0, 0.0001);
+  BOOST_CHECK_EQUAL(cit1 - cM1.begin(), 2);
+  cit1--;
+  BOOST_CHECK_CLOSE(*cit1, 1.5, 0.0001);
+  BOOST_CHECK_CLOSE(*(--cit1), 2.0, 0.0001);
+
+  NaturalParameters<double>::const_iterator it2 = M1.begin();
+  BOOST_CHECK_CLOSE(*it2, 2.0, 0.0001);
+  it2++;
+  BOOST_CHECK_CLOSE(*(it2), 1.5, 0.0001);
+  BOOST_CHECK_CLOSE(*(++it2), 4.0, 0.0001);
+  BOOST_CHECK_EQUAL(it2 - M1.begin(), 2);
+  BOOST_CHECK_EQUAL(it2 - it1, 2);
+  it2--;
+  BOOST_CHECK_CLOSE(*(it2), 1.5, 0.0001);
+  BOOST_CHECK_CLOSE(*(--it2), 2.0, 0.0001);
+
+  
+  it1 = M1.end();
+  it2 = cM1.begin();
+  it1--;
+  //it1 = cit1; //test const conversion
+  it2 = it1; //test const conversion
+  BOOST_CHECK_CLOSE(*it1, 4.0, 0.0001);
+  BOOST_CHECK_CLOSE(*it2, 4.0, 0.0001);
+  
+  *it1 = 3.3;
+  BOOST_CHECK_CLOSE(M1[2], 3.3, 0.0001);
+  
+  
+}
+
+
 
 
 BOOST_AUTO_TEST_SUITE_END()
