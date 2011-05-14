@@ -95,6 +95,11 @@ namespace ICR{
       reference
       operator*=(data_parameter other);
       
+      template<class U>
+      friend
+      U
+      operator*(const NaturalParameters<U>&  a, 
+		const Moments<U>& b);
     private:
 
       struct plus
@@ -126,7 +131,7 @@ namespace ICR{
       	  return i*j;
       	}
       };
-
+     
       struct times_by{
 	times_by(data_parameter t) : m_t(t) {};
   
@@ -147,9 +152,9 @@ namespace ICR{
 
     template<class T>
     inline
-    typename NaturalParameters<T>::type
-    operator+(typename NaturalParameters<T>::parameter a,
-	      typename NaturalParameters<T>::parameter b)
+    NaturalParameters<T>
+    operator+(const NaturalParameters<T>& a,
+	      const NaturalParameters<T>& b)
     {
       NaturalParameters<T> tmp = a;
       return tmp+=b;
@@ -157,45 +162,38 @@ namespace ICR{
     
     template<class T>
     inline
-    typename ICR::ICA::NaturalParameters<T>::type
-    operator-(typename ICR::ICA::NaturalParameters<T>::parameter a,
-	      typename ICR::ICA::NaturalParameters<T>::parameter b)
+    NaturalParameters<T>
+    operator-(const NaturalParameters<T>& a,
+	      const NaturalParameters<T>& b)
     {
       ICR::ICA::NaturalParameters<T> tmp = a;
       return tmp-=b;
     }  
 
+    
+ 
     template<class T>
     inline
-    typename NaturalParameters<T>::data_type
-    operator*(typename NaturalParameters<T>::parameter a, 
-	      typename Moments<T>::parameter b)
-    {
-      struct times
-      {
-	typename boost::call_traits<T>::data_type
-      	operator()(typename boost::call_traits<T>::data_parameter i, 
-      		   typename boost::call_traits<T>::data_parameter j) 
-      	{
-      	  return i*j;
-      	}
-      };
+    T
+    operator*(const NaturalParameters<T>&  a, 
+	      const Moments<T>& b)
+    { 
       
       std::vector<T> prod(a.size());
-      PARALLEL_TRANSFORM(a.begin(), a.end(), b.begin(), prod.begin(), times());
-      T sum = 0;
+      PARALLEL_TRANSFORM(a.begin(), a.end(), b.begin(), prod.begin(), 
+			 typename NaturalParameters<T>::times());
+      T sum = 0.0;
       return PARALLEL_ACCUMULATE(prod.begin(), prod.end(), sum);
     }  
-
+      
 
 
     template<class T>
     inline
-    typename NaturalParameters<T>::data_type
-    operator*(typename Moments<T>::data_parameter a, 
-	      typename NaturalParameters<T>::data_parameter b)
+    T
+    operator*(const Moments<T>& m,const NaturalParameters<T>&  p)
     {
-      return b*a;
+      return p*m;
     }  
 
 

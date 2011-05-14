@@ -8,6 +8,7 @@
 #include "ICA/message/Coster.hpp"
 #include "ICA/message/Moments.hpp"
 #include "ICA/message/NaturalParameters.hpp"
+//#include "ICA/Builder.hpp"
 #include "rng.hpp"
 #include <boost/test/unit_test.hpp>
 #include <iostream>
@@ -382,30 +383,31 @@ BOOST_AUTO_TEST_CASE( maths_op_test  )
   
   //FREE FUNCTIONS TEST
   //plus
-  // NaturalParameters<double> NP3 = NP1+NP2;
-  // BOOST_CHECK_CLOSE(NP3[0], 4.0, 0.0001);
-  // BOOST_CHECK_CLOSE(NP3[1], -1.5, 0.0001);
-  // BOOST_CHECK_CLOSE(NP3[2], 8.0, 0.0001);
-  // //check not pushed to the front or anyting silly
-  // BOOST_CHECK_EQUAL(NP3.size(), (size_t) 3); 
+  NaturalParameters<double> NP3 
+    = NaturalParameters<double>(v1)+NaturalParameters<double>(v2);
+  BOOST_CHECK_CLOSE(NP3[0], 4.0, 0.0001);
+  BOOST_CHECK_CLOSE(NP3[1], -1.5, 0.0001);
+  BOOST_CHECK_CLOSE(NP3[2], 8.0, 0.0001);
+  //check not pushed to the front or anyting silly
+  BOOST_CHECK_EQUAL(NP3.size(), (size_t) 3); 
   
-  // //Minus
-  // NaturalParameters<double> NP4 = NP3-NP2;
-  // BOOST_CHECK_CLOSE(NP4[0], 2.0, 0.0001);
-  // BOOST_CHECK_CLOSE(NP4[1], 1.5, 0.0001);
-  // BOOST_CHECK_CLOSE(NP4[2], 4.0, 0.0001);
-  // //check not pushed to the front or anyting silly
-  // BOOST_CHECK_EQUAL(NP4.size(), (size_t) 3);  
+  //Minus
+  NaturalParameters<double> NP4 = NP3-NP2;
+  BOOST_CHECK_CLOSE(NP4[0], 2.0, 0.0001);
+  BOOST_CHECK_CLOSE(NP4[1], 1.5, 0.0001);
+  BOOST_CHECK_CLOSE(NP4[2], 4.0, 0.0001);
+  //check not pushed to the front or anyting silly
+  BOOST_CHECK_EQUAL(NP4.size(), (size_t) 3);  
 
   // //times
   // // NaturalParameters<double> NP4 = NP1*NP2;
   
-  // //INNER PRODUCT
-  // NaturalParameters<double> NPIP = NP1;
-  // Moments<double> MIP(v2);
-  // BOOST_CHECK_CLOSE(NPIP*MIP,4.0-4.5+ 16.0 , 0.0001);
-  // BOOST_CHECK_CLOSE(MIP*NP,4.0-4.5+ 16.0 , 0.0001);
-  
+  //INNER PRODUCT
+  NaturalParameters<double> NPIP = NaturalParameters<double>(v1);
+  Moments<double> MIP(v2);
+  BOOST_CHECK_CLOSE(NPIP*MIP,4.0-4.5+ 16.0 , 0.0001);
+  BOOST_CHECK_CLOSE(MIP*NPIP,4.0-4.5+ 16.0 , 0.0001);
+   
   
 
 }
