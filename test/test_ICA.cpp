@@ -178,6 +178,37 @@ BOOST_AUTO_TEST_CASE( maths_op_test  )
   BOOST_CHECK_CLOSE(M1[1], -4.5, 0.0001);
   BOOST_CHECK_CLOSE(M1[2], 16, 0.0001);
   BOOST_CHECK_EQUAL(M1.size(), (size_t) 3);  
+
+  //CHECK FREE FUNCTIONS;
+  
+  //Plus
+  Moments<double> M4 = Moments<double>(v1)+Moments<double>(v2);
+  BOOST_CHECK_CLOSE(M4[0], 4.0, 0.0001);
+  BOOST_CHECK_CLOSE(M4[1], -1.5, 0.0001);
+  BOOST_CHECK_CLOSE(M4[2], 8.0, 0.0001);
+  //check not pushed to the front or anyting silly
+  BOOST_CHECK_EQUAL(M4.size(), (size_t) 3);
+
+  //Times double
+  Moments<double> M5 =  Moments<double>(v1)*-2.0;  //reset
+  BOOST_CHECK_CLOSE(M5[0], -4.0, 0.0001);
+  BOOST_CHECK_CLOSE(M5[1], -3.0, 0.0001);
+  BOOST_CHECK_CLOSE(M5[2], -8.0, 0.0001);
+  BOOST_CHECK_EQUAL(M5.size(), (size_t) 3); 
+  
+  Moments<double> M6 = -2.0* Moments<double>(v1);  //reset
+  BOOST_CHECK_CLOSE(M6[0], -4.0, 0.0001);
+  BOOST_CHECK_CLOSE(M6[1], -3.0, 0.0001);
+  BOOST_CHECK_CLOSE(M6[2], -8.0, 0.0001);
+  BOOST_CHECK_EQUAL(M6.size(), (size_t) 3);  
+  
+  //Times Momenst
+  // Moments<double> M6 = Moments<double>(v1)*M3;  //reset
+  // BOOST_CHECK_CLOSE(M6[0], 4.0, 0.0001);
+  // BOOST_CHECK_CLOSE(M6[1], -4.5, 0.0001);
+  // BOOST_CHECK_CLOSE(M6[2], 16, 0.0001);
+  // BOOST_CHECK_EQUAL(M6.size(), (size_t) 3);  
+
 }
 
 BOOST_AUTO_TEST_CASE( iterator_test  )

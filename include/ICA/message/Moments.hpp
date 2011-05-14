@@ -177,8 +177,8 @@ namespace ICR{
 
     template<class T>
     inline
-    typename Moments<T>::type
-    operator+(typename Moments<T>::parameter a, typename Moments<T>::parameter b)
+    const Moments<T>
+    operator+(const Moments<T>& a, const Moments<T>& b)
     {
       Moments<T> tmp = a;
       return tmp+=b;
@@ -186,9 +186,9 @@ namespace ICR{
     
     template<class T>  
     inline 
-    typename Moments<T>::type
-    operator*(typename Moments<T>::parameter m,  
-	      typename Moments<T>::data_parameter d)
+    const Moments<T>
+    operator*(const Moments<T>& m,  
+	      const T d)
     {
       Moments<T> tmp = m;
       return tmp*=d;
@@ -197,9 +197,9 @@ namespace ICR{
 
     template<class T>  
     inline 
-    typename Moments<T>::type
-    operator*( typename Moments<T>::data_parameter d, 
-	       typename Moments<T>::parameter m)
+    const Moments<T>
+    operator*(const T d, 
+	      const Moments<T>& m)
     {
       Moments<T> tmp = m;
       return tmp*=d;
