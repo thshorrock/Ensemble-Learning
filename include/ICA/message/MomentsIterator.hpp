@@ -36,7 +36,7 @@ namespace ICR{
       /** A constructor */
       MomentsIterator()
 	: m_Moments(0),
-	  m_index(0)
+	  m_index(0),
 	  m_mutex() 
       {}
       
@@ -47,7 +47,7 @@ namespace ICR{
        */
       explicit MomentsIterator(moments* p,  typename F::difference_type  index)
 	: m_Moments(p),
-	  m_index(index)
+	  m_index(index),
 	  m_mutex() 
       {}
       
