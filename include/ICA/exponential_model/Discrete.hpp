@@ -250,9 +250,10 @@ ICR::ICA::NaturalParameters<T>
 ICR::ICA::DiscreteModel<T>::CalcNP2Prior(const Moments<T>& Discrete)
 {
   //The probabilities are provided by Discrete and need to be passsed onto Prior
-  //std::cout<<"CalcNP2Prior = "<<Discrete<<std::endl;
-
-  return NaturalParameters<T>(Discrete);
+  // Want to simply foward these:
+  NaturalParameters<T> NP(Discrete.size());
+  PARALLEL_COPY(Discrete.begin(), Discrete.end(), NP.begin());
+  return NP;
 }
   
    
@@ -262,8 +263,11 @@ ICR::ICA::NaturalParameters<T>
 ICR::ICA::DiscreteModel<T>::CalcNP2Data(const Moments<T>& Dirichlet)
 {
   //the log probs are provided by Dirichlet, need to pass them on
+  //Want to simply copy these
+  NaturalParameters<T> NP(Dirichlet.size());
+  PARALLEL_COPY(Dirichlet.begin(), Dirichlet.end(), NP.begin());
   
-  return  NaturalParameters<T>(Dirichlet);
+  return  NP;
   //  BOOST_ASSERT(NP.size() == m_LogPi.size());
   //PARALLEL_COPY( m_LogPi.begin(), m_LogPi.end(), NP.begin(), take_log() );
   //PARALLEL_TRANSFORM( m_LogPi.begin(), m_LogPi.end(), NP.begin(), take_log() );
