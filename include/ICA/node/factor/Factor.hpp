@@ -23,20 +23,20 @@ namespace ICR{
   namespace ICA{
     
 
-    template<class Model, class T = double>
-    class Factor :  public FactorNode<T>
-    {
-      //this will not compile if you try to call it directly.
-      // You need to use one of the specializations.
-    };
+    // template<class Model, class T = double>
+    // class Factor :  public FactorNode<T>
+    // {
+    //   //this will not compile if you try to call it directly.
+    //   // You need to use one of the specializations.
+    // };
    
     /******************************************************************************
      * GaussianModel Specialisation Double
      ******************************************************************************/
-    template<>
-    class Factor<GaussianModel<double> > : public FactorNode<double>
+    template<class Model, class T = double>
+    class Factor : public FactorNode<T>
     {
-      Factor(const Factor<GaussianModel<double> >& f) {};
+      Factor(const Factor<Model>& f) {};
     public:
       
       Factor( VariableNode<double>* Parent1,  VariableNode<double>* Parent2,  VariableNode<double>* Child)
@@ -47,13 +47,12 @@ namespace ICR{
     	Parent1->AddChildFactor(this);
     	Parent2->AddChildFactor(this);
     	Child->SetParentFactor(this);
-
       };
       
       Moments<double>
       InitialiseMoments() const
       {
-	return  GaussianModel<double>::CalcSample(m_parent1_node,m_parent2_node );
+	return  Model::CalcSample(m_parent1_node,m_parent2_node );
       }
       
       double
@@ -64,11 +63,35 @@ namespace ICR{
 
 
       NaturalParameters<double>
-      GetNaturalNot(const VariableNode<double>* v) const;
-      
+      GetNaturalNot(const VariableNode<double>* v) const
+      {
+
+	if (v==m_parent1_node)
+	  {
+	    Moments<double> prec = m_parent2_node->GetMoments();
+	    Moments<double> child = m_child_node->GetMoments();
+	    return GaussianModel<double>::CalcNP2Parent1(prec,child);
+	  }
+	else if (v==m_parent2_node)
+	  {
+	    Moments<double> parent1 = m_parent1_node->GetMoments();
+	    Moments<double> child = m_child_node->GetMoments();
+	    return GaussianModel<double>::CalcNP2Parent2(parent1,child);
+	  }
+	else if (v == m_child_node) 
+	  {
+	    Moments<double> parent1 = m_parent1_node->GetMoments();
+	    Moments<double> prec = m_parent2_node->GetMoments();
+	    m_LogNorm = GaussianModel<double>::CalcLogNorm(parent1,prec);
+	    return GaussianModel<double>::CalcNP2Data(parent1,prec);
+	  }
+	else{
+	  throw ("Unknown Node in GetNaturalNot");
+	}
+      }
 
     private: 
-       VariableNode<double> *m_parent1_node, *m_parent2_node, *m_child_node;
+      VariableNode<double> *m_parent1_node, *m_parent2_node, *m_child_node;
       mutable double m_LogNorm;
     private:
       mutable boost::mutex m_mutex;
@@ -260,43 +283,6 @@ namespace ICR{
     };
     
   
-    /**************************************************************************************
-     **************************************************************************************
-     **************************************************************************************
-     *
-     *  GAUSSIAN
-     *
-     **************************************************************************************
-     **************************************************************************************
-    //  **************************************************************************************/
-    //template<>
-    inline
-    NaturalParameters<double>
-    Factor< GaussianModel<double> ,double>::GetNaturalNot(const VariableNode<double>* v) const
-    {
-      if (v==m_parent1_node)
-	{
-	  Moments<double> prec = m_parent2_node->GetMoments();
-	  Moments<double> child = m_child_node->GetMoments();
-	  return GaussianModel<double>::CalcNP2Parent1(prec,child);
-	}
-      else if (v==m_parent2_node)
-	{
-	  Moments<double> parent1 = m_parent1_node->GetMoments();
-	  Moments<double> child = m_child_node->GetMoments();
-	  return GaussianModel<double>::CalcNP2Parent2(parent1,child);
-	}
-      else if (v == m_child_node) 
-	{
-	  Moments<double> parent1 = m_parent1_node->GetMoments();
-	  Moments<double> prec = m_parent2_node->GetMoments();
-	  m_LogNorm = GaussianModel<double>::CalcLogNorm(parent1,prec);
-	  return GaussianModel<double>::CalcNP2Data(parent1,prec);
-	}
-      else{
-	throw ("Unknown Node in GetNaturalNot");
-      }
-    }
 
     /**************************************************************************************
      **************************************************************************************
