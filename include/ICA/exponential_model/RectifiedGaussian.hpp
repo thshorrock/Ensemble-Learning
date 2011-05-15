@@ -1,11 +1,4 @@
 #pragma once
-// #include "ExponentialModel.hpp"
-// #include "ICA/NaturalParameters.hpp"
-// #include "ICA/NaturalParameters.hpp"
-// #include "ICA/Node.hpp"
-// #include "ICA/variable/DeterministicNode.hpp"
-// #include "ICA/Deterministic/Context.hpp"
-// #include "ICA/Deterministic/Expression.hpp"
 #include "ICA/node/variable/Calculation.hpp"
 #include "ICA/calculation_tree/Context.hpp"
 #include "ICA/calculation_tree/Expression.hpp"
@@ -87,10 +80,6 @@ namespace ICR{
       Moments<T>
       CalcMoments(const NaturalParameters<T>& NP)  ;
       
-      // static
-      // NaturalParameters<T>
-      // CalcNaturalParameters(const Moments<T>& M);
-
       static
       NaturalParameters<T>
       CalcNP2Mean(const Moments<T>& Precision, const Moments<T>& Data)  ;
@@ -105,21 +94,9 @@ namespace ICR{
       
 
 
-      //Deterministic to Stock
-      
-      template<template<class> class Op>
-      static
-      NaturalParameters<T>
-      CalcNP2Parent(const VariableNode<T>* OtherParent,const DeterministicNode<RectifiedGaussianModel<T>, T>* Data);
+
 
       //Deterministic to Stock
-      template<template<class> class Op>
-      static
-      NaturalParameters<T>
-      CalcNP2Deterministic( VariableNode<T>* ParentA,const VariableNode<T>* ParentB);
-
-
-
       static
       NaturalParameters<T>
       CalcNP2Parent(const VariableNode<T>* ParentA, 
@@ -231,61 +208,7 @@ ICR::ICA::RectifiedGaussianModel<T>::CalcMoments(const NaturalParameters<T>& NP)
     }
 }
 
-// template<class T>
-// inline
-// ICR::ICA::NaturalParameters<T>
-// ICR::ICA::RectifiedGaussianModel<T>::CalcNaturalParameters(const Moments<T>& M)
-// {
-
-//   double precision = -1.0/(M[0]*M[0]-M[1]);
-//   return  NaturalParameters<T>( M[0]*precision, 
-// 				-0.5*precision);
-// }
-
 //Deterministic to Stock
-template<class T> 
-template<template<class> class Op>
-inline
-ICR::ICA::NaturalParameters<T>
-ICR::ICA::RectifiedGaussianModel<T>::CalcNP2Parent(const VariableNode<T>* OtherParent,const DeterministicNode<RectifiedGaussianModel<T>, T>* Data)
-{
-  const Moments<T>& FData = Data->GetForwardedMoments();
-  const Moments<T>& Other = OtherParent->GetMoments();
-  
-
-  //std::cout<<"Node Det = "<<Data<<std::endl;
-
-  //calc the forwared precision and the forwared data;
-  T fprec = -1.0/(FData[0]*FData[0]-FData[1]);
-  T fdata = FData[0];
-  T other = Other[0];
-  
-  T inv_op_data = Op<T>::Inverse(fdata,other); 
-  
-  return NaturalParameters<T>(fprec*inv_op_data, -0.5*fprec);
-}
-
-//Deterministic to Stock
-template<class T> 
-template<template<class> class Op>
-inline
-ICR::ICA::NaturalParameters<T>
-ICR::ICA::RectifiedGaussianModel<T>::CalcNP2Deterministic(VariableNode<T>* ParentA,const VariableNode<T>* ParentB)
-{
-  //  std::cout<<"Node A = "<<ParentA<<std::endl;
-
-
-  const Moments<T>&  a = ParentA->GetMoments();
-  const Moments<T>&  b = ParentB->GetMoments();
-  
-  // std::cout<<"Moments A = "<<a<<std::endl;
-  // std::cout<<"Moments B = "<<b<<std::endl;
-  //calc the forwared precision and the forwared data;
-  T prec = 1.0/( Op<T>::Forward( a[1], b[1]) - Op<T>::Forward(a[0]*a[0], b[0]*b[0]) );
-  
-  return NaturalParameters<T>(  Op<T>::Forward( a[0], b[0])*prec  , -0.5*prec);
-
-}
 
 
 template<class T> 
@@ -326,17 +249,8 @@ inline
 ICR::ICA::NaturalParameters<T>
 ICR::ICA::RectifiedGaussianModel<T>::CalcNP2Deterministic(const Expression<T>* Expr,const Context<T>& C)
 {
-  //  std::cout<<"Node A = "<<ParentA<<std::endl;
-  
   SubContext<T> C0 = C[0];
   SubContext<T> C1 = C[1];
-  // std::cout<<"C02Det = "<<C[0]<<std::endl;
-  // std::cout<<"C02Det^2 = "<<C[0]*C[0]<<std::endl;
-  // std::cout<<"C12Det = "<<C[1]<<std::endl;
-  // std::cout<<"Expr->Evaluate(C1) = "<<Expr->Evaluate(C1)<<std::endl;
-  // std::cout<<"Expr->Evaluate(C0) = "<<Expr->Evaluate(C0)<<std::endl;
-  // std::cout<<"Expr->Evaluate(C0*C0) = "<<Expr->Evaluate(C0)<<std::endl;
-
   
   T prec = 1.0/(Expr->Evaluate(C1) - Expr->Evaluate(C0*C0) );
   

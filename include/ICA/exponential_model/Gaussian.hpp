@@ -12,46 +12,6 @@
 namespace ICR{
   namespace ICA{
     
-    namespace Det
-    {
-      template<class T>
-      struct Add
-      {
-	static
-	T
-	Forward(T a, T b)
-	{
-	  return a+b;
-	}
-	static
-	T
-	Inverse(T a, T b)
-	{
-	  return a-b;
-	}
-      };
-
-      template<class T>
-      struct Multiply
-      {
-	static
-	T
-	Forward(T a, T b)
-	{
-	  return a*b;
-	}
-	static
-	T
-	Inverse(T a, T b)
-	{
-	  return a/b;
-	}
-
-
-      };
-      
-
-    }
 
 
     template<class T=double>
@@ -120,9 +80,6 @@ namespace ICR{
       Moments<T>
       CalcMoments(const NaturalParameters<T>& NP)  ;
       
-      // static
-      // NaturalParameters<T>
-      // CalcNaturalParameters(const Moments<T>& M);
 
       static
       NaturalParameters<T>
@@ -140,19 +97,6 @@ namespace ICR{
 
       //Deterministic to Stock
       
-      template<template<class> class Op>
-      static
-      NaturalParameters<T>
-      CalcNP2Parent(const VariableNode<T>* OtherParent,const DeterministicNode<GaussianModel<T>, T>* Data);
-
-      //Deterministic to Stock
-      template<template<class> class Op>
-      static
-      NaturalParameters<T>
-      CalcNP2Deterministic( VariableNode<T>* ParentA,const VariableNode<T>* ParentB);
-
-
-
       static
       NaturalParameters<T>
       CalcNP2Parent(const VariableNode<T>* ParentA, 
@@ -166,6 +110,9 @@ namespace ICR{
       CalcNP2Deterministic(const Expression<T>* Expr,const Context<T>& C);
 
     private:
+
+
+      
       static
       T
       CalcLogNorm(const T& mean,const T& mean_squared,const T& precision) ;
@@ -226,50 +173,9 @@ ICR::ICA::GaussianModel<T>::CalcMoments(const NaturalParameters<T>& NP)
 // 				-0.5*precision);
 // }
 
-//Deterministic to Stock
-template<class T> 
-template<template<class> class Op>
-inline
-ICR::ICA::NaturalParameters<T>
-ICR::ICA::GaussianModel<T>::CalcNP2Parent(const VariableNode<T>* OtherParent,const DeterministicNode<GaussianModel<T>, T>* Data)
-{
-  const Moments<T>& FData = Data->GetForwardedMoments();
-  const Moments<T>& Other = OtherParent->GetMoments();
-  
-
-  //std::cout<<"Node Det = "<<Data<<std::endl;
-
-  //calc the forwared precision and the forwared data;
-  T fprec = -1.0/(FData[0]*FData[0]-FData[1]);
-  T fdata = FData[0];
-  T other = Other[0];
-  
-  T inv_op_data = Op<T>::Inverse(fdata,other); 
-  
-  return NaturalParameters<T>(fprec*inv_op_data, -0.5*fprec);
-}
 
 //Deterministic to Stock
-template<class T> 
-template<template<class> class Op>
-inline
-ICR::ICA::NaturalParameters<T>
-ICR::ICA::GaussianModel<T>::CalcNP2Deterministic(VariableNode<T>* ParentA,const VariableNode<T>* ParentB)
-{
-  //  std::cout<<"Node A = "<<ParentA<<std::endl;
 
-
-  const Moments<T>&  a = ParentA->GetMoments();
-  const Moments<T>&  b = ParentB->GetMoments();
-  
-  // std::cout<<"Moments A = "<<a<<std::endl;
-  // std::cout<<"Moments B = "<<b<<std::endl;
-  //calc the forwared precision and the forwared data;
-  T prec = 1.0/( Op<T>::Forward( a[1], b[1]) - Op<T>::Forward(a[0]*a[0], b[0]*b[0]) );
-  
-  return NaturalParameters<T>(  Op<T>::Forward( a[0], b[0])*prec  , -0.5*prec);
-
-}
 
 
 template<class T> 
@@ -308,24 +214,15 @@ ICR::ICA::GaussianModel<T>::CalcNP2Parent(const VariableNode<T>* ParentA,
 template<class T> 
 inline
 ICR::ICA::NaturalParameters<T>
-ICR::ICA::GaussianModel<T>::CalcNP2Deterministic(const Expression<T>* Expr,const Context<T>& C)
+ICR::ICA::GaussianModel<T>::CalcNP2Deterministic(const Expression<T>* Expr,const Context<T>& M)
 {
-  //  std::cout<<"Node A = "<<ParentA<<std::endl;
-  
-  SubContext<T> C0 = C[0];
-  SubContext<T> C1 = C[1];
-  // std::cout<<"C02Det = "<<C[0]<<std::endl;
-  // std::cout<<"C02Det^2 = "<<C[0]*C[0]<<std::endl;
-  // std::cout<<"C12Det = "<<C[1]<<std::endl;
-  // std::cout<<"Expr->Evaluate(C1) = "<<Expr->Evaluate(C1)<<std::endl;
-  // std::cout<<"Expr->Evaluate(C0) = "<<Expr->Evaluate(C0)<<std::endl;
-  // std::cout<<"Expr->Evaluate(C0*C0) = "<<Expr->Evaluate(C0)<<std::endl;
-
-  
-  T prec = 1.0/(Expr->Evaluate(C1) - Expr->Evaluate(C0*C0) );
-  
-  return NaturalParameters<T>(  Expr->Evaluate(C0) *prec  , -0.5*prec);
-
+  //The context provides the Moments of every element in expression.
+  SubContext<T> M0 = M[0];  //All the first moments  (the <x>'s of every element in expr)
+  SubContext<T> M1 = M[1];  //The second moment (the <x^2> of every element of expression)
+  //Precision is 1.0/ (<expr(x^2)> - <expr(x)>^2)
+  T prec = 1.0/(Expr->Evaluate(M1) - Expr->Evaluate(M0*M0) );
+  // NP = [<expr(x)> * prec, -0.5*prec]
+  return NaturalParameters<T>(  Expr->Evaluate(M0) *prec  , -0.5*prec);
 }
 
 
