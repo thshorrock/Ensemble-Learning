@@ -632,7 +632,7 @@ namespace ICR{
 	//     		     boost::bind(&VariableNode<T>::Iterate, _1, boost::ref(Cost))
 	//     		     );
 
-	// Initialise();
+	 Initialise();
 	
 	for(size_t i=0;i<max_iterations;++i){
 	  double Cost = Iterate();
@@ -669,10 +669,14 @@ namespace ICR{
       Initialise()
       {
 	if (!m_initialised) {
-	  PARALLEL_FOREACH(m_Nodes.begin(), m_Nodes.end(),
-			   boost::bind(&VariableNode<T>::InitialiseMoments, _1)
-			   );
-	  m_initialised=true;
+	  for(size_t i=0;i<5;++i){
+
+
+	    PARALLEL_FOREACH(m_Nodes.begin(), m_Nodes.end(),
+			     boost::bind(&VariableNode<T>::InitialiseMoments, _1)
+			     );
+	    m_initialised=true;
+	  }
 	}
 
       }

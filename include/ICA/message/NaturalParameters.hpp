@@ -57,7 +57,7 @@ namespace ICR{
       const_iterator;
 
       /** Constructor */
-      NaturalParameters(size_parameter size = 0);
+      NaturalParameters(size_parameter size =0 );
       
       NaturalParameters(vector_parameter NP);
       // NaturalParameters(const Moments<T>& m);

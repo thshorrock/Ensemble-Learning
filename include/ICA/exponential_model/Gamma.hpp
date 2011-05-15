@@ -32,13 +32,14 @@ namespace ICR{
 	const T shape  = Shape->GetMoments()[0];
 	const T iscale = IScale->GetMoments()[0];
 
-	  
+	//std::cout<<"IScale Moments = "<<IScale<<std::endl;
+
 	const T x=  random->gamma(shape,1.0/iscale) + 1e-6; //cannot be zero so add something sma
 	
-	std::cout<<"x = "<<x<<std::endl;
+	//std::cout<<"x = "<<x<<std::endl;
 	 Moments<double> M(x,std::log(x));
 	 
-	 std::cout<<"Init = "<<M<<std::endl;
+	 // std::cout<<"Init = "<<M<<std::endl;
 	 return M;
       }
       
@@ -97,6 +98,11 @@ ICR::ICA::GammaModel<T>::CalcLogNorm(const NaturalParameters<T>& NP)
 {
   T shape  = NP[1]+1;
   T iscale = -NP[0];
+  if (iscale>0)
+    {
+      //      std::cout<<"NP = "<<NP<<std::endl;
+
+    }
   BOOST_ASSERT(iscale>0);
   return CalcLogNorm(shape, iscale);
 }

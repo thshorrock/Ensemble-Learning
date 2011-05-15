@@ -100,7 +100,7 @@ namespace ICR{
     	Precision->AddChildFactor(this);
     	Child->SetParentFactor(this);
 
-	const Moments<double> M =RectifiedGaussianModel<double>::CalcSample(Mean, Precision);
+	//const Moments<double> M =RectifiedGaussianModel<double>::CalcSample(Mean, Precision);
       };
       
       

@@ -148,7 +148,7 @@ namespace ICR{
       Moments<double>
       InitialiseMoments() const
       {
-	return GaussianModel<double>::CalcSample(m_mean_nodes,m_precision_nodes, m_weights_node );
+	return RectifiedGaussianModel<double>::CalcSample(m_mean_nodes,m_precision_nodes, m_weights_node );
       }
 
       // double
