@@ -35,29 +35,29 @@ namespace ICR{
       Mixture(const Mixture<GaussianModel<double> >& f) {};
     public:
       
-      Mixture( std::vector<VariableNode<double>*>& Mean, 
-	       std::vector<VariableNode<double>*>& Precision,  
+      Mixture( std::vector<VariableNode<double>*>& Parent1, 
+	       std::vector<VariableNode<double>*>& Parent2,  
 	       HiddenNode<DiscreteModel<double> >* Weights,
 	       VariableNode<double>* child
 	       
 	       )
-	:  m_mean_nodes(Mean), 
-	   m_precision_nodes(Precision),
+	:  m_parent1_nodes(Parent1), 
+	   m_parent2_nodes(Parent2),
 	   m_weights_node(Weights),
 	   m_child_node(child),
 	   m_LogNorm(0)
 	   
 	   // m_NP2Child(0.0,0.0), 
-	   // m_NP2Weights(std::vector<double>(Mean.size())),
+	   // m_NP2Weights(std::vector<double>(Parent1.size())),
 	   
-	   // m_NP2Mean(Mean.size()), m_NP2Precision(Mean.size())
+	   // m_NP2Parent1(Parent1.size()), m_NP2Parent2(Parent1.size())
       {
 	
-	BOOST_ASSERT(Mean.size() == Precision.size());
+	BOOST_ASSERT(Parent1.size() == Parent2.size());
 	
-	for(size_t i=0;i<Mean.size();++i){
-	  Mean[i]->AddChildFactor(this);
-	  m_precision_nodes[i]->AddChildFactor(this);
+	for(size_t i=0;i<Parent1.size();++i){
+	  Parent1[i]->AddChildFactor(this);
+	  m_parent2_nodes[i]->AddChildFactor(this);
 	}
 	Weights->AddChildFactor(this);
     	child->SetParentFactor(this);
@@ -69,7 +69,7 @@ namespace ICR{
       Moments<double>
       InitialiseMoments() const
       {
-	return GaussianModel<double>::CalcSample(m_mean_nodes,m_precision_nodes, m_weights_node );
+	return GaussianModel<double>::CalcSample(m_parent1_nodes,m_parent2_nodes, m_weights_node );
       }
 
       // double
@@ -94,7 +94,7 @@ namespace ICR{
       // Iterate();
     private: 
 
-      std::vector<VariableNode<double> *> m_mean_nodes, m_precision_nodes;
+      std::vector<VariableNode<double> *> m_parent1_nodes, m_parent2_nodes;
       HiddenNode<DiscreteModel<double> > *m_weights_node;
       VariableNode<double>  *m_child_node;
       
@@ -103,8 +103,8 @@ namespace ICR{
       mutable double m_LogNorm;
       // NaturalParameters<double> m_NP2Child;
       // NaturalParameters<double> m_NP2Weights;
-      // std::vector<NaturalParameters<double> > m_NP2Mean;
-      // std::vector<NaturalParameters<double> > m_NP2Precision;
+      // std::vector<NaturalParameters<double> > m_NP2Parent1;
+      // std::vector<NaturalParameters<double> > m_NP2Parent2;
       mutable boost::mutex m_mutex;
     };
     
@@ -117,29 +117,29 @@ namespace ICR{
       Mixture(const Mixture<RectifiedGaussianModel<double> >& f) {};
     public:
       
-      Mixture( std::vector<VariableNode<double>*>& Mean, 
-	       std::vector<VariableNode<double>*>& Precision,  
+      Mixture( std::vector<VariableNode<double>*>& Parent1, 
+	       std::vector<VariableNode<double>*>& Parent2,  
 	       HiddenNode<DiscreteModel<double> >* Weights,
 	       VariableNode<double>* child
 	       
 	       )
-	:  m_mean_nodes(Mean), 
-	   m_precision_nodes(Precision),
+	:  m_parent1_nodes(Parent1), 
+	   m_parent2_nodes(Parent2),
 	   m_weights_node(Weights),
 	   m_child_node(child),
 	   m_LogNorm(0)
 	   
 	   // m_NP2Child(0.0,0.0), 
-	   // m_NP2Weights(std::vector<double>(Mean.size())),
+	   // m_NP2Weights(std::vector<double>(Parent1.size())),
 	   
-	   // m_NP2Mean(Mean.size()), m_NP2Precision(Mean.size())
+	   // m_NP2Parent1(Parent1.size()), m_NP2Parent2(Parent1.size())
       {
 	
-	BOOST_ASSERT(Mean.size() == Precision.size());
+	BOOST_ASSERT(Parent1.size() == Parent2.size());
 	
-	for(size_t i=0;i<Mean.size();++i){
-	  Mean[i]->AddChildFactor(this);
-	  m_precision_nodes[i]->AddChildFactor(this);
+	for(size_t i=0;i<Parent1.size();++i){
+	  Parent1[i]->AddChildFactor(this);
+	  m_parent2_nodes[i]->AddChildFactor(this);
 	}
 	Weights->AddChildFactor(this);
     	child->SetParentFactor(this);
@@ -148,7 +148,7 @@ namespace ICR{
       Moments<double>
       InitialiseMoments() const
       {
-	return RectifiedGaussianModel<double>::CalcSample(m_mean_nodes,m_precision_nodes, m_weights_node );
+	return RectifiedGaussianModel<double>::CalcSample(m_parent1_nodes,m_parent2_nodes, m_weights_node );
       }
 
       // double
@@ -173,7 +173,7 @@ namespace ICR{
       // Iterate();
     private: 
 
-      std::vector<VariableNode<double> *> m_mean_nodes, m_precision_nodes;
+      std::vector<VariableNode<double> *> m_parent1_nodes, m_parent2_nodes;
       HiddenNode<DiscreteModel<double> > *m_weights_node;
       VariableNode<double>  *m_child_node;
       
@@ -182,8 +182,8 @@ namespace ICR{
       mutable double m_LogNorm;
       // NaturalParameters<double> m_NP2Child;
       // NaturalParameters<double> m_NP2Weights;
-      // std::vector<NaturalParameters<double> > m_NP2Mean;
-      // std::vector<NaturalParameters<double> > m_NP2Precision;
+      // std::vector<NaturalParameters<double> > m_NP2Parent1;
+      // std::vector<NaturalParameters<double> > m_NP2Parent2;
       mutable boost::mutex m_mutex;
     };
     
@@ -209,14 +209,14 @@ namespace ICR{
 	  m_LogNorm = 0;
 	  
 	  const Moments<double>& weights = m_weights_node->GetMoments();
-	  for(size_t i=0;i<m_mean_nodes.size();++i){
-	    const Moments<double>& mean = m_mean_nodes[i]->GetMoments();
-	    const Moments<double>& prec = m_precision_nodes[i]->GetMoments();
+	  for(size_t i=0;i<m_parent1_nodes.size();++i){
+	    const Moments<double>& parent1 = m_parent1_nodes[i]->GetMoments();
+	    const Moments<double>& prec = m_parent2_nodes[i]->GetMoments();
 	    NP2Child
-	      += GaussianModel<double>::CalcNP2Data( mean, prec) * weights[i];
+	      += GaussianModel<double>::CalcNP2Data( parent1, prec) * weights[i];
 	    
 	    m_LogNorm 
-	      += GaussianModel<double>::CalcLogNorm(mean,prec) * weights[i];
+	      += GaussianModel<double>::CalcLogNorm(parent1,prec) * weights[i];
 	  }
 	  return NP2Child;
 	  // // std::cout<<"returning child"<<m_NP2Child<<" from mixture gaussian"<<std::endl;
@@ -224,14 +224,14 @@ namespace ICR{
 	}
       else if (v == m_weights_node) 
 	{
-	  NaturalParameters<double> NP2Weights(m_mean_nodes.size());
+	  NaturalParameters<double> NP2Weights(m_parent1_nodes.size());
 	  
 
 	  const Moments<double>& child = m_child_node->GetMoments();
-	  for(size_t i=0;i<m_mean_nodes.size();++i){
-	    const Moments<double>& mean = m_mean_nodes[i]->GetMoments();
-	    const Moments<double>& prec = m_precision_nodes[i]->GetMoments();
-	    NP2Weights[i] = GaussianModel<double>::CalcAvLog(mean, prec,child);
+	  for(size_t i=0;i<m_parent1_nodes.size();++i){
+	    const Moments<double>& parent1 = m_parent1_nodes[i]->GetMoments();
+	    const Moments<double>& prec = m_parent2_nodes[i]->GetMoments();
+	    NP2Weights[i] = GaussianModel<double>::CalcAvLog(parent1, prec,child);
 	  }
 	  return NP2Weights;
 	  // std::cout<<"returning weight"<<m_NP2Weights<<" from mixture gaussian"<<std::endl;
@@ -242,27 +242,27 @@ namespace ICR{
       else 
 	{
 	  std::vector<VariableNode<double> *>::const_iterator it;
-	  it = PARALLEL_FIND(m_mean_nodes.begin(), m_mean_nodes.end(), v);
-	  if (it!=m_mean_nodes.end()) 
+	  it = PARALLEL_FIND(m_parent1_nodes.begin(), m_parent1_nodes.end(), v);
+	  if (it!=m_parent1_nodes.end()) 
 	    {
-	      size_t i = it-m_mean_nodes.begin();
+	      size_t i = it-m_parent1_nodes.begin();
 	      const Moments<double>& weights = m_weights_node->GetMoments();
-	      const Moments<double>& prec = m_precision_nodes[i]->GetMoments();
+	      const Moments<double>& prec = m_parent2_nodes[i]->GetMoments();
 	      const Moments<double>& child = m_child_node->GetMoments();
-	      return GaussianModel<double>::CalcNP2Mean(prec,child)  * weights[i];
-	      //	std::cout<<"returning mean["<<i<<"] "<<m_NP2Mean[i]<<" from mixture gaussian"<<std::endl;
-	      // return m_NP2Mean[i];
+	      return GaussianModel<double>::CalcNP2Parent1(prec,child)  * weights[i];
+	      //	std::cout<<"returning parent1["<<i<<"] "<<m_NP2Parent1[i]<<" from mixture gaussian"<<std::endl;
+	      // return m_NP2Parent1[i];
 	    }
 	  else
 	    {
-	      it = PARALLEL_FIND(m_precision_nodes.begin(), m_precision_nodes.end(), v);
-	      size_t i = it-m_precision_nodes.begin();
+	      it = PARALLEL_FIND(m_parent2_nodes.begin(), m_parent2_nodes.end(), v);
+	      size_t i = it-m_parent2_nodes.begin();
 	      const Moments<double>& weights = m_weights_node->GetMoments();
-	      const Moments<double>& mean = m_mean_nodes[i]->GetMoments();
+	      const Moments<double>& parent1 = m_parent1_nodes[i]->GetMoments();
 	      const Moments<double>& child = m_child_node->GetMoments();
-	      return GaussianModel<double>::CalcNP2Precision(mean,child) * weights[i];
-	      //	std::cout<<"returning prec["<<i<<"] "<<m_NP2Precision[i]<<" from mixture gaussian"<<std::endl;
-	      // return m_NP2Precision[i];
+	      return GaussianModel<double>::CalcNP2Parent2(parent1,child) * weights[i];
+	      //	std::cout<<"returning prec["<<i<<"] "<<m_NP2Parent2[i]<<" from mixture gaussian"<<std::endl;
+	      // return m_NP2Parent2[i];
 	    }
 	}
       throw ("Unknown Node in GetNaturalNot");
@@ -290,14 +290,14 @@ namespace ICR{
 	  m_LogNorm = 0;
 	  
 	  const Moments<double>& weights = m_weights_node->GetMoments();
-	  for(size_t i=0;i<m_mean_nodes.size();++i){
-	    const Moments<double>& mean = m_mean_nodes[i]->GetMoments();
-	    const Moments<double>& prec = m_precision_nodes[i]->GetMoments();
+	  for(size_t i=0;i<m_parent1_nodes.size();++i){
+	    const Moments<double>& parent1 = m_parent1_nodes[i]->GetMoments();
+	    const Moments<double>& prec = m_parent2_nodes[i]->GetMoments();
 	    NP2Child
-	      += RectifiedGaussianModel<double>::CalcNP2Data( mean, prec) * weights[i];
+	      += RectifiedGaussianModel<double>::CalcNP2Data( parent1, prec) * weights[i];
 	    
 	    m_LogNorm 
-	      += RectifiedGaussianModel<double>::CalcLogNorm(mean,prec) * weights[i];
+	      += RectifiedGaussianModel<double>::CalcLogNorm(parent1,prec) * weights[i];
 	  }
 	  return NP2Child;
 	  // // std::cout<<"returning child"<<m_NP2Child<<" from mixture gaussian"<<std::endl;
@@ -305,14 +305,14 @@ namespace ICR{
 	}
       else if (v == m_weights_node) 
 	{
-	  NaturalParameters<double> NP2Weights(m_mean_nodes.size());
+	  NaturalParameters<double> NP2Weights(m_parent1_nodes.size());
 	  
 
 	  const Moments<double>& child = m_child_node->GetMoments();
-	  for(size_t i=0;i<m_mean_nodes.size();++i){
-	    const Moments<double>& mean = m_mean_nodes[i]->GetMoments();
-	    const Moments<double>& prec = m_precision_nodes[i]->GetMoments();
-	    NP2Weights[i] = RectifiedGaussianModel<double>::CalcAvLog(mean, prec,child);
+	  for(size_t i=0;i<m_parent1_nodes.size();++i){
+	    const Moments<double>& parent1 = m_parent1_nodes[i]->GetMoments();
+	    const Moments<double>& prec = m_parent2_nodes[i]->GetMoments();
+	    NP2Weights[i] = RectifiedGaussianModel<double>::CalcAvLog(parent1, prec,child);
 	  }
 	  return NP2Weights;
 	  // std::cout<<"returning weight"<<m_NP2Weights<<" from mixture gaussian"<<std::endl;
@@ -323,27 +323,27 @@ namespace ICR{
       else 
 	{
 	  std::vector<VariableNode<double> *>::const_iterator it;
-	  it = PARALLEL_FIND(m_mean_nodes.begin(), m_mean_nodes.end(), v);
-	  if (it!=m_mean_nodes.end()) 
+	  it = PARALLEL_FIND(m_parent1_nodes.begin(), m_parent1_nodes.end(), v);
+	  if (it!=m_parent1_nodes.end()) 
 	    {
-	      size_t i = it-m_mean_nodes.begin();
+	      size_t i = it-m_parent1_nodes.begin();
 	      const Moments<double>& weights = m_weights_node->GetMoments();
-	      const Moments<double>& prec = m_precision_nodes[i]->GetMoments();
+	      const Moments<double>& prec = m_parent2_nodes[i]->GetMoments();
 	      const Moments<double>& child = m_child_node->GetMoments();
-	      return RectifiedGaussianModel<double>::CalcNP2Mean(prec,child)  * weights[i];
-	      //	std::cout<<"returning mean["<<i<<"] "<<m_NP2Mean[i]<<" from mixture gaussian"<<std::endl;
-	      // return m_NP2Mean[i];
+	      return RectifiedGaussianModel<double>::CalcNP2Parent1(prec,child)  * weights[i];
+	      //	std::cout<<"returning parent1["<<i<<"] "<<m_NP2Parent1[i]<<" from mixture gaussian"<<std::endl;
+	      // return m_NP2Parent1[i];
 	    }
 	  else
 	    {
-	      it = PARALLEL_FIND(m_precision_nodes.begin(), m_precision_nodes.end(), v);
-	      size_t i = it-m_precision_nodes.begin();
+	      it = PARALLEL_FIND(m_parent2_nodes.begin(), m_parent2_nodes.end(), v);
+	      size_t i = it-m_parent2_nodes.begin();
 	      const Moments<double>& weights = m_weights_node->GetMoments();
-	      const Moments<double>& mean = m_mean_nodes[i]->GetMoments();
+	      const Moments<double>& parent1 = m_parent1_nodes[i]->GetMoments();
 	      const Moments<double>& child = m_child_node->GetMoments();
-	      return RectifiedGaussianModel<double>::CalcNP2Precision(mean,child) * weights[i];
-	      //	std::cout<<"returning prec["<<i<<"] "<<m_NP2Precision[i]<<" from mixture gaussian"<<std::endl;
-	      // return m_NP2Precision[i];
+	      return RectifiedGaussianModel<double>::CalcNP2Parent2(parent1,child) * weights[i];
+	      //	std::cout<<"returning prec["<<i<<"] "<<m_NP2Parent2[i]<<" from mixture gaussian"<<std::endl;
+	      // return m_NP2Parent2[i];
 	    }
 	}
       throw ("Unknown Node in GetNaturalNot");
@@ -356,53 +356,53 @@ namespace ICR{
 
     //   Moments<double> weights = m_weights_node->GetMoments();
       
-    //   // Moments<double> av_mean;
+    //   // Moments<double> av_parent1;
     //   // Moments<double> av_prec;
     //    Moments<double> child = m_child_node->GetMoments();
 
     //    // std::cout<<"Weights  = "<<weights<<std::endl;
-    //    // std::cout<<"mean size = "<<m_mean_nodes.size()<<std::endl;
+    //    // std::cout<<"parent1 size = "<<m_parent1_nodes.size()<<std::endl;
       
 
-    //   for(size_t i=0;i<m_mean_nodes.size();++i){
+    //   for(size_t i=0;i<m_parent1_nodes.size();++i){
 	
     // 	// GaussianModel<double> model;
 
-    // 	Moments<double> mean = m_mean_nodes[i]->GetMoments();
-    // 	Moments<double> prec = m_precision_nodes[i]->GetMoments();
+    // 	Moments<double> parent1 = m_parent1_nodes[i]->GetMoments();
+    // 	Moments<double> prec = m_parent2_nodes[i]->GetMoments();
 
-    // 	// model.SetAvMean(mean[0]);
-    // 	// model.SetAvMeanSquared(mean[1]);
-    // 	// model.SetAvPrecision(prec[0]);
+    // 	// model.SetAvParent1(parent1[0]);
+    // 	// model.SetAvParent1Squared(parent1[1]);
+    // 	// model.SetAvParent2(prec[0]);
     // 	// model.SetData(child[0]);
 	
-    // 	m_NP2Mean[i]
-    // 	  = GaussianModel<double>::CalcNP2Mean(prec,child)  * weights[i];
+    // 	m_NP2Parent1[i]
+    // 	  = GaussianModel<double>::CalcNP2Parent1(prec,child)  * weights[i];
 	
-    // 	m_NP2Precision[i]
-    // 	  = GaussianModel<double>::CalcNP2Precision(mean,child) * weights[i];
+    // 	m_NP2Parent2[i]
+    // 	  = GaussianModel<double>::CalcNP2Parent2(parent1,child) * weights[i];
       
-    // 	// Moments<double> mean = mean->GetMoments() * weights[i];
+    // 	// Moments<double> parent1 = parent1->GetMoments() * weights[i];
     // 	// Moments<double> prec = prec->GetMoments() * weights[i];
 
     // 	if (i == 0)
     // 	  {
     // 	    m_NP2Child 
-    // 	      = GaussianModel<double>::CalcNP2Data( mean, prec) * weights[i];
+    // 	      = GaussianModel<double>::CalcNP2Data( parent1, prec) * weights[i];
 	    
     // 	    m_LogNorm 
-    // 	      = GaussianModel<double>::CalcLogNorm(mean, prec) * weights[i];
+    // 	      = GaussianModel<double>::CalcLogNorm(parent1, prec) * weights[i];
     // 	  } 
     // 	else
     // 	  {
     // 	    m_NP2Child
-    // 	      += GaussianModel<double>::CalcNP2Data( mean, prec)  * weights[i];
+    // 	      += GaussianModel<double>::CalcNP2Data( parent1, prec)  * weights[i];
 	    
     // 	    m_LogNorm 
-    // 	      += GaussianModel<double>::CalcLogNorm(mean,prec) * weights[i];
+    // 	      += GaussianModel<double>::CalcLogNorm(parent1,prec) * weights[i];
     // 	  }
 
-    // 	m_NP2Weights[i] = GaussianModel<double>::CalcAvLog(mean, prec,child);
+    // 	m_NP2Weights[i] = GaussianModel<double>::CalcAvLog(parent1, prec,child);
 
     // 	//std::cout<<"m_NP2Weights (b4 norm) ["<<i<<"] = "<<(m_NP2Weights[i])<<std::endl;
 
@@ -426,9 +426,9 @@ namespace ICR{
     // {
     // 	GaussianModel<double> model;
 	
-    // 	model.SetAvMean(av_mean[0]);
-    // 	model.SetAvMeanSquared(av_mean[1]);
-    // 	model.SetAvPrecision(av_prec[0]);
+    // 	model.SetAvParent1(av_parent1[0]);
+    // 	model.SetAvParent1Squared(av_parent1[1]);
+    // 	model.SetAvParent2(av_prec[0]);
     // 	model.SetData(child[0]);
 
     // 	model.CalcNP2Data(m_NP2Child);
@@ -452,27 +452,27 @@ namespace ICR{
       // }
       // GaussianModel<double> model;
 
-      // 	Moments<double> mean = m_mean_nodes[i]->GetMoments();
-      // 	Moments<double> prec = m_precision_node[i]->GetMoments();
+      // 	Moments<double> parent1 = m_parent1_nodes[i]->GetMoments();
+      // 	Moments<double> prec = m_parent2_node[i]->GetMoments();
       // 	Moments<double> weights = m_weights_node->GetMoments();
       // 	Moments<double> child = m_child_node->GetMoments();
 
-      // 	model.SetAvMean(mean[0]);
-      // 	model.SetAvMeanSquared(mean[1]);
-      // 	model.SetAvPrecision(prec[0]);
+      // 	model.SetAvParent1(parent1[0]);
+      // 	model.SetAvParent1Squared(parent1[1]);
+      // 	model.SetAvParent2(prec[0]);
       // 	model.SetData(child[0]);
 
       
       // 	m_LogNorm = model.CalcLogNorm();
       // 	m_FFunction = model.GetFFunction();
 
-      // 	model.CalcNP2Mean(m_NP2Mean[i]);
-      // 	model.CalcNP2Precision(m_NP2Precision[i]);
+      // 	model.CalcNP2Parent1(m_NP2Parent1[i]);
+      // 	model.CalcNP2Parent2(m_NP2Parent2[i]);
       // 	model.CalcNP2Data(m_NP2Child);
 
       // }
-      // m_mean_node -> ReceiveNaturalParameters(m_NP2Mean);
-      // m_precision_node -> ReceiveNaturalParameters(m_NP2Precision);
+      // m_parent1_node -> ReceiveNaturalParameters(m_NP2Parent1);
+      // m_parent2_node -> ReceiveNaturalParameters(m_NP2Parent2 );
       // m_child_node -> ReceiveNaturalParameters(m_NP2Child);
   
   }

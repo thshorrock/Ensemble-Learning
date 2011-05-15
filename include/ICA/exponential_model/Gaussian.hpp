@@ -83,7 +83,7 @@ namespace ICR{
 
       static
       NaturalParameters<T>
-      CalcNP2Mean(const Moments<T>& Precision, const Moments<T>& Data)  ;
+      CalcNP2Parent1(const Moments<T>& Precision, const Moments<T>& Data)  ;
 
       static
       NaturalParameters<T>
@@ -91,7 +91,7 @@ namespace ICR{
 
       static
       NaturalParameters<T>
-      CalcNP2Precision(const Moments<T>& Mean,const  Moments<T>& Data)  ;
+      CalcNP2Parent2(const Moments<T>& Mean,const  Moments<T>& Data)  ;
       
 
 
@@ -229,7 +229,7 @@ ICR::ICA::GaussianModel<T>::CalcNP2Deterministic(const Expression<T>* Expr,const
 template<class T> 
 inline
 ICR::ICA::NaturalParameters<T>
-ICR::ICA::GaussianModel<T>::CalcNP2Mean(const Moments<T>& Precision,const Moments<T>& Data)
+ICR::ICA::GaussianModel<T>::CalcNP2Parent1(const Moments<T>& Precision,const Moments<T>& Data)
 {
   T precision = Precision[0];
   T data = Data[0];
@@ -249,7 +249,7 @@ ICR::ICA::GaussianModel<T>::CalcNP2Data(const Moments<T>& Mean,const Moments<T>&
 template<class T>
 inline
 ICR::ICA::NaturalParameters<T>
-ICR::ICA::GaussianModel<T>::CalcNP2Precision(const Moments<T>& Mean,const Moments<T>& Data)
+ICR::ICA::GaussianModel<T>::CalcNP2Parent2(const Moments<T>& Mean,const Moments<T>& Data)
 {
   T mean = Mean[0];
   T mean_squared = Mean[1];

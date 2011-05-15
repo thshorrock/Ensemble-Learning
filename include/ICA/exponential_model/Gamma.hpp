@@ -53,7 +53,7 @@ namespace ICR{
 
       static
       NaturalParameters<T>
-      CalcNP2IScale(const Moments<T> Shape,const Moments<T>& Data);
+      CalcNP2Parent2(const Moments<T> Shape,const Moments<T>& Data);
 
       static
       NaturalParameters<T>
@@ -139,7 +139,7 @@ ICR::ICA::GammaModel<T>::CalcMoments(const NaturalParameters<T>& NP)
 template<class T>
 inline 
 ICR::ICA::NaturalParameters<T>
-ICR::ICA::GammaModel<T>::CalcNP2IScale(const Moments<T> Shape,
+ICR::ICA::GammaModel<T>::CalcNP2Parent2(const Moments<T> Shape,
 					    const Moments<T>& Data)
 {
   return NaturalParameters<T>(-Data[0], Shape[0]);

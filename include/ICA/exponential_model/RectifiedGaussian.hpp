@@ -82,7 +82,7 @@ namespace ICR{
       
       static
       NaturalParameters<T>
-      CalcNP2Mean(const Moments<T>& Precision, const Moments<T>& Data)  ;
+      CalcNP2Parent1(const Moments<T>& Precision, const Moments<T>& Data)  ;
 
       static
       NaturalParameters<T>
@@ -90,7 +90,7 @@ namespace ICR{
 
       static
       NaturalParameters<T>
-      CalcNP2Precision(const Moments<T>& Mean,const  Moments<T>& Data)  ;
+      CalcNP2Parent2(const Moments<T>& Mean,const  Moments<T>& Data)  ;
       
 
 
@@ -269,7 +269,7 @@ ICR::ICA::RectifiedGaussianModel<T>::CalcNP2Deterministic(const Expression<T>* E
 template<class T> 
 inline
 ICR::ICA::NaturalParameters<T>
-ICR::ICA::RectifiedGaussianModel<T>::CalcNP2Mean(const Moments<T>& Precision,const Moments<T>& Data)
+ICR::ICA::RectifiedGaussianModel<T>::CalcNP2Parent1(const Moments<T>& Precision,const Moments<T>& Data)
 {
   BOOST_ASSERT(Precision.size() == 2);
   BOOST_ASSERT(Data.size() == 2);
@@ -293,7 +293,7 @@ ICR::ICA::RectifiedGaussianModel<T>::CalcNP2Data(const Moments<T>& Mean,const Mo
 template<class T>
 inline
 ICR::ICA::NaturalParameters<T>
-ICR::ICA::RectifiedGaussianModel<T>::CalcNP2Precision(const Moments<T>& Mean,const Moments<T>& Data)
+ICR::ICA::RectifiedGaussianModel<T>::CalcNP2Parent2(const Moments<T>& Mean,const Moments<T>& Data)
 {
   BOOST_ASSERT(Mean.size() == 2);
   BOOST_ASSERT(Data.size() == 2);
