@@ -50,7 +50,11 @@ namespace ICR{
       // static
       // NaturalParameters<T>
       // CalcNaturalParameters(const Moments<T>& M);
-
+      static
+      NaturalParameters<T>
+      CalcNP2Parent1(const Moments<T> IScale,
+		     const Moments<T>& Data);
+      
       static
       NaturalParameters<T>
       CalcNP2Parent2(const Moments<T> Shape,const Moments<T>& Data);
@@ -136,6 +140,14 @@ ICR::ICA::GammaModel<T>::CalcMoments(const NaturalParameters<T>& NP)
 // 				-0.5*precision);
 // }
 
+template<class T>
+inline 
+ICR::ICA::NaturalParameters<T>
+ICR::ICA::GammaModel<T>::CalcNP2Parent1(const Moments<T> IScale,
+					    const Moments<T>& Data)
+{
+   throw ("Can't pass message to parent1 variable  of Gamma Distribution");
+}
 template<class T>
 inline 
 ICR::ICA::NaturalParameters<T>
