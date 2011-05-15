@@ -39,7 +39,7 @@ namespace ICR{
       Factor(const Factor<Model>& f) {};
     public:
       
-      Factor( VariableNode<double>* Parent1,  VariableNode<double>* Parent2,  VariableNode<double>* Child)
+      Factor( VariableNode<T>* Parent1,  VariableNode<T>* Parent2,  VariableNode<T>* Child)
 	: m_parent1_node(Parent1),
 	  m_parent2_node(Parent2),
 	  m_child_node(Child)
@@ -49,39 +49,39 @@ namespace ICR{
     	Child->SetParentFactor(this);
       };
       
-      Moments<double>
+      Moments<T>
       InitialiseMoments() const
       {
 	return  Model::CalcSample(m_parent1_node,m_parent2_node );
       }
       
-      double
+      T
       CalcLogNorm() const 
       {
 	return m_LogNorm;
       }
 
 
-      NaturalParameters<double>
-      GetNaturalNot(const VariableNode<double>* v) const
+      NaturalParameters<T>
+      GetNaturalNot(const VariableNode<T>* v) const
       {
 
 	if (v==m_parent1_node)
 	  {
-	    Moments<double> parent2 = m_parent2_node->GetMoments();
-	    Moments<double> child = m_child_node->GetMoments();
+	    Moments<T> parent2 = m_parent2_node->GetMoments();
+	    Moments<T> child = m_child_node->GetMoments();
 	    return Model::CalcNP2Parent1(parent2,child);
 	  }
 	else if (v==m_parent2_node)
 	  {
-	    Moments<double> parent1 = m_parent1_node->GetMoments();
-	    Moments<double> child = m_child_node->GetMoments();
+	    Moments<T> parent1 = m_parent1_node->GetMoments();
+	    Moments<T> child = m_child_node->GetMoments();
 	    return Model::CalcNP2Parent2(parent1,child);
 	  }
 	else if (v == m_child_node) 
 	  {
-	    Moments<double> parent1 = m_parent1_node->GetMoments();
-	    Moments<double> parent2 = m_parent2_node->GetMoments();
+	    Moments<T> parent1 = m_parent1_node->GetMoments();
+	    Moments<T> parent2 = m_parent2_node->GetMoments();
 	    m_LogNorm = Model::CalcLogNorm(parent1,parent2);
 	    return Model::CalcNP2Data(parent1,parent2);
 	  }
@@ -91,8 +91,8 @@ namespace ICR{
       }
 
     private: 
-      VariableNode<double> *m_parent1_node, *m_parent2_node, *m_child_node;
-      mutable double m_LogNorm;
+      VariableNode<T> *m_parent1_node, *m_parent2_node, *m_child_node;
+      mutable T m_LogNorm;
     private:
       mutable boost::mutex m_mutex;
     };
