@@ -68,22 +68,22 @@ namespace ICR{
 
 	if (v==m_parent1_node)
 	  {
-	    Moments<double> prec = m_parent2_node->GetMoments();
+	    Moments<double> parent2 = m_parent2_node->GetMoments();
 	    Moments<double> child = m_child_node->GetMoments();
-	    return GaussianModel<double>::CalcNP2Parent1(prec,child);
+	    return Model::CalcNP2Parent1(parent2,child);
 	  }
 	else if (v==m_parent2_node)
 	  {
 	    Moments<double> parent1 = m_parent1_node->GetMoments();
 	    Moments<double> child = m_child_node->GetMoments();
-	    return GaussianModel<double>::CalcNP2Parent2(parent1,child);
+	    return Model::CalcNP2Parent2(parent1,child);
 	  }
 	else if (v == m_child_node) 
 	  {
 	    Moments<double> parent1 = m_parent1_node->GetMoments();
-	    Moments<double> prec = m_parent2_node->GetMoments();
-	    m_LogNorm = GaussianModel<double>::CalcLogNorm(parent1,prec);
-	    return GaussianModel<double>::CalcNP2Data(parent1,prec);
+	    Moments<double> parent2 = m_parent2_node->GetMoments();
+	    m_LogNorm = Model::CalcLogNorm(parent1,parent2);
+	    return Model::CalcNP2Data(parent1,parent2);
 	  }
 	else{
 	  throw ("Unknown Node in GetNaturalNot");
@@ -96,97 +96,7 @@ namespace ICR{
     private:
       mutable boost::mutex m_mutex;
     };
-     /******************************************************************************
-     * RectifiedGaussianModel Specialisation Double
-     ******************************************************************************/
-    template<>
-    class Factor<RectifiedGaussianModel<double> > : public FactorNode<double>
-    {
-      Factor(const Factor<RectifiedGaussianModel<double> >& f) {};
-    public:
-      
-      Factor( VariableNode<double>* Parent1,  VariableNode<double>* Parent2,  VariableNode<double>* Child)
-	: m_parent1_node(Parent1),
-	  m_parent2_node(Parent2),
-	  m_child_node(Child)
-      {
-    	Parent1->AddChildFactor(this);
-    	Parent2->AddChildFactor(this);
-    	Child->SetParentFactor(this);
-
-	//const Moments<double> M =RectifiedGaussianModel<double>::CalcSample(Parent1, Parent2);
-      };
-      
-      
-      Moments<double>
-      InitialiseMoments() const
-      {
-	return  RectifiedGaussianModel<double>::CalcSample(m_parent1_node,m_parent2_node );
-      }
-      double
-      CalcLogNorm() const 
-      {
-	return m_LogNorm;
-      }
-
-
-      NaturalParameters<double>
-      GetNaturalNot(const VariableNode<double>* v) const;
-      
-
-    private: 
-       VariableNode<double> *m_parent1_node, *m_parent2_node, *m_child_node;
-      
-      mutable double m_LogNorm;
-    private:
-      mutable boost::mutex m_mutex;
-    };
-    
-    /******************************************************************************
-     * GammaModel Specialisation
-     ******************************************************************************/
-    template<>
-    class Factor<GammaModel<double> > : public FactorNode<double>
-    {
-      
-    public:
-      
-      Factor( VariableNode<double>* Parent1,  VariableNode<double>* Parent2,  VariableNode<double>* Child)
-	: m_parent1_node(Parent1),
-	  m_parent2_node(Parent2),
-	  m_child_node(Child)
-      {
-    	Parent1->AddChildFactor(this);
-    	Parent2->AddChildFactor(this);
-    	Child->SetParentFactor(this);
-      };
-      
-      Moments<double>
-      InitialiseMoments() const
-      {
-	
-	//std::cout<<"here0"<<std::endl;
-	return  GammaModel<double>::CalcSample(m_parent1_node, m_parent2_node);
-      }
-
-      double
-      CalcLogNorm() const 
-      {
-	//boost::mutex::scoped_lock lock(m_mutex);
-	return m_LogNorm;//m_Model.CalcLogNorm();
-      }
-
-
-      NaturalParameters<double>
-      GetNaturalNot(const VariableNode<double>* v) const;
-      
-    private: 
-      VariableNode<double> *m_parent1_node, *m_parent2_node, *m_child_node;
-     mutable  double  m_LogNorm;
-    private:
-      mutable boost::mutex m_mutex;
-    };
-      
+   
     /******************************************************************************
      * DirichletModel Specialisation Double
      ******************************************************************************/
@@ -284,97 +194,8 @@ namespace ICR{
     
   
 
-    /**************************************************************************************
-     **************************************************************************************
-     **************************************************************************************
-     *
-     *  Rectified GAUSSIAN
-     *
-     **************************************************************************************
-     **************************************************************************************
-    //  **************************************************************************************/
-    //template<>
-    inline
-    NaturalParameters<double>
-    Factor< RectifiedGaussianModel<double> ,double>::GetNaturalNot(const VariableNode<double>* v) const
-    {
-      if (v==m_parent1_node)
-	{
-	  Moments<double> prec = m_parent2_node->GetMoments();
-	  Moments<double> child = m_child_node->GetMoments();
-	  return RectifiedGaussianModel<double>::CalcNP2Parent1(prec,child);
-	  //return m_NP2Parent1;
-	}
-      else if (v==m_parent2_node)
-	{
-	  Moments<double> parent1 = m_parent1_node->GetMoments();
-	  Moments<double> child = m_child_node->GetMoments();
-	  return RectifiedGaussianModel<double>::CalcNP2Parent2(parent1,child);
-	}
-      else if (v == m_child_node) 
-	{
-	  Moments<double> parent1 = m_parent1_node->GetMoments();
-	  Moments<double> prec = m_parent2_node->GetMoments();
-	  m_LogNorm = RectifiedGaussianModel<double>::CalcLogNorm(parent1,prec);
-	  return RectifiedGaussianModel<double>::CalcNP2Data(parent1,prec);
-	  
-	  // std::cout<<"returning child"<<m_NP2Child<<" from gaussian"<<std::endl;
-	  //return m_NP2Child;
-	}
-      else{
-	throw ("Unknown Node in GetNaturalNot");
-      }
-    }
+   
 
-    /**************************************************************************************
-     **************************************************************************************
-     **************************************************************************************
-     *
-     *  GAMMA
-     *
-     **************************************************************************************
-     **************************************************************************************
-     **************************************************************************************/
-  
-  
-
-    inline
-    NaturalParameters<double>
-    Factor<GammaModel<double>,double >::GetNaturalNot(const VariableNode<double>* v) const
-    {
-      boost::mutex::scoped_lock lock(m_mutex);
-      if (v==m_parent1_node)
-	{
-	  std::cerr<<"Can't pass message to parent1 variable  of Gamma Distribution"<<v<<std::endl;
-	  throw ("Can't pass message to parent1 variable  of Gamma Distribution");
-	}
-      else if (v==m_parent2_node)
-	{
-	  Moments<double> parent1  = m_parent1_node->GetMoments();
-	  //Moments<double> parent2 = m_parent2_node->GetMoments();
-	  Moments<double> child  = m_child_node->GetMoments();
-	  return GammaModel<double>::CalcNP2Parent2(parent1,child);
-	}
-      else 
-	{
-	  Moments<double> parent1  = m_parent1_node->GetMoments();
-	  Moments<double> parent2 = m_parent2_node->GetMoments();
-	  //Moments<double> child  = m_child_node->GetMoments();
-	  BOOST_ASSERT(parent2.size() == 2);
-	  BOOST_ASSERT(parent2[0] > 0);
-	  if (parent1[0] == 0) {
-	    std::cout<<"parent1 "<<parent1<<std::endl;
-	    std::cout<<"parent2"<<parent2<<std::endl;
-	  
-	  }
-	  BOOST_ASSERT(parent1[0] != 0);
-	  m_LogNorm = GammaModel<double>::CalcLogNorm(parent1,parent2);
-	  return GammaModel<double>::CalcNP2Data(parent1, parent2);
-
-	}
-    }
-
-    
 
     /**************************************************************************************
      **************************************************************************************
