@@ -31,7 +31,7 @@ namespace ICR{
     // };
    
     /******************************************************************************
-     * GaussianModel Specialisation Double
+     * Default Specialisation Double - Gaussian, RectifiedGaussian, Gamma
      ******************************************************************************/
     template<class Model, class T = double>
     class Factor : public FactorNode<T>
