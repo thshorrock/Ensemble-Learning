@@ -489,9 +489,58 @@ BOOST_AUTO_TEST_CASE( iterator_test  )
 
 BOOST_AUTO_TEST_SUITE_END()
 
-// BOOST_AUTO_TEST_SUITE( ExpModels_test )
+/*****************************************************
+ *****************************************************
+ *****      Exponential Models      TEST       *******
+ *****************************************************
+ *****************************************************/
+
+BOOST_AUTO_TEST_SUITE( ExpModels_test )
   
-// BOOST_AUTO_TEST_CASE( GaussianModel_test  )
+BOOST_AUTO_TEST_CASE( GaussianModel_test  )
+{
+  //Initialise
+  Moments<double> Mean(2,5);
+  Moments<double> Precision(3,6);
+  Moments<double> Data(4,7);
+  NaturalParameters<double> SumNP(6,-1.5);
+
+  //Collect
+  NaturalParameters<double> NPMean
+    = GaussianModel<double>::CalcNP2Mean(Precision,Data);
+  NaturalParameters<double> NPPrec
+    = GaussianModel<double>::CalcNP2Precision(Mean,Data);
+  NaturalParameters<double> NPData
+    = GaussianModel<double>::CalcNP2Data(Mean,Precision);
+  
+
+  Moments<double> Update =  GaussianModel<double>::CalcMoments(SumNP);
+
+  double LogNorm1 = GaussianModel<double>::CalcLogNorm(Mean,Precision);
+  double LogNorm2 = GaussianModel<double>::CalcLogNorm(SumNP);
+  double AvLog    = GaussianModel<double>::CalcAvLog(Mean,Precision,Data);
+  
+  
+
+  //Check
+  BOOST_CHECK_CLOSE(NPMean[0], 12.0 , 0.0001);  //3*4
+  BOOST_CHECK_CLOSE(NPMean[1], -1.5 , 0.0001);  //-3/2
+  BOOST_CHECK_CLOSE(NPPrec[0], 2.0 , 0.0001);  // - 0.5*(7-2*4*2 +5)
+  BOOST_CHECK_CLOSE(NPPrec[1], 0.5 , 0.0001);  // 0.5
+  BOOST_CHECK_CLOSE(NPData[0], 6.0 , 0.0001);  //2*3
+  BOOST_CHECK_CLOSE(NPData[1], -1.5 , 0.0001);  //-3/2
+
+  BOOST_CHECK_CLOSE(Update[0],2.0 , 0.0001);  
+  BOOST_CHECK_CLOSE(Update[1],4.0+1.0/3.0 , 0.0001);  
+
+
+  BOOST_CHECK_CLOSE(LogNorm1, 0.5*(std::log(3) - 3*5 - std::log(2*M_PI)) , 0.0001);  
+  BOOST_CHECK_CLOSE(LogNorm2, 0.5*(std::log(3) - 3*4 - std::log(2*M_PI)), 0.0001);  
+  
+  BOOST_CHECK_CLOSE(AvLog, NPData[0]*4 + NPData[1]*7 + LogNorm1, 0.0001);  
+} 
+
+// BOOST_AUTO_TEST_CASE( RectifiendGaussianModel_test  )
 // {
 //   //Initialise
 //   Moments<double> Mean(2,5);
@@ -501,19 +550,20 @@ BOOST_AUTO_TEST_SUITE_END()
 
 //   //Collect
 //   NaturalParameters<double> NPMean
-//     = GaussianModel<double>::CalcNP2Mean(Precision,Data);
+//     = RectifiendGaussianModel<double>::CalcNP2Mean(Precision,Data);
 //   NaturalParameters<double> NPPrec
-//     = GaussianModel<double>::CalcNP2Precision(Mean,Data);
+//     = RectifiendGaussianModel<double>::CalcNP2Precision(Mean,Data);
 //   NaturalParameters<double> NPData
-//     = GaussianModel<double>::CalcNP2Data(Mean,Precision);
+//     = RectifiendGaussianModel<double>::CalcNP2Data(Mean,Precision);
   
 
-//   Moments<double> Update =  GaussianModel<double>::CalcMoments(SumNP);
+//   Moments<double> Update =  RectifiendGaussianModel<double>::CalcMoments(SumNP);
 
-//   double LogNorm1 = GaussianModel<double>::CalcLogNorm(Mean,Precision);
-//   double LogNorm2 = GaussianModel<double>::CalcLogNorm(SumNP);
-//   double AvLog    = GaussianModel<double>::CalcAvLog(Mean,Precision,Data);
+//   double LogNorm1 = RectifiendGaussianModel<double>::CalcLogNorm(Mean,Precision);
+//   double LogNorm2 = RectifiendGaussianModel<double>::CalcLogNorm(SumNP);
+//   double AvLog    = RectifiendGaussianModel<double>::CalcAvLog(Mean,Precision,Data);
   
+//   double LogNorm = 
 
 //   //Check
 //   BOOST_CHECK_CLOSE(NPMean[0], 12.0 , 0.0001);  //3*4
@@ -533,128 +583,128 @@ BOOST_AUTO_TEST_SUITE_END()
 //   BOOST_CHECK_CLOSE(AvLog, NPData[0]*4 + NPData[1]*7 + LogNorm1, 0.0001);  
 // } 
 
-// BOOST_AUTO_TEST_CASE( GammaModel_test  )
-// {
-//   //Initialise
-//   Moments<double> Shape(2,5);
-//   Moments<double> IScale(3,0);
-//   Moments<double> Data(4,7);
-//   NaturalParameters<double> SumNP(-3,1);
+BOOST_AUTO_TEST_CASE( GammaModel_test  )
+{
+  //Initialise
+  Moments<double> Shape(2,5);
+  Moments<double> IScale(3,0);
+  Moments<double> Data(4,7);
+  NaturalParameters<double> SumNP(-3,1);
 
-//   //Collect
-//   NaturalParameters<double> NPIScale
-//     = GammaModel<double>::CalcNP2IScale(Shape,Data);
-//   NaturalParameters<double> NPData
-//     = GammaModel<double>::CalcNP2Data(Shape,IScale);
+  //Collect
+  NaturalParameters<double> NPIScale
+    = GammaModel<double>::CalcNP2IScale(Shape,Data);
+  NaturalParameters<double> NPData
+    = GammaModel<double>::CalcNP2Data(Shape,IScale);
   
 
-//   Moments<double> Update =  GammaModel<double>::CalcMoments(SumNP);
+  Moments<double> Update =  GammaModel<double>::CalcMoments(SumNP);
 
-//   double LogNorm1 = GammaModel<double>::CalcLogNorm(Shape,IScale);
-//   double LogNorm2 = GammaModel<double>::CalcLogNorm(SumNP);
-//   double AvLog    = GammaModel<double>::CalcAvLog(Shape,IScale,Data);
+  double LogNorm1 = GammaModel<double>::CalcLogNorm(Shape,IScale);
+  double LogNorm2 = GammaModel<double>::CalcLogNorm(SumNP);
+  double AvLog    = GammaModel<double>::CalcAvLog(Shape,IScale,Data);
   
 
-//   //Check
-//   BOOST_CHECK_CLOSE(NPIScale[0], -4.0 , 0.0001);  //-4
-//   BOOST_CHECK_CLOSE(NPIScale[1], 2.0 , 0.0001);  //3-1
-//   BOOST_CHECK_CLOSE(NPData[0], -3.0 , 0.0001);  //-3
-//   BOOST_CHECK_CLOSE(NPData[1], 1.0 , 0.0001);  //2-1
+  //Check
+  BOOST_CHECK_CLOSE(NPIScale[0], -4.0 , 0.0001);  //-4
+  BOOST_CHECK_CLOSE(NPIScale[1], 2.0 , 0.0001);  //3-1
+  BOOST_CHECK_CLOSE(NPData[0], -3.0 , 0.0001);  //-3
+  BOOST_CHECK_CLOSE(NPData[1], 1.0 , 0.0001);  //2-1
 
-//   BOOST_CHECK_CLOSE(Update[0], 2.0/3.0, 0.0001);  
-//   BOOST_CHECK_CLOSE(Update[1], gsl_sf_psi(2.0) - std::log(3.0), 0.0001);  
+  BOOST_CHECK_CLOSE(Update[0], 2.0/3.0, 0.0001);  
+  BOOST_CHECK_CLOSE(Update[1], gsl_sf_psi(2.0) - std::log(3.0), 0.0001);  
 
 
-//   BOOST_CHECK_CLOSE(LogNorm1, 2.0*std::log(3.0) - gsl_sf_lngamma(2.0) , 0.0001);  
-//   BOOST_CHECK_CLOSE(LogNorm2, LogNorm1, 0.0001);  
+  BOOST_CHECK_CLOSE(LogNorm1, 2.0*std::log(3.0) - gsl_sf_lngamma(2.0) , 0.0001);  
+  BOOST_CHECK_CLOSE(LogNorm2, LogNorm1, 0.0001);  
   
-//   BOOST_CHECK_CLOSE(AvLog, NPData[0]*4.0 + NPData[1]*7.0 + LogNorm1, 0.0001);  
-// } 
+  BOOST_CHECK_CLOSE(AvLog, NPData[0]*4.0 + NPData[1]*7.0 + LogNorm1, 0.0001);  
+} 
 
-// BOOST_AUTO_TEST_CASE( DirichletModel_test  )
-// {
-//   //Initialise
-//   std::vector<double> u(3,1.1);
-//   Moments<double> Us(u);
-//   NaturalParameters<double> SumNP(std::vector<double>(3,0.1));
+BOOST_AUTO_TEST_CASE( DirichletModel_test  )
+{
+  //Initialise
+  std::vector<double> u(3,1.1);
+  Moments<double> Us(u);
+  NaturalParameters<double> SumNP(std::vector<double>(3,0.1));
 
-//   //Collect
-//   NaturalParameters<double> NPData
-//     = DirichletModel<double>::CalcNP2Data(Us);
-  
-
-//   Moments<double> Update =  DirichletModel<double>::CalcMoments(SumNP);
-
-//   double LogNorm1 = DirichletModel<double>::CalcLogNorm(Us);
-//   double LogNorm2 = DirichletModel<double>::CalcLogNorm(SumNP);
+  //Collect
+  NaturalParameters<double> NPData
+    = DirichletModel<double>::CalcNP2Data(Us);
   
 
-//   //Check
-//   BOOST_CHECK_CLOSE(NPData[0], 0.1 , 0.0001);  //1.1-1
-//   BOOST_CHECK_CLOSE(NPData[1], 0.1 , 0.0001);  //1.1-1
-//   BOOST_CHECK_CLOSE(NPData[2], 0.1 , 0.0001);  //1.1-1
+  Moments<double> Update =  DirichletModel<double>::CalcMoments(SumNP);
 
-//   BOOST_CHECK_CLOSE(Update[0], gsl_sf_psi(1.1)-gsl_sf_psi(3.3), 0.0001); 
-//   BOOST_CHECK_CLOSE(Update[1], gsl_sf_psi(1.1)-gsl_sf_psi(3.3), 0.0001); 
-//   BOOST_CHECK_CLOSE(Update[2], gsl_sf_psi(1.1)-gsl_sf_psi(3.3), 0.0001); 
-
-//   //BOOST_CHECK_CLOSE(3*std::exp(Update[0]), 1.0, 0.0001);
-
-//   BOOST_CHECK_CLOSE(LogNorm1, gsl_sf_lngamma(3.3) -3.0*gsl_sf_lngamma(1.1) , 0.0001);  
-//   BOOST_CHECK_CLOSE(LogNorm2, LogNorm1, 0.0001);  
-  
-// } 
-
-
-// BOOST_AUTO_TEST_CASE( DiscreteModel_test  )
-// {
-//   //Initialise
-//   std::vector<double> p(3);
-//   std::vector<double> logp(3);
-//   p[0] = 0;
-//   p[1] = 0.4;
-//   p[2] = 0.6;
-//   logp[0] = -500;
-//   logp[1] = -0.9;
-//   logp[2] = -0.5;
-
-//   Moments<double> Dirichlet(logp);
-//   Moments<double> Discrete(p);
-//   NaturalParameters<double> SumNP(logp);
-
-//   //Collect
-//   NaturalParameters<double> NPData
-//     = DiscreteModel<double>::CalcNP2Data(Dirichlet);
-//   NaturalParameters<double> NPPrior
-//     = DiscreteModel<double>::CalcNP2Prior(Discrete);
+  double LogNorm1 = DirichletModel<double>::CalcLogNorm(Us);
+  double LogNorm2 = DirichletModel<double>::CalcLogNorm(SumNP);
   
 
-//   Moments<double> Update =  DiscreteModel<double>::CalcMoments(SumNP);
+  //Check
+  BOOST_CHECK_CLOSE(NPData[0], 0.1 , 0.0001);  //1.1-1
+  BOOST_CHECK_CLOSE(NPData[1], 0.1 , 0.0001);  //1.1-1
+  BOOST_CHECK_CLOSE(NPData[2], 0.1 , 0.0001);  //1.1-1
 
-//   double LogNorm1 = DiscreteModel<double>::CalcLogNorm(Dirichlet);
-//   double LogNorm2 = DiscreteModel<double>::CalcLogNorm(SumNP);
+  BOOST_CHECK_CLOSE(Update[0], gsl_sf_psi(1.1)-gsl_sf_psi(3.3), 0.0001); 
+  BOOST_CHECK_CLOSE(Update[1], gsl_sf_psi(1.1)-gsl_sf_psi(3.3), 0.0001); 
+  BOOST_CHECK_CLOSE(Update[2], gsl_sf_psi(1.1)-gsl_sf_psi(3.3), 0.0001); 
+
+  //BOOST_CHECK_CLOSE(3*std::exp(Update[0]), 1.0, 0.0001);
+
+  BOOST_CHECK_CLOSE(LogNorm1, gsl_sf_lngamma(3.3) -3.0*gsl_sf_lngamma(1.1) , 0.0001);  
+  BOOST_CHECK_CLOSE(LogNorm2, LogNorm1, 0.0001);  
   
-//   //Check
-//    BOOST_CHECK_CLOSE(NPData[0],  -500 , 0.0001);  //1.1-1
-//    BOOST_CHECK_CLOSE(NPData[1],   -0.9, 0.0001);  //1.1-1
-//    BOOST_CHECK_CLOSE(NPData[2],  -0.5 , 0.0001);  //1.1-1
-//    BOOST_CHECK_CLOSE(NPPrior[0], 0.0 , 0.0001);  //1.1-1
-//    BOOST_CHECK_CLOSE(NPPrior[1], 0.4 , 0.0001);  //1.1-1
-//    BOOST_CHECK_CLOSE(NPPrior[2], 0.6 , 0.0001);  //1.1-1
+} 
 
-//    BOOST_CHECK_CLOSE(Update[0], std::exp(-500+LogNorm1), 0.0001); 
-//    BOOST_CHECK_CLOSE(Update[1], std::exp(-0.9+LogNorm1), 0.0001); 
-//    BOOST_CHECK_CLOSE(Update[2], std::exp(-0.5+LogNorm1), 0.0001); 
+
+BOOST_AUTO_TEST_CASE( DiscreteModel_test  )
+{
+  //Initialise
+  std::vector<double> p(3);
+  std::vector<double> logp(3);
+  p[0] = 0;
+  p[1] = 0.4;
+  p[2] = 0.6;
+  logp[0] = -500;
+  logp[1] = -0.9;
+  logp[2] = -0.5;
+
+  Moments<double> Dirichlet(logp);
+  Moments<double> Discrete(p);
+  NaturalParameters<double> SumNP(logp);
+
+  //Collect
+  NaturalParameters<double> NPData
+    = DiscreteModel<double>::CalcNP2Data(Dirichlet);
+  NaturalParameters<double> NPPrior
+    = DiscreteModel<double>::CalcNP2Prior(Discrete);
+  
+
+  Moments<double> Update =  DiscreteModel<double>::CalcMoments(SumNP);
+
+  double LogNorm1 = DiscreteModel<double>::CalcLogNorm(Dirichlet);
+  double LogNorm2 = DiscreteModel<double>::CalcLogNorm(SumNP);
+  
+  //Check
+   BOOST_CHECK_CLOSE(NPData[0],  -500 , 0.0001);  //1.1-1
+   BOOST_CHECK_CLOSE(NPData[1],   -0.9, 0.0001);  //1.1-1
+   BOOST_CHECK_CLOSE(NPData[2],  -0.5 , 0.0001);  //1.1-1
+   BOOST_CHECK_CLOSE(NPPrior[0], 0.0 , 0.0001);  //1.1-1
+   BOOST_CHECK_CLOSE(NPPrior[1], 0.4 , 0.0001);  //1.1-1
+   BOOST_CHECK_CLOSE(NPPrior[2], 0.6 , 0.0001);  //1.1-1
+
+   BOOST_CHECK_CLOSE(Update[0], std::exp(-500+LogNorm1), 0.0001); 
+   BOOST_CHECK_CLOSE(Update[1], std::exp(-0.9+LogNorm1), 0.0001); 
+   BOOST_CHECK_CLOSE(Update[2], std::exp(-0.5+LogNorm1), 0.0001); 
 
    
-//   BOOST_CHECK_CLOSE(Update[0]+Update[1]+Update[2], 1.0, 0.0001);
+  BOOST_CHECK_CLOSE(Update[0]+Update[1]+Update[2], 1.0, 0.0001);
 
-//   BOOST_CHECK_CLOSE(LogNorm1,-0.013015253 , 0.0001);  
-//   BOOST_CHECK_CLOSE(LogNorm2, LogNorm1, 0.0001);  
+  BOOST_CHECK_CLOSE(LogNorm1,-0.013015253 , 0.0001);  
+  BOOST_CHECK_CLOSE(LogNorm2, LogNorm1, 0.0001);  
   
-// } 
+} 
 
-// BOOST_AUTO_TEST_SUITE_END()
+BOOST_AUTO_TEST_SUITE_END()
 
 
 
