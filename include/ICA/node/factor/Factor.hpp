@@ -143,7 +143,7 @@ namespace ICR{
       {
 	
 	//std::cout<<"here0"<<std::endl;
-	return  GammaModel<double>::CalcSample(m_parent1_node, m_child_node);
+	return  GammaModel<double>::CalcSample(m_parent1_node, m_parent2_node);
       }
 
       double
