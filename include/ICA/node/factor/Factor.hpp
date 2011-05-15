@@ -39,13 +39,13 @@ namespace ICR{
       Factor(const Factor<GaussianModel<double> >& f) {};
     public:
       
-      Factor( VariableNode<double>* Mean,  VariableNode<double>* Precision,  VariableNode<double>* Child)
-	: m_mean_node(Mean),
-	  m_precision_node(Precision),
+      Factor( VariableNode<double>* Parent1,  VariableNode<double>* Parent2,  VariableNode<double>* Child)
+	: m_parent1_node(Parent1),
+	  m_parent2_node(Parent2),
 	  m_child_node(Child)
       {
-    	Mean->AddChildFactor(this);
-    	Precision->AddChildFactor(this);
+    	Parent1->AddChildFactor(this);
+    	Parent2->AddChildFactor(this);
     	Child->SetParentFactor(this);
 
       };
@@ -53,7 +53,7 @@ namespace ICR{
       Moments<double>
       InitialiseMoments() const
       {
-	return  GaussianModel<double>::CalcSample(m_mean_node,m_precision_node );
+	return  GaussianModel<double>::CalcSample(m_parent1_node,m_parent2_node );
       }
       
       double
@@ -68,7 +68,7 @@ namespace ICR{
       
 
     private: 
-       VariableNode<double> *m_mean_node, *m_precision_node, *m_child_node;
+       VariableNode<double> *m_parent1_node, *m_parent2_node, *m_child_node;
       mutable double m_LogNorm;
     private:
       mutable boost::mutex m_mutex;
@@ -82,23 +82,23 @@ namespace ICR{
       Factor(const Factor<RectifiedGaussianModel<double> >& f) {};
     public:
       
-      Factor( VariableNode<double>* Mean,  VariableNode<double>* Precision,  VariableNode<double>* Child)
-	: m_mean_node(Mean),
-	  m_precision_node(Precision),
+      Factor( VariableNode<double>* Parent1,  VariableNode<double>* Parent2,  VariableNode<double>* Child)
+	: m_parent1_node(Parent1),
+	  m_parent2_node(Parent2),
 	  m_child_node(Child)
       {
-    	Mean->AddChildFactor(this);
-    	Precision->AddChildFactor(this);
+    	Parent1->AddChildFactor(this);
+    	Parent2->AddChildFactor(this);
     	Child->SetParentFactor(this);
 
-	//const Moments<double> M =RectifiedGaussianModel<double>::CalcSample(Mean, Precision);
+	//const Moments<double> M =RectifiedGaussianModel<double>::CalcSample(Parent1, Parent2);
       };
       
       
       Moments<double>
       InitialiseMoments() const
       {
-	return  RectifiedGaussianModel<double>::CalcSample(m_mean_node,m_precision_node );
+	return  RectifiedGaussianModel<double>::CalcSample(m_parent1_node,m_parent2_node );
       }
       double
       CalcLogNorm() const 
@@ -112,7 +112,7 @@ namespace ICR{
       
 
     private: 
-       VariableNode<double> *m_mean_node, *m_precision_node, *m_child_node;
+       VariableNode<double> *m_parent1_node, *m_parent2_node, *m_child_node;
       
       mutable double m_LogNorm;
     private:
@@ -128,13 +128,13 @@ namespace ICR{
       
     public:
       
-      Factor( VariableNode<double>* Shape,  VariableNode<double>* IScale,  VariableNode<double>* Child)
-	: m_shape_node(Shape),
-	  m_iscale_node(IScale),
+      Factor( VariableNode<double>* Parent1,  VariableNode<double>* Parent2,  VariableNode<double>* Child)
+	: m_parent1_node(Parent1),
+	  m_parent2_node(Parent2),
 	  m_child_node(Child)
       {
-    	Shape->AddChildFactor(this);
-    	IScale->AddChildFactor(this);
+    	Parent1->AddChildFactor(this);
+    	Parent2->AddChildFactor(this);
     	Child->SetParentFactor(this);
       };
       
@@ -143,7 +143,7 @@ namespace ICR{
       {
 	
 	//std::cout<<"here0"<<std::endl;
-	return  GammaModel<double>::CalcSample(m_shape_node, m_child_node);
+	return  GammaModel<double>::CalcSample(m_parent1_node, m_child_node);
       }
 
       double
@@ -158,7 +158,7 @@ namespace ICR{
       GetNaturalNot(const VariableNode<double>* v) const;
       
     private: 
-      VariableNode<double> *m_shape_node, *m_iscale_node, *m_child_node;
+      VariableNode<double> *m_parent1_node, *m_parent2_node, *m_child_node;
      mutable  double  m_LogNorm;
     private:
       mutable boost::mutex m_mutex;
@@ -274,24 +274,24 @@ namespace ICR{
     NaturalParameters<double>
     Factor< GaussianModel<double> ,double>::GetNaturalNot(const VariableNode<double>* v) const
     {
-      if (v==m_mean_node)
+      if (v==m_parent1_node)
 	{
-	  Moments<double> prec = m_precision_node->GetMoments();
+	  Moments<double> prec = m_parent2_node->GetMoments();
 	  Moments<double> child = m_child_node->GetMoments();
-	  return GaussianModel<double>::CalcNP2Mean(prec,child);
+	  return GaussianModel<double>::CalcNP2Parent1(prec,child);
 	}
-      else if (v==m_precision_node)
+      else if (v==m_parent2_node)
 	{
-	  Moments<double> mean = m_mean_node->GetMoments();
+	  Moments<double> parent1 = m_parent1_node->GetMoments();
 	  Moments<double> child = m_child_node->GetMoments();
-	  return GaussianModel<double>::CalcNP2Precision(mean,child);
+	  return GaussianModel<double>::CalcNP2Parent2(parent1,child);
 	}
       else if (v == m_child_node) 
 	{
-	  Moments<double> mean = m_mean_node->GetMoments();
-	  Moments<double> prec = m_precision_node->GetMoments();
-	  m_LogNorm = GaussianModel<double>::CalcLogNorm(mean,prec);
-	  return GaussianModel<double>::CalcNP2Data(mean,prec);
+	  Moments<double> parent1 = m_parent1_node->GetMoments();
+	  Moments<double> prec = m_parent2_node->GetMoments();
+	  m_LogNorm = GaussianModel<double>::CalcLogNorm(parent1,prec);
+	  return GaussianModel<double>::CalcNP2Data(parent1,prec);
 	}
       else{
 	throw ("Unknown Node in GetNaturalNot");
@@ -312,25 +312,25 @@ namespace ICR{
     NaturalParameters<double>
     Factor< RectifiedGaussianModel<double> ,double>::GetNaturalNot(const VariableNode<double>* v) const
     {
-      if (v==m_mean_node)
+      if (v==m_parent1_node)
 	{
-	  Moments<double> prec = m_precision_node->GetMoments();
+	  Moments<double> prec = m_parent2_node->GetMoments();
 	  Moments<double> child = m_child_node->GetMoments();
-	  return RectifiedGaussianModel<double>::CalcNP2Mean(prec,child);
-	  //return m_NP2Mean;
+	  return RectifiedGaussianModel<double>::CalcNP2Parent1(prec,child);
+	  //return m_NP2Parent1;
 	}
-      else if (v==m_precision_node)
+      else if (v==m_parent2_node)
 	{
-	  Moments<double> mean = m_mean_node->GetMoments();
+	  Moments<double> parent1 = m_parent1_node->GetMoments();
 	  Moments<double> child = m_child_node->GetMoments();
-	  return RectifiedGaussianModel<double>::CalcNP2Precision(mean,child);
+	  return RectifiedGaussianModel<double>::CalcNP2Parent2(parent1,child);
 	}
       else if (v == m_child_node) 
 	{
-	  Moments<double> mean = m_mean_node->GetMoments();
-	  Moments<double> prec = m_precision_node->GetMoments();
-	  m_LogNorm = RectifiedGaussianModel<double>::CalcLogNorm(mean,prec);
-	  return RectifiedGaussianModel<double>::CalcNP2Data(mean,prec);
+	  Moments<double> parent1 = m_parent1_node->GetMoments();
+	  Moments<double> prec = m_parent2_node->GetMoments();
+	  m_LogNorm = RectifiedGaussianModel<double>::CalcLogNorm(parent1,prec);
+	  return RectifiedGaussianModel<double>::CalcNP2Data(parent1,prec);
 	  
 	  // std::cout<<"returning child"<<m_NP2Child<<" from gaussian"<<std::endl;
 	  //return m_NP2Child;
@@ -357,33 +357,33 @@ namespace ICR{
     Factor<GammaModel<double>,double >::GetNaturalNot(const VariableNode<double>* v) const
     {
       boost::mutex::scoped_lock lock(m_mutex);
-      if (v==m_shape_node)
+      if (v==m_parent1_node)
 	{
-	  std::cerr<<"Can't pass message to shape variable  of Gamma Distribution"<<v<<std::endl;
-	  throw ("Can't pass message to shape variable  of Gamma Distribution");
+	  std::cerr<<"Can't pass message to parent1 variable  of Gamma Distribution"<<v<<std::endl;
+	  throw ("Can't pass message to parent1 variable  of Gamma Distribution");
 	}
-      else if (v==m_iscale_node)
+      else if (v==m_parent2_node)
 	{
-	  Moments<double> shape  = m_shape_node->GetMoments();
-	  //Moments<double> iscale = m_iscale_node->GetMoments();
+	  Moments<double> parent1  = m_parent1_node->GetMoments();
+	  //Moments<double> parent2 = m_parent2_node->GetMoments();
 	  Moments<double> child  = m_child_node->GetMoments();
-	  return GammaModel<double>::CalcNP2IScale(shape,child);
+	  return GammaModel<double>::CalcNP2Parent2(parent1,child);
 	}
       else 
 	{
-	  Moments<double> shape  = m_shape_node->GetMoments();
-	  Moments<double> iscale = m_iscale_node->GetMoments();
+	  Moments<double> parent1  = m_parent1_node->GetMoments();
+	  Moments<double> parent2 = m_parent2_node->GetMoments();
 	  //Moments<double> child  = m_child_node->GetMoments();
-	  BOOST_ASSERT(iscale.size() == 2);
-	  BOOST_ASSERT(iscale[0] > 0);
-	  if (shape[0] == 0) {
-	    std::cout<<"shape "<<shape<<std::endl;
-	    std::cout<<"iscale"<<iscale<<std::endl;
+	  BOOST_ASSERT(parent2.size() == 2);
+	  BOOST_ASSERT(parent2[0] > 0);
+	  if (parent1[0] == 0) {
+	    std::cout<<"parent1 "<<parent1<<std::endl;
+	    std::cout<<"parent2"<<parent2<<std::endl;
 	  
 	  }
-	  BOOST_ASSERT(shape[0] != 0);
-	  m_LogNorm = GammaModel<double>::CalcLogNorm(shape,iscale);
-	  return GammaModel<double>::CalcNP2Data(shape, iscale);
+	  BOOST_ASSERT(parent1[0] != 0);
+	  m_LogNorm = GammaModel<double>::CalcLogNorm(parent1,parent2);
+	  return GammaModel<double>::CalcNP2Data(parent1, parent2);
 
 	}
     }

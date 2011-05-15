@@ -1,5 +1,4 @@
 
-
 #define BOOST_TEST_MODULE ICA_library_tests
 
 #include <gsl/gsl_sf_psi.h> //for Digamma function gsl_sf_psi
@@ -507,9 +506,9 @@ BOOST_AUTO_TEST_CASE( GaussianModel_test  )
 
   //Collect
   NaturalParameters<double> NPMean
-    = GaussianModel<double>::CalcNP2Mean(Precision,Data);
+    = GaussianModel<double>::CalcNP2Parent1(Precision,Data);
   NaturalParameters<double> NPPrec
-    = GaussianModel<double>::CalcNP2Precision(Mean,Data);
+    = GaussianModel<double>::CalcNP2Parent2(Mean,Data);
   NaturalParameters<double> NPData
     = GaussianModel<double>::CalcNP2Data(Mean,Precision);
   
@@ -593,7 +592,7 @@ BOOST_AUTO_TEST_CASE( GammaModel_test  )
 
   //Collect
   NaturalParameters<double> NPIScale
-    = GammaModel<double>::CalcNP2IScale(Shape,Data);
+    = GammaModel<double>::CalcNP2Parent2(Shape,Data);
   NaturalParameters<double> NPData
     = GammaModel<double>::CalcNP2Data(Shape,IScale);
   
