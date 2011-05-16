@@ -29,23 +29,38 @@ namespace ICR{
     template<class T>
     class Placeholder : public Expression<T>
     {
+      
+      
     public:
+      
+      
+      typedef typename boost::call_traits<Function<T>*>::param_type
+      function_parameter;
+      
+      typedef typename boost::call_traits<Function<T>*>::value_type
+      function_t;
 
+      typedef typename boost::call_traits<SubContext<T> >::param_type
+      subcontext_parameter;
+
+      typedef typename boost::call_traits<T>::value_type
+      data_t;
+      
       Placeholder()
 	: Expression<T>(),
 	  m_parent(0)
       {}
       
-      T   Evaluate(const SubContext<T>& c) const
+      data_t   Evaluate(subcontext_parameter c) const
       {
 	return c.Lookup(this);
       }
       
       void
-      SetParent(const Function<T>* p)
+      SetParent(function_parameter p)
       {m_parent = p;}
       
-      const Function<T>*
+      function_t
       GetParent() const
       {return m_parent;}
       
@@ -121,7 +136,7 @@ namespace ICR{
       }
 
     private:
-      Function<T> const *m_parent;
+      function_t m_parent;
       friend class SubContext<T>;
     };
 

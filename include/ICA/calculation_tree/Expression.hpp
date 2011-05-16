@@ -1,9 +1,6 @@
 #pragma once
 
 
-
-#include<string>
-
 namespace ICR{
 
   namespace ICA{
@@ -17,17 +14,45 @@ namespace ICR{
       };
     };
     
+    template<class T>
+    class Plus;
+    
+    template<class T>
+    class Times;
+    
+    template<class T>
+    class Placeholder;
+    
     template<class> class Function;
     
     template<class T>
     class Expression
     {
     public:
+      typedef typename boost::call_traits<Function<T>*>::param_type
+      function_parameter;
+      
+      typedef typename boost::call_traits<Function<T>*>::value_type
+      function_t;
+
+      typedef typename boost::call_traits<SubContext<T> >::param_type
+      subcontext_parameter;
+
+      typedef typename boost::call_traits<T>::value_type
+      data_t;
+      
       virtual ~Expression(){};
       
-      virtual void SetParent(const Function<T>*) = 0;
-      virtual const Function<T>* GetParent() const = 0;
-      virtual T Evaluate(const SubContext<T>&) const = 0;
+      virtual data_t Evaluate(subcontext_parameter) const = 0;
+
+    protected:
+      friend class Plus<T>;
+      friend class Times<T>;
+      friend class Placeholder<T>;
+      
+      
+      virtual void SetParent(function_parameter) = 0;
+      virtual function_t GetParent() const = 0;
     };
 
     template<class T>
