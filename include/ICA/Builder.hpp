@@ -651,10 +651,13 @@ namespace ICR{
       bool
       HasConverged(const T Cost, const T epsilon)
       {
-	std::cout<<"COST = "<<Cost<<" PREV COST = "<<m_PrevCost<<" DIFF = "<<Cost-m_PrevCost<<std::endl;
-	std::ofstream CostFile("Cost.txt",std::ios_base::app);
-	// CostFile->open("Cost.txt",std::ios_base::app);
-	CostFile<<Cost<<"\n";
+#pragma omp critical
+	{
+	  std::cout<<"COST = "<<Cost<<" PREV COST = "<<m_PrevCost<<" DIFF = "<<Cost-m_PrevCost<<std::endl;
+	  std::ofstream CostFile("Cost.txt",std::ios_base::app);
+	  // CostFile->open("Cost.txt",std::ios_base::app);
+	  CostFile<<Cost<<"\n";
+	}
 	// CostFile->close();
 	// if (Cost<m_PrevCost) 
 	//   std::cerr<<"WARNING:: BOUND HAS DECREASED - THIS IS A BAD SIGN - try making the priors less commital!\n";
