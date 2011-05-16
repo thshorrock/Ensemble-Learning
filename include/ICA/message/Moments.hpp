@@ -17,8 +17,8 @@ namespace ICR{
     Moments
     {
     public:
-      typedef  VariableNode<T>* Variable;
-      typedef  VariableNode<T> const * ConstVariable;
+      // typedef  VariableNode<T>* Variable;
+      // typedef  VariableNode<T> const * ConstVariable;
       
       typedef typename boost::call_traits<std::vector<T> >::param_type 
       vector_parameter;
