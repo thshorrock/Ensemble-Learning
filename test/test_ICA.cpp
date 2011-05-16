@@ -21,6 +21,7 @@
 #include <fstream>
 #include<boost/assign/list_of.hpp>
 #include <boost/assign/std/vector.hpp>
+#include <gsl/gsl_sf_erf.h>
 using namespace ICR::ICA;
 // using namespace boost::assign;
 //____________________________________________________________________________//
@@ -533,54 +534,98 @@ BOOST_AUTO_TEST_CASE( GaussianModel_test  )
   BOOST_CHECK_CLOSE(Update[1],4.0+1.0/3.0 , 0.0001);  
 
 
-  BOOST_CHECK_CLOSE(LogNorm1, 0.5*(std::log(3) - 3*5 - std::log(2*M_PI)) , 0.0001);  
-  BOOST_CHECK_CLOSE(LogNorm2, 0.5*(std::log(3) - 3*4 - std::log(2*M_PI)), 0.0001);  
+  BOOST_CHECK_CLOSE(LogNorm1, 0.5*(std::log(3.) - 3*5 - std::log(2*M_PI)) , 0.0001);  
+  BOOST_CHECK_CLOSE(LogNorm2, 0.5*(std::log(3.) - 3*4 - std::log(2*M_PI)), 0.0001);  
   
   BOOST_CHECK_CLOSE(AvLog, NPData[0]*4 + NPData[1]*7 + LogNorm1, 0.0001);  
 } 
 
-// BOOST_AUTO_TEST_CASE( RectifiendGaussianModel_test  )
-// {
-//   //Initialise
-//   Moments<double> Mean(2,5);
-//   Moments<double> Precision(3,6);
-//   Moments<double> Data(4,7);
-//   NaturalParameters<double> SumNP(6,-1.5);
+double argm(double mean, double prec)
+{
+  return -mean*std::sqrt(prec/2.0);
+}
+double erfcx(double x)
+{
+  return std::exp(x*x)* gsl_sf_erfc(x);
+  
+}
 
-//   //Collect
-//   NaturalParameters<double> NPMean
-//     = RectifiendGaussianModel<double>::CalcNP2Mean(Precision,Data);
-//   NaturalParameters<double> NPPrec
-//     = RectifiendGaussianModel<double>::CalcNP2Precision(Mean,Data);
-//   NaturalParameters<double> NPData
-//     = RectifiendGaussianModel<double>::CalcNP2Data(Mean,Precision);
+double
+mean_0(double mean, double prec)
+{
+  
+  return mean + std::sqrt(2.0/(M_PI*prec))/erfcx(argm(mean,prec));
+
+}
+
+double
+mean_1(double mean, double prec)
+{  
+  return mean*mean + 1.0/prec + std::sqrt(2.0/(2.0*M_PI*prec))*mean/erfcx(argm(mean,prec));
+}
+
+BOOST_AUTO_TEST_CASE( RectifiedGaussianModel_test  )
+{
+  //Initialise
+  Moments<double> Parent1(2,5);
+  Moments<double> Parent2(3,6);
+  Moments<double> Data(4,17);
+  NaturalParameters<double> SumNP(6,-1.5);
+  //test large values (numerical errors can occur arg of +-30
+  NaturalParameters<double> SumNP2(60,-1);
+  NaturalParameters<double> SumNP3(-40,-1);
+  //test large values (numerical errors can occur arg of +-15
+  NaturalParameters<double> SumNP4(30,-1);
+  NaturalParameters<double> SumNP5(-30,-1);
+
+
+  //Collect
+  NaturalParameters<double> NPParent1
+    = RectifiedGaussianModel<double>::CalcNP2Parent1(Parent2,Data);
+  NaturalParameters<double> NPPrec
+    = RectifiedGaussianModel<double>::CalcNP2Parent2(Parent1,Data);
+  NaturalParameters<double> NPData
+    = RectifiedGaussianModel<double>::CalcNP2Data(Parent1,Parent2);
   
 
-//   Moments<double> Update =  RectifiendGaussianModel<double>::CalcMoments(SumNP);
+  Moments<double> Update =  RectifiedGaussianModel<double>::CalcMoments(SumNP);
+  Moments<double> Update1 =  RectifiedGaussianModel<double>::CalcMoments(SumNP2);
+  Moments<double> Update2 =  RectifiedGaussianModel<double>::CalcMoments(SumNP3);
+  Moments<double> Update3 =  RectifiedGaussianModel<double>::CalcMoments(SumNP4);
+  Moments<double> Update4 =  RectifiedGaussianModel<double>::CalcMoments(SumNP5);
 
-//   double LogNorm1 = RectifiendGaussianModel<double>::CalcLogNorm(Mean,Precision);
-//   double LogNorm2 = RectifiendGaussianModel<double>::CalcLogNorm(SumNP);
-//   double AvLog    = RectifiendGaussianModel<double>::CalcAvLog(Mean,Precision,Data);
+  double LogNorm1 = RectifiedGaussianModel<double>::CalcLogNorm(Parent1,Parent2);
+  double LogNorm2 = RectifiedGaussianModel<double>::CalcLogNorm(SumNP);
+  double AvLog    = RectifiedGaussianModel<double>::CalcAvLog(Parent1,Parent2,Data);
   
-//   double LogNorm = 
 
-//   //Check
-//   BOOST_CHECK_CLOSE(NPMean[0], 12.0 , 0.0001);  //3*4
-//   BOOST_CHECK_CLOSE(NPMean[1], -1.5 , 0.0001);  //-3/2
-//   BOOST_CHECK_CLOSE(NPPrec[0], 2.0 , 0.0001);  // - 0.5*(7-2*4*2 +5)
-//   BOOST_CHECK_CLOSE(NPPrec[1], 0.5 , 0.0001);  // 0.5
-//   BOOST_CHECK_CLOSE(NPData[0], 6.0 , 0.0001);  //2*3
-//   BOOST_CHECK_CLOSE(NPData[1], -1.5 , 0.0001);  //-3/2
+  //Check
+  BOOST_CHECK_CLOSE(NPParent1[0], 12.0 , 0.0001);  //3*4
+  BOOST_CHECK_CLOSE(NPParent1[1], -1.5 , 0.0001);  //-3/2
+  BOOST_CHECK_CLOSE(NPPrec[0], -3.0 , 0.0001);  // - 0.5*(17-2*4*2 +5)
+  BOOST_CHECK_CLOSE(NPPrec[1], 0.5 , 0.0001);  // 0.5
+  BOOST_CHECK_CLOSE(NPData[0], 6.0 , 0.0001);  //2*3
+  BOOST_CHECK_CLOSE(NPData[1], -1.5 , 0.0001);  //-3/2
 
-//   BOOST_CHECK_CLOSE(Update[0],2.0 , 0.0001);  
-//   BOOST_CHECK_CLOSE(Update[1],4.0+1.0/3.0 , 0.0001);  
+  BOOST_CHECK_CLOSE(Update[0],mean_0(2,3), 0.0001);  
+  BOOST_CHECK_CLOSE(Update[1],mean_1(2,3) , 0.0001);  
+  BOOST_CHECK_CLOSE(Update1[0],mean_0(30,2), 0.0001);  
+  BOOST_CHECK_CLOSE(Update1[1],mean_1(30,2) , 0.0001);  
+  BOOST_CHECK_CLOSE(Update2[0],mean_0(-20,2), 0.1);  
+  BOOST_CHECK_CLOSE(Update2[1],mean_1(-20,2) , 0.1);  
+  BOOST_CHECK_CLOSE(Update3[0],mean_0(15,2), 0.1);  //approximations to within 0.1%
+  BOOST_CHECK_CLOSE(Update3[1],mean_1(15,2) , 0.1);  //approximations to within 0.1%
+  BOOST_CHECK_CLOSE(Update4[0],mean_0(-15,2), 0.1);   //approximations to within 0.1%
+  BOOST_CHECK_CLOSE(Update4[1],mean_1(-15,2) , 0.01);  //approximations to within 0.01%
 
 
-//   BOOST_CHECK_CLOSE(LogNorm1, 0.5*(std::log(3) - 3*5 - std::log(2*M_PI)) , 0.0001);  
-//   BOOST_CHECK_CLOSE(LogNorm2, 0.5*(std::log(3) - 3*4 - std::log(2*M_PI)), 0.0001);  
+
+
+  BOOST_CHECK_CLOSE(LogNorm1, 0.5*(std::log(2.*3) - 3*5 - std::log(M_PI)) - gsl_sf_log_erfc(-2.0*std::sqrt(3.0/2.0)) , 0.0001);  
+  BOOST_CHECK_CLOSE(LogNorm2,  0.5*(std::log(2.*3) - 3*4 - std::log(M_PI)) - gsl_sf_log_erfc(-2.0*std::sqrt(3.0/2.0)), 0.0001);  
   
-//   BOOST_CHECK_CLOSE(AvLog, NPData[0]*4 + NPData[1]*7 + LogNorm1, 0.0001);  
-// } 
+  BOOST_CHECK_CLOSE(AvLog, NPData[0]*4 + NPData[1]*17 + LogNorm1, 0.0001);  
+} 
 
 BOOST_AUTO_TEST_CASE( GammaModel_test  )
 {
@@ -758,7 +803,7 @@ BOOST_AUTO_TEST_SUITE_END()
    
 //   Builder<double> Build;
 //   GammaNode    Precision = Build.Gamma(0.01,0.01);
-//   GaussianNode Mean1    = Build.Gaussian(0.0,0.01);
+//   GaussianNode Parent11    = Build.Gaussian(0.0,0.01);
 //   GaussianNode Mean2    = Build.Gaussian(0.0,0.01);
   
 //   std::cout<<"Mean1 = "<<Mean1<<std::endl;

@@ -127,13 +127,6 @@ ICR::ICA::RectifiedGaussianModel<T>::CalcLogNorm(const T& mean, const T& mean_sq
   const T LN=    0.5* ( std::log(2.0*precision/(M_PI)) - (precision) * (mean_squared))
     - gsl_sf_log_erfc (-mean*std::sqrt(precision/2.0) ); //-mean*std::sqrt(precision/2.0) Typo in Minskins's thesis (... not the first)
   //std::cout<<"LN = "<<LN<<std::endl;
-  if (fabs(LN) > 1e6) 
-    {
-      std::cout<<"LN = "<<LN<<" GP = "<< 0.5* ( std::log(2.0*precision/(M_PI)) - (precision) * (mean_squared))<<" log erfc = "<<- gsl_sf_log_erfc (-mean*std::sqrt(precision/2.0) )<<std::endl;
-      std::cout<<"mean = "<<mean<<" prec = "<<precision<<" mean = "<<mean_squared<<std::endl;
-
-
-    }
   return LN;
 }
 
@@ -180,7 +173,7 @@ ICR::ICA::RectifiedGaussianModel<T>::CalcMoments(const NaturalParameters<T>& NP)
   //std::cout<<"arg = "<<arg<<std::endl;
 
   Moments<T> M(0,0);
-  if (arg>10) //will start getting bad numerical errors
+  if (arg>15) //will start getting bad numerical errors above 20
     {
       //rememer arg propto -mean
       //its tends to a gamma
@@ -189,13 +182,14 @@ ICR::ICA::RectifiedGaussianModel<T>::CalcMoments(const NaturalParameters<T>& NP)
       //From Closed-form approximations to the error and
       //complementary error functions and their applications in
       //atmospheric science we get (to one approximation better)
-      
+
+
       return  Moments<T>(-1.0/(mean*precision) + 2.5/(mean*mean_squared*precision_squared),
 			 ( mean_squared + 1.0 /(precision))*(1.0-1.0/sqrt(2))
 			 + 2.5/(mean_squared*precision_squared));
 
     }
-  if (arg<-10) //will start getting bad numerical errors
+  if (arg<-15) //will start getting bad numerical errors above 20
     {
       //its tends to a gaussin
       //std::cout<<"M1 "<<Moments<T>(mean, mean_squared + 1.0 /(precision))<<std::endl;
@@ -301,11 +295,8 @@ ICR::ICA::RectifiedGaussianModel<T>::CalcNP2Parent2(const Moments<T>& Mean,const
   T mean_squared = Mean[1];
   T data = Data[0];
   T data_squared = Data[1];
-  if (data_squared - 2*data*mean + mean_squared<0) 
-    {
-      std::cout<<"MeanRG = "<<mean<<std::endl;
-      std::cout<<"DataRG = "<<Data<<std::endl;
-    }
+
+  BOOST_ASSERT(data_squared - 2*data*mean + mean_squared>0);
   return  NaturalParameters<T>(-0.5*(data_squared - 2*data*mean + mean_squared), 0.5 );
 }
     
