@@ -1763,7 +1763,7 @@ BOOST_AUTO_TEST_CASE( ICA_test  )
 	  }
 	}
 	
-	not_converged = !Build.Run(0.001,2);
+	not_converged = !Build.Run(0.001,5);
 
 	// std::cout<<"WEIGHTS ["<<attempt<<"] = "<<std::endl;
 
