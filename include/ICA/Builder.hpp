@@ -672,14 +672,14 @@ namespace ICR{
       Initialise()
       {
 	if (!m_initialised) {
-	  for(size_t i=0;i<5;++i){
+	  // for(size_t i=0;i<5;++i){
 
 
 	    PARALLEL_FOREACH(m_Nodes.begin(), m_Nodes.end(),
 			     boost::bind(&VariableNode<T>::InitialiseMoments, _1)
 			     );
 	    m_initialised=true;
-	  }
+	  // }
 	}
 
       }

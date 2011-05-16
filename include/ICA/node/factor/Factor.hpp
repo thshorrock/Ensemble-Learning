@@ -52,6 +52,9 @@ namespace ICR{
       Moments<T>
       InitialiseMoments() const
       {
+	//Initialise up the tree first
+	m_parent1_node->InitialiseMoments();
+	m_parent2_node->InitialiseMoments();
 	return  Model::CalcSample(m_parent1_node,m_parent2_node );
       }
       
@@ -119,6 +122,8 @@ namespace ICR{
       Moments<double>
       InitialiseMoments() const
       {
+	//Initialise up the tree first
+	m_prior_node->InitialiseMoments();
 	return DirichletModel<double>::CalcSample(m_prior_node);
       }
 

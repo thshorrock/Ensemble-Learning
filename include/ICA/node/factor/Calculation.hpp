@@ -57,6 +57,7 @@ namespace ICR{
       Moments<T>
       InitialiseMoments() const
       {
+	//deterministic
 	return Model<T>::CalcMoments(Model<T>::CalcNP2Deterministic(m_expr,m_context));
       }
       

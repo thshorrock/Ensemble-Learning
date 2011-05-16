@@ -54,6 +54,14 @@ namespace ICR{
       Moments<T>
       InitialiseMoments() const
       {
+	//Initialise up the tree first
+	PARALLEL_FOREACH(m_parent1_nodes.begin(), m_parent1_nodes.end(),
+			 boost::bind(&VariableNode<T>::InitialiseMoments, _1)
+			 );
+	PARALLEL_FOREACH(m_parent2_nodes.begin(), m_parent2_nodes.end(),
+			 boost::bind(&VariableNode<T>::InitialiseMoments, _1)
+			 );
+	m_weights_node->InitialiseMoments();
 	return Model::CalcSample(m_parent1_nodes,m_parent2_nodes, m_weights_node );
       }
 
