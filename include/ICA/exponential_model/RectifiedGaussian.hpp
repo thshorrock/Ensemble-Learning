@@ -207,9 +207,16 @@ ICR::ICA::RectifiedGaussianModel<T>::CalcMoments(const NaturalParameters<T>& NP)
     {
       //rememer arg propto -mean
       //its tends to a gamma
-      //std::cout<<"M2 "<<Moments<T>(-1.0/(mean*precision), 2.0/(mean_squared*precision_squared))<<std::endl;
+      //This is the answer according to Miskin, but the second is clearly wrong (try plotting it)
+      //return  Moments<T>(-1.0/(mean*precision), 2.0/(mean_squared*precision_squared));
+      //From Closed-form approximations to the error and
+      //complementary error functions and their applications in
+      //atmospheric science we get (to one approximation better)
+      
+      return  Moments<T>(-1.0/(mean*precision) + 2.5/(mean*mean_squared*precision_squared),
+			 ( mean_squared + 1.0 /(precision))*(1.0-1.0/sqrt(2))
+			 + 2.5/(mean_squared*precision_squared));
 
-      return  Moments<T>(-1.0/(mean*precision), 2.0/(mean_squared*precision_squared));
     }
   if (arg<-10) //will start getting bad numerical errors
     {
