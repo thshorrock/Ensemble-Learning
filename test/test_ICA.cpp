@@ -706,6 +706,38 @@ BOOST_AUTO_TEST_CASE( DiscreteModel_test  )
 BOOST_AUTO_TEST_SUITE_END()
 
 
+/*****************************************************
+ *****************************************************
+ *****      Calculation Tree        TEST       *******
+ *****************************************************
+ *****************************************************/
+
+BOOST_AUTO_TEST_SUITE( Calculation_Tree_test )
+
+BOOST_AUTO_TEST_CASE( ExpressionFactor_test  )
+{
+  //Create an expression X*Y + Z.
+  ExpressionFactory<double> Factory;  // Create a Factory.
+       
+  Placeholder<double>* X = Factory.placeholder();
+  Placeholder<double>* Y = Factory.placeholder();
+  Placeholder<double>* Z = Factory.placeholder();
+  Expression<double>* XY = Factory.Multiply(X,Y);
+  Expression<double>* Expr = Factory.Add(XY,Z);
+}
+
+BOOST_AUTO_TEST_CASE( SubContext_test  )
+{
+  SubContext<double> C;
+  
+  
+}
+
+
+BOOST_AUTO_TEST_SUITE_END()
+
+
+//BOOST_AUTO_TEST_SUITE( Add_Test_Suite )
 
 // BOOST_AUTO_TEST_SUITE( Add_Test )
 

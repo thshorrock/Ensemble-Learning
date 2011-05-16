@@ -37,7 +37,8 @@ namespace ICR{
 	    m_context(context),
 	    m_child_node(Child)
 	{
-	  
+
+  
 	  for(typename Context<T>::const_iterator it = context.begin();
 	      it!= context.end();
 	      ++it)
