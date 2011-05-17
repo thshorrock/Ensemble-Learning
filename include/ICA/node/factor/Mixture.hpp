@@ -27,11 +27,20 @@ namespace ICR{
       Mixture(const Mixture<Model>& f) {};
     public:
       
-      Mixture( std::vector<VariableNode<T>*>& Parent1, 
-	       std::vector<VariableNode<T>*>& Parent2,  
-	       HiddenNode<DiscreteModel<T> >* Weights,
-	       VariableNode<T>* child
-	       
+      typedef typename boost::call_traits< VariableNode<T>* const>::param_type
+      variable_parameter;
+      typedef typename boost::call_traits< VariableNode<T>* const>::value_type
+      variable_t;
+      typedef typename boost::call_traits< std::vector<VariableNode<T>*> >::param_type
+      variable_vector_parameter;
+      typedef typename boost::call_traits< std::vector<VariableNode<T>*> >::value_type
+      variable_vector_t;
+      
+      Mixture(variable_vector_parameter Parent1, 
+	      variable_vector_parameter Parent2,  
+	      HiddenNode<DiscreteModel<T> >* Weights,
+	      variable_parameter child
+	      
 	       )
 	:  m_parent1_nodes(Parent1), 
 	   m_parent2_nodes(Parent2),
@@ -73,13 +82,13 @@ namespace ICR{
 
 
       NaturalParameters<T>
-      GetNaturalNot( VariableNode<T>* const v) const;
+      GetNaturalNot( variable_parameter v) const;
       
     private: 
 
-      std::vector<VariableNode<T> *> m_parent1_nodes, m_parent2_nodes;
+      variable_vector_parameter m_parent1_nodes, m_parent2_nodes;
       HiddenNode<DiscreteModel<T> > *m_weights_node;
-      VariableNode<T>  *m_child_node;
+      variable_t  m_child_node;
       
       mutable T m_LogNorm;
       mutable boost::mutex m_mutex;
@@ -98,7 +107,7 @@ namespace ICR{
     template<class Model, class T>
     inline
     NaturalParameters<T>
-    Mixture< Model ,T>::GetNaturalNot( VariableNode<T>* const v) const
+    Mixture< Model ,T>::GetNaturalNot( variable_parameter v) const
     {
       if (v == m_child_node) 
 	{

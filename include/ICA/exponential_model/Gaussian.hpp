@@ -26,6 +26,8 @@ namespace ICR{
       variable_parameter;
       typedef typename boost::call_traits< VariableNode<T>* const>::value_type
       variable_t;
+      typedef typename boost::call_traits< std::vector<VariableNode<T>*> >::param_type
+      variable_vector_parameter;
 
       typedef typename boost::call_traits< Moments<T> >::param_type
       moments_parameter;
@@ -110,8 +112,8 @@ namespace ICR{
        */
       static
       moments_t
-      CalcSample(std::vector<variable_t> mean_nodes,
-		 std::vector<variable_t> precision_nodes,
+      CalcSample(variable_vector_parameter mean_nodes,
+		 variable_vector_parameter precision_nodes,
 		 variable_t weights_node);
       
       /** Calculate the Moments from the Natural Paramters.
@@ -154,7 +156,8 @@ namespace ICR{
        */
       static
       NP_t
-      CalcNP2Data(moments_parameter Mean, moments_parameter Precision)  ;
+      CalcNP2Data(moments_parameter Mean, 
+		  moments_parameter Precision)  ;
 
 
       //Deterministic to Stock
@@ -182,13 +185,16 @@ namespace ICR{
        */
       static
       NP_t
-      CalcNP2Deterministic(expression_parameter Expr,context_parameter C);
+      CalcNP2Deterministic(expression_parameter Expr,
+			   context_parameter C);
 
     private:
       //The Log norm is actually evaluated here.
       static
-      T
-      CalcLogNorm(const T& mean,const T& mean_squared,const T& precision) ;
+      data_t
+      CalcLogNorm(data_parameter mean,
+		  data_parameter mean_squared,
+		  data_parameter precision) ;
     };
 
   }
@@ -196,10 +202,10 @@ namespace ICR{
 
 template<class T>
 inline
-T
-ICR::ICA::Gaussian<T>::CalcLogNorm(const T& mean, 
-					const T& mean_squared, 
-					const T& precision)  
+typename ICR::ICA::Gaussian<T>::data_t
+ICR::ICA::Gaussian<T>::CalcLogNorm(data_parameter mean, 
+				   data_parameter mean_squared, 
+				   data_parameter precision)  
 {
   //The log norm
   return   0.5* ( std::log(precision/(2.0*M_PI)) - (precision) * (mean_squared)); 
@@ -209,7 +215,7 @@ template<class T>
 inline
 typename ICR::ICA::Gaussian<T>::data_t
 ICR::ICA::Gaussian<T>::CalcLogNorm(moments_parameter Mean,
-					moments_parameter Precision)  
+				   moments_parameter Precision)  
 {
   return  CalcLogNorm(Mean[0], Mean[1], Precision[0]);
 }
@@ -231,8 +237,8 @@ template<class T>
 inline
 typename ICR::ICA::Gaussian<T>::data_t
 ICR::ICA::Gaussian<T>::CalcAvLog(moments_parameter Mean,
-				      moments_parameter Precision,
-				      moments_parameter Data)
+				 moments_parameter Precision,
+				 moments_parameter Data)
 {
   const NP_t NPData = CalcNP2Data(Mean, Precision);
   return 
@@ -243,7 +249,7 @@ template<class T>
 inline
 typename ICR::ICA::Gaussian<T>::moments_t
 ICR::ICA::Gaussian<T>::CalcSample(variable_parameter Mean,
-				       variable_parameter Precision) 
+				  variable_parameter Precision) 
 {
   ICR::maths::rng* random = Random::Instance();
   const_data_t mean = Mean->GetMoments()[0];
@@ -254,9 +260,9 @@ ICR::ICA::Gaussian<T>::CalcSample(variable_parameter Mean,
 
 template<class T>
 typename ICR::ICA::Gaussian<T>::moments_t
-ICR::ICA::Gaussian<T>::CalcSample(std::vector<variable_t> mean_nodes,
-				       std::vector<variable_t> precision_nodes,
-				       variable_t weights_node)
+ICR::ICA::Gaussian<T>::CalcSample(variable_vector_parameter mean_nodes,
+				  variable_vector_parameter precision_nodes,
+				  variable_t weights_node)
 {
   moments_t weights = weights_node->GetMoments();
   std::vector<moments_t > mean(weights.size());
@@ -303,7 +309,7 @@ template<class T>
 inline
 typename ICR::ICA::Gaussian<T>::NP_t
 ICR::ICA::Gaussian<T>::CalcNP2Parent1(moments_parameter Precision,
-					   moments_parameter Data)
+				      moments_parameter Data)
 {
   //Get the data from the moments.
   const_data_t precision = Precision[0];
