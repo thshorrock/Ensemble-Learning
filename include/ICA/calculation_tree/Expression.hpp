@@ -7,6 +7,7 @@ namespace ICR{
     
     //Forward declarations
     template<class>  class SubContext;
+    template<class>  class FunctionIterator;
     
     template<class T>
     class Plus;
@@ -63,7 +64,7 @@ namespace ICR{
       friend class Plus<T>;
       friend class Times<T>;
       friend class Placeholder<T>;
-      
+      template<class> friend  class FunctionIterator;
       
       virtual void SetParent(function_parameter) = 0;
       virtual function_t GetParent() const = 0;
