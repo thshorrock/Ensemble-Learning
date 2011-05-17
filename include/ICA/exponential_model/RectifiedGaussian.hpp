@@ -12,7 +12,7 @@ namespace ICR{
 
 
     template<class T=double>
-    class RectifiedGaussianModel
+    class RectifiedGaussian
     {
     public:
       static
@@ -100,7 +100,7 @@ namespace ICR{
       static
       NaturalParameters<T>
       CalcNP2Parent(const VariableNode<T>* ParentA, 
-		    const DeterministicNode<RectifiedGaussianModel<T>, T>* Data, 
+		    const DeterministicNode<RectifiedGaussian<T>, T>* Data, 
 		    const Context<T>& C);
 
 
@@ -121,7 +121,7 @@ namespace ICR{
 template<class T>
 inline
 T
-ICR::ICA::RectifiedGaussianModel<T>::CalcLogNorm(const T& mean, const T& mean_squared, const T& precision)  
+ICR::ICA::RectifiedGaussian<T>::CalcLogNorm(const T& mean, const T& mean_squared, const T& precision)  
 {
   // std::cout<<"GAUSSIAN "<<std::endl;
   const T LN=    0.5* ( std::log(2.0*precision/(M_PI)) - (precision) * (mean_squared))
@@ -133,7 +133,7 @@ ICR::ICA::RectifiedGaussianModel<T>::CalcLogNorm(const T& mean, const T& mean_sq
 template<class T>
 inline
 T
-ICR::ICA::RectifiedGaussianModel<T>::CalcLogNorm(const Moments<T>& Mean,const Moments<T>& Precision)  
+ICR::ICA::RectifiedGaussian<T>::CalcLogNorm(const Moments<T>& Mean,const Moments<T>& Precision)  
 {
   return  CalcLogNorm(Mean[0], Mean[1], Precision[0]);
 }
@@ -141,7 +141,7 @@ ICR::ICA::RectifiedGaussianModel<T>::CalcLogNorm(const Moments<T>& Mean,const Mo
 template<class T>
 inline
 T
-ICR::ICA::RectifiedGaussianModel<T>::CalcLogNorm(const NaturalParameters<T>& NP)  
+ICR::ICA::RectifiedGaussian<T>::CalcLogNorm(const NaturalParameters<T>& NP)  
 {
   T precision    = -NP[1]*2.0;
   T mean         =  NP[0]/(precision);
@@ -161,7 +161,7 @@ struct Erfcx
 template<class T>
 inline
 ICR::ICA::Moments<T>
-ICR::ICA::RectifiedGaussianModel<T>::CalcMoments(const NaturalParameters<T>& NP)
+ICR::ICA::RectifiedGaussian<T>::CalcMoments(const NaturalParameters<T>& NP)
 {
   BOOST_ASSERT(NP.size() == 2);
   const T precision    = -NP[1]*2.0;
@@ -215,8 +215,8 @@ ICR::ICA::RectifiedGaussianModel<T>::CalcMoments(const NaturalParameters<T>& NP)
 template<class T> 
 inline
 ICR::ICA::NaturalParameters<T>
-ICR::ICA::RectifiedGaussianModel<T>::CalcNP2Parent(const VariableNode<T>* ParentA, 
-					  const DeterministicNode<RectifiedGaussianModel<T>, T>* Data, 
+ICR::ICA::RectifiedGaussian<T>::CalcNP2Parent(const VariableNode<T>* ParentA, 
+					  const DeterministicNode<RectifiedGaussian<T>, T>* Data, 
 					  const Context<T>& C)
 {
   
@@ -248,7 +248,7 @@ ICR::ICA::RectifiedGaussianModel<T>::CalcNP2Parent(const VariableNode<T>* Parent
 template<class T> 
 inline
 ICR::ICA::NaturalParameters<T>
-ICR::ICA::RectifiedGaussianModel<T>::CalcNP2Deterministic(const Expression<T>* Expr,const Context<T>& C)
+ICR::ICA::RectifiedGaussian<T>::CalcNP2Deterministic(const Expression<T>* Expr,const Context<T>& C)
 {
   SubContext<T> C0 = C[0];
   SubContext<T> C1 = C[1];
@@ -263,7 +263,7 @@ ICR::ICA::RectifiedGaussianModel<T>::CalcNP2Deterministic(const Expression<T>* E
 template<class T> 
 inline
 ICR::ICA::NaturalParameters<T>
-ICR::ICA::RectifiedGaussianModel<T>::CalcNP2Parent1(const Moments<T>& Precision,const Moments<T>& Data)
+ICR::ICA::RectifiedGaussian<T>::CalcNP2Parent1(const Moments<T>& Precision,const Moments<T>& Data)
 {
   BOOST_ASSERT(Precision.size() == 2);
   BOOST_ASSERT(Data.size() == 2);
@@ -275,7 +275,7 @@ ICR::ICA::RectifiedGaussianModel<T>::CalcNP2Parent1(const Moments<T>& Precision,
 template<class T>
 inline
 ICR::ICA::NaturalParameters<T>
-ICR::ICA::RectifiedGaussianModel<T>::CalcNP2Data(const Moments<T>& Mean,const Moments<T>& Precision)
+ICR::ICA::RectifiedGaussian<T>::CalcNP2Data(const Moments<T>& Mean,const Moments<T>& Precision)
 {
   BOOST_ASSERT(Mean.size() == 2);
   BOOST_ASSERT(Precision.size() == 2);
@@ -287,7 +287,7 @@ ICR::ICA::RectifiedGaussianModel<T>::CalcNP2Data(const Moments<T>& Mean,const Mo
 template<class T>
 inline
 ICR::ICA::NaturalParameters<T>
-ICR::ICA::RectifiedGaussianModel<T>::CalcNP2Parent2(const Moments<T>& Mean,const Moments<T>& Data)
+ICR::ICA::RectifiedGaussian<T>::CalcNP2Parent2(const Moments<T>& Mean,const Moments<T>& Data)
 {
   BOOST_ASSERT(Mean.size() == 2);
   BOOST_ASSERT(Data.size() == 2);
@@ -303,7 +303,7 @@ ICR::ICA::RectifiedGaussianModel<T>::CalcNP2Parent2(const Moments<T>& Mean,const
 template<class T>
 inline
 T
-ICR::ICA::RectifiedGaussianModel<T>::CalcAvLog(const Moments<T>& Mean,const Moments<T>& Precision,const Moments<T>& Data)
+ICR::ICA::RectifiedGaussian<T>::CalcAvLog(const Moments<T>& Mean,const Moments<T>& Precision,const Moments<T>& Data)
 {
   BOOST_ASSERT(Mean.size() == 2);
   BOOST_ASSERT(Precision.size() == 2);

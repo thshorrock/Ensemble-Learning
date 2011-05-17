@@ -15,7 +15,7 @@ namespace ICR{
 
 
     template<class T=double>
-    class GaussianModel
+    class Gaussian
     {
     public:
       
@@ -31,7 +31,7 @@ namespace ICR{
       typedef typename boost::call_traits< Moments<T> >::value_type
       moments_t;
       
-      typedef typename boost::call_traits< DeterministicNode<GaussianModel<T>, T>* >::param_type
+      typedef typename boost::call_traits< DeterministicNode<Gaussian<T>, T>* >::param_type
       deterministic_parameter;
       typedef typename boost::call_traits< Expression<T>* >::param_type
       expression_parameter;
@@ -194,7 +194,7 @@ namespace ICR{
 template<class T>
 inline
 T
-ICR::ICA::GaussianModel<T>::CalcLogNorm(const T& mean, 
+ICR::ICA::Gaussian<T>::CalcLogNorm(const T& mean, 
 					const T& mean_squared, 
 					const T& precision)  
 {
@@ -204,8 +204,8 @@ ICR::ICA::GaussianModel<T>::CalcLogNorm(const T& mean,
 
 template<class T>
 inline
-typename ICR::ICA::GaussianModel<T>::data_t
-ICR::ICA::GaussianModel<T>::CalcLogNorm(moments_parameter Mean,
+typename ICR::ICA::Gaussian<T>::data_t
+ICR::ICA::Gaussian<T>::CalcLogNorm(moments_parameter Mean,
 					moments_parameter Precision)  
 {
   return  CalcLogNorm(Mean[0], Mean[1], Precision[0]);
@@ -213,8 +213,8 @@ ICR::ICA::GaussianModel<T>::CalcLogNorm(moments_parameter Mean,
 
 template<class T>
 inline
-typename ICR::ICA::GaussianModel<T>::data_t
-ICR::ICA::GaussianModel<T>::CalcLogNorm(NP_parameter NP)  
+typename ICR::ICA::Gaussian<T>::data_t
+ICR::ICA::Gaussian<T>::CalcLogNorm(NP_parameter NP)  
 {
   //Obtain data from natural parameters.
   const_data_t precision    = -NP[1]*2.0;
@@ -226,8 +226,8 @@ ICR::ICA::GaussianModel<T>::CalcLogNorm(NP_parameter NP)
     
 template<class T>
 inline
-typename ICR::ICA::GaussianModel<T>::data_t
-ICR::ICA::GaussianModel<T>::CalcAvLog(moments_parameter Mean,
+typename ICR::ICA::Gaussian<T>::data_t
+ICR::ICA::Gaussian<T>::CalcAvLog(moments_parameter Mean,
 				      moments_parameter Precision,
 				      moments_parameter Data)
 {
@@ -238,8 +238,8 @@ ICR::ICA::GaussianModel<T>::CalcAvLog(moments_parameter Mean,
     
 template<class T>
 inline
-typename ICR::ICA::GaussianModel<T>::moments_t
-ICR::ICA::GaussianModel<T>::CalcSample(variable_parameter Mean,
+typename ICR::ICA::Gaussian<T>::moments_t
+ICR::ICA::Gaussian<T>::CalcSample(variable_parameter Mean,
 				       variable_parameter Precision) 
 {
   ICR::maths::rng* random = Random::Instance();
@@ -250,8 +250,8 @@ ICR::ICA::GaussianModel<T>::CalcSample(variable_parameter Mean,
 }
 
 template<class T>
-typename ICR::ICA::GaussianModel<T>::moments_t
-ICR::ICA::GaussianModel<T>::CalcSample(std::vector<variable_t> mean_nodes,
+typename ICR::ICA::Gaussian<T>::moments_t
+ICR::ICA::Gaussian<T>::CalcSample(std::vector<variable_t> mean_nodes,
 				       std::vector<variable_t> precision_nodes,
 				       variable_t weights_node)
 {
@@ -285,8 +285,8 @@ ICR::ICA::GaussianModel<T>::CalcSample(std::vector<variable_t> mean_nodes,
 
 template<class T>
 inline
-typename ICR::ICA::GaussianModel<T>::moments_t
-ICR::ICA::GaussianModel<T>::CalcMoments(NP_parameter NP)
+typename ICR::ICA::Gaussian<T>::moments_t
+ICR::ICA::Gaussian<T>::CalcMoments(NP_parameter NP)
 {
   //Get the data from the natural paremetes.
   const_data_t precision    = -NP[1]*2.0;
@@ -298,8 +298,8 @@ ICR::ICA::GaussianModel<T>::CalcMoments(NP_parameter NP)
 
 template<class T> 
 inline
-typename ICR::ICA::GaussianModel<T>::NP_t
-ICR::ICA::GaussianModel<T>::CalcNP2Parent1(moments_parameter Precision,
+typename ICR::ICA::Gaussian<T>::NP_t
+ICR::ICA::Gaussian<T>::CalcNP2Parent1(moments_parameter Precision,
 					   moments_parameter Data)
 {
   //Get the data from the moments.
@@ -311,8 +311,8 @@ ICR::ICA::GaussianModel<T>::CalcNP2Parent1(moments_parameter Precision,
 
 template<class T>
 inline
-typename ICR::ICA::GaussianModel<T>::NP_t
-ICR::ICA::GaussianModel<T>::CalcNP2Parent2(moments_parameter Mean,
+typename ICR::ICA::Gaussian<T>::NP_t
+ICR::ICA::Gaussian<T>::CalcNP2Parent2(moments_parameter Mean,
 					   moments_parameter Data)
 {
   const_data_t mean = Mean[0];
@@ -328,8 +328,8 @@ ICR::ICA::GaussianModel<T>::CalcNP2Parent2(moments_parameter Mean,
 
 template<class T>
 inline
-typename ICR::ICA::GaussianModel<T>::NP_t
-ICR::ICA::GaussianModel<T>::CalcNP2Data(moments_parameter Mean,
+typename ICR::ICA::Gaussian<T>::NP_t
+ICR::ICA::Gaussian<T>::CalcNP2Data(moments_parameter Mean,
 					moments_parameter Precision)
 {
   //Get the data from the moments.
@@ -342,8 +342,8 @@ ICR::ICA::GaussianModel<T>::CalcNP2Data(moments_parameter Mean,
 
 template<class T> 
 inline
-typename ICR::ICA::GaussianModel<T>::NP_t
-ICR::ICA::GaussianModel<T>::CalcNP2Parent(variable_parameter ParentA, 
+typename ICR::ICA::Gaussian<T>::NP_t
+ICR::ICA::Gaussian<T>::CalcNP2Parent(variable_parameter ParentA, 
 					  deterministic_parameter Data, 
 					  context_parameter C)
 {
@@ -393,8 +393,8 @@ ICR::ICA::GaussianModel<T>::CalcNP2Parent(variable_parameter ParentA,
 //Deterministic to Stock
 template<class T> 
 inline
-typename ICR::ICA::GaussianModel<T>::NP_t
-ICR::ICA::GaussianModel<T>::CalcNP2Deterministic(expression_parameter Expr,
+typename ICR::ICA::Gaussian<T>::NP_t
+ICR::ICA::Gaussian<T>::CalcNP2Deterministic(expression_parameter Expr,
 						 context_parameter M)
 {
   //The context provides the Moments of every element in expression.

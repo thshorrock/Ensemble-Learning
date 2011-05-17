@@ -26,21 +26,21 @@ namespace ICR{
     class Builder
     {
 
-      typedef Factor<RectifiedGaussianModel<T> >      RectifiedGaussianFactor;
-      typedef Factor<GaussianModel<T> >      GaussianFactor;
+      typedef Factor<RectifiedGaussian<T> >      RectifiedGaussianFactor;
+      typedef Factor<Gaussian<T> >      GaussianFactor;
       typedef Factor<GammaModel<T> >         GammaFactor;
       typedef Factor<DirichletModel<T> >     DirichletFactor;
       typedef Factor<DiscreteModel<T> >      DiscreteFactor;
-      typedef Mixture<RectifiedGaussianModel<T> >     RectifiedGaussianMixtureFactor;
-      typedef Mixture<GaussianModel<T> >     GaussianMixtureFactor;
+      typedef Mixture<RectifiedGaussian<T> >     RectifiedGaussianMixtureFactor;
+      typedef Mixture<Gaussian<T> >     GaussianMixtureFactor;
 
-      typedef Details::CalcGaussianFactor<GaussianModel, T >  CalcGaussianFactor;
+      typedef Details::CalcGaussianFactor<Gaussian, T >  CalcGaussianFactor;
 
-      // typedef DeterministicFactor<GaussianModel,Det::Add, T >     AddFactor;
-      // typedef DeterministicFactor<GaussianModel,Det::Multiply, T >     MultiplyFactor;
+      // typedef DeterministicFactor<Gaussian,Det::Add, T >     AddFactor;
+      // typedef DeterministicFactor<Gaussian,Det::Multiply, T >     MultiplyFactor;
 
-      typedef HiddenNode<GaussianModel<T> >      GaussianType;
-      typedef HiddenNode<RectifiedGaussianModel<T> >      RectifiedGaussianType;
+      typedef HiddenNode<Gaussian<T> >      GaussianType;
+      typedef HiddenNode<RectifiedGaussian<T> >      RectifiedGaussianType;
       typedef HiddenNode<GammaModel<T> >         GammaType;
       typedef HiddenNode<DirichletModel<T> >     DirichletType;
       typedef DataNode<GaussianConstant<T> >     GaussianDataType;
@@ -49,26 +49,26 @@ namespace ICR{
       typedef ConstantNode<GammaConstant<T> >    GammaConstType;
       typedef ConstantNode<NormalConstant<T> >   NormalConstType;
       typedef ConstantNode<DirichletConstant<T> >  DirichletConstType;
-      typedef DeterministicNode<GaussianModel<T>, T>    GaussianResultType;
+      typedef DeterministicNode<Gaussian<T>, T>    GaussianResultType;
 
       
       typedef HiddenNode<DirichletModel<T> >     WeightsType;
       typedef HiddenNode<DiscreteModel<T> >      CatagoryType;
-      //      typedef ForwardingNode<GaussianModel<T> >   GaussianMixtureType;
+      //      typedef ForwardingNode<Gaussian<T> >   GaussianMixtureType;
     public:
       typedef VariableNode<T>*                    Variable;
-      typedef HiddenNode<RectifiedGaussianModel<T> >*      RectifiedGaussianNode;
-      typedef HiddenNode<GaussianModel<T> >*      GaussianNode;
+      typedef HiddenNode<RectifiedGaussian<T> >*      RectifiedGaussianNode;
+      typedef HiddenNode<Gaussian<T> >*      GaussianNode;
       typedef HiddenNode<GammaModel<T> >*         GammaNode;
       typedef DataNode<GaussianConstant<T> >*     GaussianDataNode;
       typedef DataNode<GammaConstant<T> >*        GammaDataNode;
       typedef ConstantNode<GaussianConstant<T> >* GaussianConstNode;
       typedef ConstantNode<GammaConstant<T> >*    GammaConstNode;
-      typedef DeterministicNode<GaussianModel<T>, T>*    GaussianResultNode;
+      typedef DeterministicNode<Gaussian<T>, T>*    GaussianResultNode;
       
       typedef HiddenNode<DirichletModel<T> >*      WeightsNode;
       typedef HiddenNode<DiscreteModel<T> >*       CatagoryNode;
-      // typedef ForwardingNode<GaussianModel<T> >*  GaussianMixtureNode;
+      // typedef ForwardingNode<Gaussian<T> >*  GaussianMixtureNode;
       
       
       Builder()
@@ -107,38 +107,38 @@ namespace ICR{
       }
 
       GaussianNode
-      Gaussian(Variable Mean, Variable Precision)
+      gaussian(Variable Mean, Variable Precision)
       {
 	
-	boost::shared_ptr<GaussianType > Gaussian(new GaussianType());
-	boost::shared_ptr<GaussianFactor > GaussianF(new GaussianFactor(Mean, Precision, Gaussian.get()));
+	boost::shared_ptr<GaussianType > GaussianN(new GaussianType());
+	boost::shared_ptr<GaussianFactor > GaussianF(new GaussianFactor(Mean, Precision, GaussianN.get()));
 	
 	m_Factors.push_back(GaussianF);
-	m_Nodes.push_back(Gaussian);
+	m_Nodes.push_back(GaussianN);
 	
-	return Gaussian.get();
+	return GaussianN.get();
       }
 
       GaussianNode
-      Gaussian(GaussianNode Mean, const T& precision)
+      gaussian(GaussianNode Mean, const T& precision)
       {
 	
 	boost::shared_ptr<GammaConstType > Precision(new GammaConstType(precision));
 	m_Nodes.push_back(Precision);
-	return Gaussian(Mean,Precision.get());
+	return gaussian(Mean,Precision.get());
       }
       
       GaussianNode
-      Gaussian(const T& mean, GammaNode Precision)
+      gaussian(const T& mean, GammaNode Precision)
       {
 	
 	boost::shared_ptr<GaussianConstType > Mean(new GaussianConstType(mean));
 	m_Nodes.push_back(Mean);
-	return Gaussian(Mean.get(),Precision);
+	return gaussian(Mean.get(),Precision);
       }
   
       GaussianNode
-      Gaussian(const T& mean, const T& precision)
+      gaussian(const T& mean, const T& precision)
       {
 	
 	boost::shared_ptr<GaussianConstType > Mean(new GaussianConstType(mean));
@@ -147,12 +147,12 @@ namespace ICR{
 	m_Nodes.push_back(Mean);
 	m_Nodes.push_back(Precision);
 	
-	return Gaussian(Mean.get(),Precision.get());
+	return gaussian(Mean.get(),Precision.get());
       }
       
 
       RectifiedGaussianNode
-      RectifiedGaussian(Variable Mean,Variable  Precision)
+      rectified_gaussian(Variable Mean,Variable  Precision)
       {
 	
 	boost::shared_ptr<RectifiedGaussianType > RectifiedGaussian(new RectifiedGaussianType());
@@ -165,25 +165,25 @@ namespace ICR{
       }
 
       RectifiedGaussianNode
-      RectifiedGaussian(GaussianNode Mean, const T& precision)
+      rectified_gaussian(GaussianNode Mean, const T& precision)
       {
 	
 	boost::shared_ptr<GammaConstType > Precision(new GammaConstType(precision));
 	m_Nodes.push_back(Precision);
-	return RectifiedGaussian(Mean,Precision.get());
+	return rectified_gaussian(Mean,Precision.get());
       }
       
       RectifiedGaussianNode
-      RectifiedGaussian(const T& mean, GammaNode Precision)
+      rectified_gaussian(const T& mean, GammaNode Precision)
       {
 	
 	boost::shared_ptr<GaussianConstType > Mean(new GaussianConstType(mean));
 	m_Nodes.push_back(Mean);
-	return RectifiedGaussian(Mean.get(),Precision);
+	return rectified_gaussian(Mean.get(),Precision);
       }
   
       RectifiedGaussianNode
-      RectifiedGaussian(const T& mean, const T& precision)
+      rectified_gaussian(const T& mean, const T& precision)
       {
 	
 	boost::shared_ptr<GaussianConstType > Mean(new GaussianConstType(mean));
@@ -192,7 +192,7 @@ namespace ICR{
 	m_Nodes.push_back(Mean);
 	m_Nodes.push_back(Precision);
 	
-	 return RectifiedGaussian(Mean.get(),Precision.get());
+	 return rectified_gaussian(Mean.get(),Precision.get());
       }
       
       

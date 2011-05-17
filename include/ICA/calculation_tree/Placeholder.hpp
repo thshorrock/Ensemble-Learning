@@ -78,8 +78,8 @@ namespace ICR{
       typedef typename boost::call_traits<T>::value_type
       data_t;
 
-      template<class> friend class GaussianModel;
-      template<class> friend class RectifiedGaussianModel;
+      template<class> friend class Gaussian;
+      template<class> friend class RectifiedGaussian;
 
       /** A forward iterator pointing to the first operator (one below this placeholder).
        */

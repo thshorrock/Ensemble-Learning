@@ -497,7 +497,7 @@ BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE( ExpModels_test )
   
-BOOST_AUTO_TEST_CASE( GaussianModel_test  )
+BOOST_AUTO_TEST_CASE( Gaussian_test  )
 {
   //Initialise
   Moments<double> Mean(2,5);
@@ -507,18 +507,18 @@ BOOST_AUTO_TEST_CASE( GaussianModel_test  )
 
   //Collect
   NaturalParameters<double> NPMean
-    = GaussianModel<double>::CalcNP2Parent1(Precision,Data);
+    = Gaussian<double>::CalcNP2Parent1(Precision,Data);
   NaturalParameters<double> NPPrec
-    = GaussianModel<double>::CalcNP2Parent2(Mean,Data);
+    = Gaussian<double>::CalcNP2Parent2(Mean,Data);
   NaturalParameters<double> NPData
-    = GaussianModel<double>::CalcNP2Data(Mean,Precision);
+    = Gaussian<double>::CalcNP2Data(Mean,Precision);
   
 
-  Moments<double> Update =  GaussianModel<double>::CalcMoments(SumNP);
+  Moments<double> Update =  Gaussian<double>::CalcMoments(SumNP);
 
-  double LogNorm1 = GaussianModel<double>::CalcLogNorm(Mean,Precision);
-  double LogNorm2 = GaussianModel<double>::CalcLogNorm(SumNP);
-  double AvLog    = GaussianModel<double>::CalcAvLog(Mean,Precision,Data);
+  double LogNorm1 = Gaussian<double>::CalcLogNorm(Mean,Precision);
+  double LogNorm2 = Gaussian<double>::CalcLogNorm(SumNP);
+  double AvLog    = Gaussian<double>::CalcAvLog(Mean,Precision,Data);
   
   
 
@@ -564,7 +564,7 @@ mean_1(double mean, double prec)
   return mean*mean + 1.0/prec + std::sqrt(2.0/(2.0*M_PI*prec))*mean/erfcx(argm(mean,prec));
 }
 
-BOOST_AUTO_TEST_CASE( RectifiedGaussianModel_test  )
+BOOST_AUTO_TEST_CASE( RectifiedGaussian_test  )
 {
   //Initialise
   Moments<double> Parent1(2,5);
@@ -581,22 +581,22 @@ BOOST_AUTO_TEST_CASE( RectifiedGaussianModel_test  )
 
   //Collect
   NaturalParameters<double> NPParent1
-    = RectifiedGaussianModel<double>::CalcNP2Parent1(Parent2,Data);
+    = RectifiedGaussian<double>::CalcNP2Parent1(Parent2,Data);
   NaturalParameters<double> NPPrec
-    = RectifiedGaussianModel<double>::CalcNP2Parent2(Parent1,Data);
+    = RectifiedGaussian<double>::CalcNP2Parent2(Parent1,Data);
   NaturalParameters<double> NPData
-    = RectifiedGaussianModel<double>::CalcNP2Data(Parent1,Parent2);
+    = RectifiedGaussian<double>::CalcNP2Data(Parent1,Parent2);
   
 
-  Moments<double> Update =  RectifiedGaussianModel<double>::CalcMoments(SumNP);
-  Moments<double> Update1 =  RectifiedGaussianModel<double>::CalcMoments(SumNP2);
-  Moments<double> Update2 =  RectifiedGaussianModel<double>::CalcMoments(SumNP3);
-  Moments<double> Update3 =  RectifiedGaussianModel<double>::CalcMoments(SumNP4);
-  Moments<double> Update4 =  RectifiedGaussianModel<double>::CalcMoments(SumNP5);
+  Moments<double> Update =  RectifiedGaussian<double>::CalcMoments(SumNP);
+  Moments<double> Update1 =  RectifiedGaussian<double>::CalcMoments(SumNP2);
+  Moments<double> Update2 =  RectifiedGaussian<double>::CalcMoments(SumNP3);
+  Moments<double> Update3 =  RectifiedGaussian<double>::CalcMoments(SumNP4);
+  Moments<double> Update4 =  RectifiedGaussian<double>::CalcMoments(SumNP5);
 
-  double LogNorm1 = RectifiedGaussianModel<double>::CalcLogNorm(Parent1,Parent2);
-  double LogNorm2 = RectifiedGaussianModel<double>::CalcLogNorm(SumNP);
-  double AvLog    = RectifiedGaussianModel<double>::CalcAvLog(Parent1,Parent2,Data);
+  double LogNorm1 = RectifiedGaussian<double>::CalcLogNorm(Parent1,Parent2);
+  double LogNorm2 = RectifiedGaussian<double>::CalcLogNorm(SumNP);
+  double AvLog    = RectifiedGaussian<double>::CalcAvLog(Parent1,Parent2,Data);
   
 
   //Check
@@ -1614,7 +1614,7 @@ BOOST_AUTO_TEST_CASE( ICA_test  )
       ShypMean[m].resize(Components);
       ShypPrec[m].resize(Components);
       for(size_t c=0;c<Components;++c){
-	ShypMean[m][c]=	Build.Gaussian(0.0,0.1);
+	ShypMean[m][c]=	Build.gaussian(0.0,0.1);
 	ShypPrec[m][c]= Build.Gamma(0.1,0.1);
       }
 
@@ -1633,7 +1633,7 @@ BOOST_AUTO_TEST_CASE( ICA_test  )
 
     std::vector<GaussianNode> AMean(M);
     for(size_t m=0;m<M;++m){
-      AMean[m] = Build.Gaussian(0.0,0.1);
+      AMean[m] = Build.gaussian(0.0,0.1);
     }
     std::vector<GammaNode> APrecision(M);
     for(size_t m=0;m<M;++m){
@@ -1644,14 +1644,14 @@ BOOST_AUTO_TEST_CASE( ICA_test  )
     for(size_t n=0;n<N;++n){ 
       A[n].resize(M);
       for(size_t m=0;m<M;++m){ 
-	A[n][m] = Build.RectifiedGaussian(AMean[m], APrecision[m]);
+	A[n][m] = Build.rectified_gaussian(AMean[m], APrecision[m]);
       }
     }
 
     
     std::vector<RectifiedGaussianNode> noiseMean(N);
     for(size_t n=0;n<N;++n){
-      noiseMean[n] = Build.RectifiedGaussian(0.00,0.01);
+      noiseMean[n] = Build.rectified_gaussian(0.00,0.01);
     }
     
     
