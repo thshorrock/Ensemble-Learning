@@ -28,8 +28,9 @@ namespace ICR{
       const Moments<T>&
       GetMoments() const;
 
+      //should make a const version of this 
       const Moments<T>
-      GetForwardedMoments() const;
+      GetForwardedMoments() ;
 
       size_t 
       size() const {return m_Moments.size();}
@@ -101,7 +102,7 @@ ICR::ICA::DeterministicNode<Model,T>::GetMoments() const
 template<class Model,class T>
 inline
 const ICR::ICA::Moments<T>
-ICR::ICA::DeterministicNode<Model,T>::GetForwardedMoments() const
+ICR::ICA::DeterministicNode<Model,T>::GetForwardedMoments() 
 {
   /*This value is update once in update stage,
    * and called in a Factor update stage.
@@ -112,9 +113,14 @@ ICR::ICA::DeterministicNode<Model,T>::GetForwardedMoments() const
 
   std::vector<NaturalParameters<T> > vChildrenNP(m_children.size());
   //Get the NPs and put them in the vector
+  // for(size_t i=0;i<m_children.size();++i){
+  //   vChildrenNP[i] = m_children[i]->GetNaturalNot(this);
+  // }
+
+
   PARALLEL_TRANSFORM(m_children.begin(), m_children.end(), 
-		     vChildrenNP.begin(), boost::bind(&FactorNode<T>::GetNaturalNot, _1, this)
-		     ); 
+  		     vChildrenNP.begin(), boost::bind(&FactorNode<T>::GetNaturalNot, _1, this)
+  		     ); 
 
   BOOST_ASSERT(vChildrenNP.size() >0);
   NaturalParameters<T> ChildrenNP = PARALLEL_ACCUMULATE(vChildrenNP.begin(), vChildrenNP.end(), NaturalParameters<T>(vChildrenNP[0].size() )); 

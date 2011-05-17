@@ -38,8 +38,13 @@ namespace ICR{
     {
       Factor(const Factor<Model>& f) {};
     public:
+      typedef typename boost::call_traits< VariableNode<T>* const>::param_type
+      variable_parameter;
+      typedef typename boost::call_traits< VariableNode<T>* const>::value_type
+      variable_t;
+
       
-      Factor( VariableNode<T>* Parent1,  VariableNode<T>* Parent2,  VariableNode<T>* Child)
+      Factor( variable_parameter Parent1,  variable_parameter Parent2,  variable_parameter Child)
 	: m_parent1_node(Parent1),
 	  m_parent2_node(Parent2),
 	  m_child_node(Child)
@@ -66,7 +71,7 @@ namespace ICR{
 
 
       NaturalParameters<T>
-      GetNaturalNot(const VariableNode<T>* v) const
+      GetNaturalNot( variable_parameter const v) const
       {
 
 	if (v==m_parent1_node)
@@ -109,8 +114,13 @@ namespace ICR{
       Factor(const Factor<DirichletModel<double> >& f) {};
     public:
       
+      typedef  boost::call_traits< VariableNode<double>* const>::param_type
+      variable_parameter;
+      typedef  boost::call_traits< VariableNode<double>* const>::value_type
+      variable_t;
 
-      Factor( VariableNode<double>* Prior,  VariableNode<double>* Child)
+
+      Factor( variable_parameter Prior,  variable_parameter Child)
 	: m_prior_node(Prior),
 	  m_child_node(Child)
       {
@@ -136,7 +146,7 @@ namespace ICR{
 
 
       NaturalParameters<double>
-      GetNaturalNot(const VariableNode<double>* v) const;
+      GetNaturalNot( variable_parameter v) const;
       
 
       // void 
@@ -157,7 +167,12 @@ namespace ICR{
     public:
       
 
-      Factor( VariableNode<double>* Prior,  VariableNode<double>* Child)
+      typedef  boost::call_traits< VariableNode<double>* const>::param_type
+      variable_parameter;
+      typedef  boost::call_traits< VariableNode<double>* const>::value_type
+      variable_t;
+
+      Factor( variable_parameter Prior,  variable_parameter Child)
 	: m_prior_node(Prior),
 	  m_child_node(Child)
       {
@@ -183,7 +198,7 @@ namespace ICR{
 
 
       NaturalParameters<double>
-      GetNaturalNot(const VariableNode<double>* v) const;
+      GetNaturalNot( variable_parameter v) const;
       
       // void
       // Reset();
@@ -214,7 +229,7 @@ namespace ICR{
     //template<>
     inline
     NaturalParameters<double>
-    Factor< DirichletModel<double> ,double>::GetNaturalNot(const VariableNode<double>* v) const
+    Factor< DirichletModel<double> ,double>::GetNaturalNot( variable_parameter v) const
     {
       if (v==m_child_node)
 	{
@@ -241,7 +256,7 @@ namespace ICR{
 
     inline
     NaturalParameters<double>
-    Factor<DiscreteModel<double>,double>::GetNaturalNot(const VariableNode<double>* v) const
+    Factor<DiscreteModel<double>,double>::GetNaturalNot( variable_parameter v) const
     {
       boost::mutex::scoped_lock lock(m_mutex);
       if (v==m_prior_node)

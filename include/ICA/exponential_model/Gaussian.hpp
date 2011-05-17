@@ -18,6 +18,12 @@ namespace ICR{
     class GaussianModel
     {
     public:
+      
+      typedef typename boost::call_traits< VariableNode<T>* const>::param_type
+      variable_parameter;
+      typedef typename boost::call_traits< VariableNode<T>* const>::value_type
+      variable_t;
+
       static
       T
       CalcLogNorm(const Moments<T>& Mean,const Moments<T>& Precision) ;
@@ -32,7 +38,7 @@ namespace ICR{
 
       static
       Moments<T>
-      CalcSample(const VariableNode<T>* Mean,const VariableNode<T>* Precision) 
+      CalcSample(variable_parameter Mean,variable_parameter Precision) 
       {
 	ICR::maths::rng* random = Random::Instance();
 	const T mean = Mean->GetMoments()[0];
@@ -43,9 +49,9 @@ namespace ICR{
       
       static
       Moments<T>
-      CalcSample(std::vector<VariableNode<T> *> m_mean_nodes,
-		 std::vector<VariableNode<T> *> m_precision_nodes,
-		 VariableNode<T> * m_weights_node)
+      CalcSample(std::vector<variable_t> m_mean_nodes,
+		 std::vector<variable_t> m_precision_nodes,
+		 variable_t m_weights_node)
 	
       {
 	Moments<T> weights = m_weights_node->GetMoments();
@@ -99,9 +105,9 @@ namespace ICR{
       
       static
       NaturalParameters<T>
-      CalcNP2Parent(const VariableNode<T>* ParentA, 
-		    const DeterministicNode<GaussianModel<T>, T>* Data, 
-		    const Context<T>& C);
+      CalcNP2Parent( variable_parameter  ParentA, 
+		     DeterministicNode<GaussianModel<T>, T>* Data, 
+		     const Context<T>& C);
 
 
       //Deterministic to Stock
@@ -181,8 +187,8 @@ ICR::ICA::GaussianModel<T>::CalcMoments(const NaturalParameters<T>& NP)
 template<class T> 
 inline
 ICR::ICA::NaturalParameters<T>
-ICR::ICA::GaussianModel<T>::CalcNP2Parent(const VariableNode<T>* ParentA, 
-					  const DeterministicNode<GaussianModel<T>, T>* Data, 
+ICR::ICA::GaussianModel<T>::CalcNP2Parent(variable_parameter ParentA, 
+					   DeterministicNode<GaussianModel<T>, T>* Data, 
 					  const Context<T>& C)
 {
   
@@ -196,7 +202,7 @@ ICR::ICA::GaussianModel<T>::CalcNP2Parent(const VariableNode<T>* ParentA,
 
   // std::cout<<"C02P = "<<C[0]<<std::endl;
   // std::cout<<"C12P = "<<C[1]<<std::endl;
-  const Placeholder<T>* P= C.Lookup(ParentA);
+  const Placeholder<T>*  P= C.Lookup(ParentA);
   
   std::pair<T,T> inv_op_data0 = P->Invert(fdata, C0);
   T unsummed0 =inv_op_data0.first;

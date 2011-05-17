@@ -84,9 +84,14 @@ namespace ICR{
     {
     public:
       
+      typedef typename boost::call_traits< VariableNode<T>* const>::param_type
+      variable_parameter;
+      typedef typename boost::call_traits< VariableNode<T>* const>::value_type
+      variable_t;
+
       virtual
       NaturalParameters<T>
-      GetNaturalNot(const VariableNode<T>*) const = 0;
+      GetNaturalNot( variable_parameter ) const = 0;
  
       virtual 
       T

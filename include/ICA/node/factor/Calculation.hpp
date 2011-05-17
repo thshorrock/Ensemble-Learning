@@ -31,6 +31,11 @@ namespace ICR{
       {
       public:
       
+      typedef typename boost::call_traits< VariableNode<T>* const>::param_type
+      variable_parameter;
+      typedef typename boost::call_traits< VariableNode<T>* const>::value_type
+      variable_t;
+
 	CalcGaussianFactor( Expression<T>* Expr, const Context<T>& context,
 			    DeterministicNode<Model<T>,T>* Child)
 	  : m_expr(Expr),
@@ -55,15 +60,15 @@ namespace ICR{
 
 	};
       
-      Moments<T>
-      InitialiseMoments() const
-      {
-	//deterministic
-	return Model<T>::CalcMoments(Model<T>::CalcNP2Deterministic(m_expr,m_context));
-      }
+	Moments<T>
+	InitialiseMoments() const
+	{
+	  //deterministic
+	  return Model<T>::CalcMoments(Model<T>::CalcNP2Deterministic(m_expr,m_context));
+	}
       
 	NaturalParameters<T>
-	GetNaturalNot(const VariableNode<T>* v) const
+	GetNaturalNot( variable_parameter v) const
 	{
 	  // std::cout<<"v"<<v<<std::endl;
 
@@ -82,7 +87,7 @@ namespace ICR{
       private: 
 	Expression<T>* m_expr;
 	Context<T> m_context;
-	DeterministicNode<Model<T>,T> *m_child_node;
+	mutable DeterministicNode<Model<T>,T> *m_child_node;
       
       };
     

@@ -73,7 +73,7 @@ namespace ICR{
 
 
       NaturalParameters<T>
-      GetNaturalNot(const VariableNode<T>* v) const;
+      GetNaturalNot( VariableNode<T>* const v) const;
       
     private: 
 
@@ -98,7 +98,7 @@ namespace ICR{
     template<class Model, class T>
     inline
     NaturalParameters<T>
-    Mixture< Model ,T>::GetNaturalNot(const VariableNode<T>* v) const
+    Mixture< Model ,T>::GetNaturalNot( VariableNode<T>* const v) const
     {
       if (v == m_child_node) 
 	{
