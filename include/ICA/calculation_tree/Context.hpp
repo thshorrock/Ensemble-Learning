@@ -203,8 +203,6 @@ namespace ICR{
       typedef typename boost::call_traits<size_t>::param_type
       size_parameter;
       
-      typedef typename  DataContainer::const_iterator 
-      const_iterator;
 
       placeholder_t
       Lookup(variable_parameter V) const
@@ -246,18 +244,6 @@ namespace ICR{
 	return c;
       }
 
-      
-      /** Obtain an iterator to the beginning of the map;
-       */
-      const_iterator
-      begin() const {return m_map.begin();}
-      
-      
-      /** Obtain an iterator to the end of the map;
-       */
-      const_iterator
-      end() const {return m_map.end();}
-
 
       friend
       std::ostream&
@@ -281,9 +267,9 @@ namespace ICR{
       void
       AddChildFactor(Details::CalcGaussianFactor<Model,U>* factor ) const
       {
-
-	for( const_iterator it = begin();
-	     it!= end();
+	typename DataContainer::const_iterator it;
+	for(  it = m_map.begin();
+	     it!= m_map.end();
 	     ++it)
 	  {
 	    it->first->AddChildFactor(factor);
