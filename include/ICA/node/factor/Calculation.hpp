@@ -25,7 +25,18 @@
 namespace ICR{
   namespace ICA{
     namespace Details{
-
+      
+      // template<template<class> class Model,  class T>
+      // struct idenity : FactorWrapper<T>;
+      // {
+      // 	identity(FactorNode<T>* I)
+      // 	  : m_identity(I) {}
+	
+      // 	FactorNode<T>* get() {return m_identity;}
+      // private:
+      // 	FactorNode<T>* m_identity;
+      // }
+      
       template<template<class> class Model,  class T>
       class CalcGaussianFactor : public FactorNode<double>
       {
@@ -36,7 +47,7 @@ namespace ICR{
       typedef typename boost::call_traits< VariableNode<T>* const>::value_type
       variable_t;
 
-	CalcGaussianFactor( Expression<T>* Expr, const Context<T>& context,
+	CalcGaussianFactor( Expression<T>* Expr,  Context<T>& context,
 			    DeterministicNode<Model<T>,T>* Child)
 	  : m_expr(Expr),
 	    m_context(context),
@@ -44,16 +55,14 @@ namespace ICR{
 	{
 
   
-	  for(typename Context<T>::const_iterator it = context.begin();
-	      it!= context.end();
-	      ++it)
-	    {
-	      //YUK, need to sort this...
-	      const VariableNode<T>* const CV = it->first;
-	      VariableNode<T>* V = const_cast<VariableNode<T>*>(CV);
-	      V->AddChildFactor(this);
-	    }
-	  
+	  // for(typename Context<T>::const_iterator it = context.begin();
+	  //     it!= context.end();
+	  //     ++it)
+	  //   {
+	  //     it->first->AddChildFactor(this);
+	  //   }
+	  //context.template AddChildFactor<CalcGaussianFactor<Model<T>,T> >(this);
+	  context.AddChildFactor(this);
 	  Child->SetParentFactor(this);
 	  
 	  // std::cout<<"Moments = "<<context<<std::endl;

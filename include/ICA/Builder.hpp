@@ -347,7 +347,7 @@ namespace ICR{
       }
 
       GaussianResultNode
-      CalcGaussian(Expression<T>* Expr, const Context<T>& context)
+      CalcGaussian(Expression<T>* Expr,  Context<T>& context)
       {
 	boost::shared_ptr<GaussianResultType > Child(new GaussianResultType());
 	boost::shared_ptr<CalcGaussianFactor > ChildF

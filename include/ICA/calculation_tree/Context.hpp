@@ -1,9 +1,8 @@
 #pragma once
 
-#include "ICA/node/Node.hpp"
-
 #include <map>
 #include <string>
+#include "ICA/node/Node.hpp"
 
 namespace ICR{
 
@@ -11,9 +10,18 @@ namespace ICR{
     //Forward declaration.
     template<class> class Placeholder;
     
+    // template <class>  class FactorNode;  //
+    // template<class U>
+    // class FactorNode<U>; //ChildFactorWrapper;
+    // template<template<class> class Model,  class U>
+    // class CalcGaussianFactor;
+    // template<class> class GaussianModel;
+      
     //Forward declaration.
-    // template<template<class> class Model,  class T>
-    // class CalcGaussianFactor ;
+    namespace Details{
+      template<template<class> class ,  class>
+      class CalcGaussianFactor ;
+    }
     /** A class that maps the placeholder in an expression
      *    to a set of Moments values of a Varible Nodes of every element in the expression.
      *
@@ -265,11 +273,25 @@ namespace ICR{
 	return out;
       }
     private:
-      
-      DataContainer m_map;
+
+      template<template<class> class Model,  class U>
+      friend class Details::CalcGaussianFactor;
+
+      template<template<class> class Model,  class U>
+      void
+      AddChildFactor(Details::CalcGaussianFactor<Model,U>* factor ) const
+      {
+
+	for( const_iterator it = begin();
+	     it!= end();
+	     ++it)
+	  {
+	    it->first->AddChildFactor(factor);
+	  }
+      }
+      mutable DataContainer m_map;
     };
 
-    
     template<class T>
     std::ostream&
     operator<<(std::ostream& out, 
@@ -288,6 +310,7 @@ namespace ICR{
 	}
       return out;
     }
+
 
 
   }
