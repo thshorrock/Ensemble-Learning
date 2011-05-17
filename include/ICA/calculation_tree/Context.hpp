@@ -10,18 +10,13 @@ namespace ICR{
     //Forward declaration.
     template<class> class Placeholder;
     
-    // template <class>  class FactorNode;  //
-    // template<class U>
-    // class FactorNode<U>; //ChildFactorWrapper;
-    // template<template<class> class Model,  class U>
-    // class CalcGaussianFactor;
-    // template<class> class GaussianModel;
-      
     //Forward declaration.
     namespace Details{
       template<template<class> class ,  class>
       class CalcGaussianFactor ;
     }
+
+
     /** A class that maps the placeholder in an expression
      *    to a set of Moments values of a Varible Nodes of every element in the expression.
      *
@@ -203,31 +198,41 @@ namespace ICR{
       typedef typename boost::call_traits<size_t>::param_type
       size_parameter;
       
-
-      placeholder_t
-      Lookup(variable_parameter V) const
-      {
-	return
-	  m_map.find(V)->second;
-      };
       
-      size_t 
-      size() const {return m_map.size();}
-
-      // void Assign(boost::shared_ptr<VariableNodeExp>&, const VariableNode<T>*  V );
+      /** Obtain the placeholder associated  with a particular VariableNoder.
+       *   @param V The VariableNode.
+       *   @return The placeholder associated with the variable.
+       */
+      placeholder_t
+      Lookup(variable_parameter V) const;
+      
+      /** Assign a placeholder a VariableNode.
+       *  @param P The Placeholder.
+       *  @param V The VariableNode 
+       */
       void 
       Assign(placeholder_parameter P, 
-	     variable_parameter  V )
-      {
-	std::pair<typename DataContainer::iterator,bool> ret;
+	     variable_parameter  V );
 
-	ret = m_map.insert( Datum ( V,P) );
-	if (ret.second == false) //already exists
-	  {
-	    ret.first->second = P;
-	  }
-      }
 
+      /** Splice a Context into Subcontext.
+       *  To evaluate an expression the average means of a variable, <x>,
+       *   or the average of the square of the means <x^2> need to be obtained 
+       *   from the Varibale Moments that contain all such information.
+       *   Subcontext's are obtained from this function.
+       *  @param i The index of the subcontext requested
+       *  @return The resulting subcontext.
+       *
+       *  Example: 
+       *  @code
+       *  //The context provides the Moments of every element in expression.
+       *  Context<double>& M
+       *  SubContext<double> M0 = M[0];  //All the first moments  (the <x>'s of every element in expr)
+       *  SubContext<doube> M1 = M[1];  //The second moment (the <x^2> of every element of expression)
+       *  //Precision is 1.0/ (<expr(x^2)> - <expr(x)>^2)
+       *  double precision = 1.0/(Expr->Evaluate(M1) - Expr->Evaluate(M0*M0) );
+       *  @endcode
+       */
       subcontext_t
       operator[](size_parameter i) const
       {
@@ -239,25 +244,19 @@ namespace ICR{
 	    variable_t V = it->first;
 	    c.Assign( it->second,V->GetMoments()[i]);
 	  }
-	      
-
 	return c;
       }
 
-
+      /** Output the Context to a stream. 
+       *  @param c The context.
+       *  @param out The output stream.
+       *  This function is thread safe.
+       */
+      template<class U>
       friend
       std::ostream&
-      operator<<(std::ostream& out, const Context&  c)
-      {
-	typename DataContainer::const_iterator it;
-	for(it = c.m_map.begin();
-	    it!= c.m_map.end();
-	    ++it)
-	  {
-	    out<<it->first<<" ";
-	  }
-	return out;
-      }
+      operator<<(std::ostream& out, const Context<U>&  c);
+
     private:
 
       template<template<class> class Model,  class U>
@@ -277,6 +276,13 @@ namespace ICR{
       }
       mutable DataContainer m_map;
     };
+
+
+    /*********************************************************
+    **********************************************************
+    **STREAM OPERATORS IMPLEMENTATION ************************
+    **********************************************************
+    **********************************************************/
 
     template<class T>
     std::ostream&
@@ -298,6 +304,27 @@ namespace ICR{
     }
 
 
+      
+    template<class T>
+    std::ostream&
+    operator<<(std::ostream& out, 
+	       const Context<T>&  c)
+    { 
+      //lock
+      boost::mutex mutex;
+      boost::lock_guard<boost::mutex> lock(mutex); 
+
+      typedef std::map<VariableNode<T>* const ,const Placeholder<T>* > DataContainer;
+      typename DataContainer::const_iterator it;
+      for(it = c.m_map.begin();
+	  it!= c.m_map.end();
+	  ++it)
+	{
+	  out<<it->first<<" ";
+	}
+      return out;
+    }
+
 
   }
 }
@@ -310,6 +337,7 @@ namespace ICR{
 **********************************************************/
 
 template<class T>
+inline
 typename ICR::ICA::SubContext<T>::data_const_reference
 ICR::ICA::SubContext<T>::Lookup(typename SubContext<T>::placeholder_parameter P) const
 {
@@ -337,6 +365,7 @@ ICR::ICA::SubContext<T>::Assign(typename SubContext<T>::placeholder_parameter P,
 
 
 template<class T>
+inline
 typename ICR::ICA::SubContext<T>::reference
 ICR::ICA::SubContext<T>::operator*=(parameter C)
 {
@@ -349,4 +378,28 @@ ICR::ICA::SubContext<T>::operator*=(parameter C)
   		   multiply_subcontext(C));
 
   return *this;
+}
+
+template<class T>
+inline
+typename ICR::ICA::Context<T>::placeholder_t
+ICR::ICA::Context<T>::Lookup(variable_parameter V) const
+{
+  return
+    m_map.find(V)->second;
+}
+
+
+template<class T>
+void
+ICR::ICA::Context<T>::Assign(placeholder_parameter P, 
+			     variable_parameter  V )
+{
+  std::pair<typename DataContainer::iterator,bool> ret;
+
+  ret = m_map.insert( Datum ( V,P) );
+  if (ret.second == false) //already exists
+    {
+      ret.first->second = P;
+    }
 }
