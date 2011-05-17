@@ -502,7 +502,7 @@ BOOST_AUTO_TEST_CASE( GaussianModel_test  )
   //Initialise
   Moments<double> Mean(2,5);
   Moments<double> Precision(3,6);
-  Moments<double> Data(4,7);
+  Moments<double> Data(4,17);
   NaturalParameters<double> SumNP(6,-1.5);
 
   //Collect
@@ -525,7 +525,7 @@ BOOST_AUTO_TEST_CASE( GaussianModel_test  )
   //Check
   BOOST_CHECK_CLOSE(NPMean[0], 12.0 , 0.0001);  //3*4
   BOOST_CHECK_CLOSE(NPMean[1], -1.5 , 0.0001);  //-3/2
-  BOOST_CHECK_CLOSE(NPPrec[0], 2.0 , 0.0001);  // - 0.5*(7-2*4*2 +5)
+  BOOST_CHECK_CLOSE(NPPrec[0], -3.0 , 0.0001);  // - 0.5*(17-2*4*2 +5)
   BOOST_CHECK_CLOSE(NPPrec[1], 0.5 , 0.0001);  // 0.5
   BOOST_CHECK_CLOSE(NPData[0], 6.0 , 0.0001);  //2*3
   BOOST_CHECK_CLOSE(NPData[1], -1.5 , 0.0001);  //-3/2
@@ -537,7 +537,7 @@ BOOST_AUTO_TEST_CASE( GaussianModel_test  )
   BOOST_CHECK_CLOSE(LogNorm1, 0.5*(std::log(3.) - 3*5 - std::log(2*M_PI)) , 0.0001);  
   BOOST_CHECK_CLOSE(LogNorm2, 0.5*(std::log(3.) - 3*4 - std::log(2*M_PI)), 0.0001);  
   
-  BOOST_CHECK_CLOSE(AvLog, NPData[0]*4 + NPData[1]*7 + LogNorm1, 0.0001);  
+  BOOST_CHECK_CLOSE(AvLog, NPData[0]*4 + NPData[1]*17 + LogNorm1, 0.0001);  
 } 
 
 double argm(double mean, double prec)
