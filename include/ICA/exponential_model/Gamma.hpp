@@ -8,6 +8,11 @@
 namespace ICR{
   namespace ICA{
 
+
+    /**  Defines the properties of a Gamma distribution.
+     *   This includes how to calculate the Moments and natural parameters
+     *   between the different factors and variables.
+     */
     template<class T=double>
     class Gamma 
     {
