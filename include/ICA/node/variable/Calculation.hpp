@@ -2,9 +2,9 @@
 #include "ICA/node/Node.hpp"
 #include "ICA/message/Moments.hpp"
 #include "ICA/message/NaturalParameters.hpp"
-#include <boost/thread/locks.hpp>
-#include <numeric>
+#include "ICA/detail/Mutex.hpp"
 #include "ICA/detail/parallel_algorithms.hpp"
+#include <numeric>
 
 namespace ICR{
   namespace ICA{
@@ -13,8 +13,8 @@ namespace ICR{
     class DeterministicNode : public VariableNode<T>
     {
     public:
-      
-      DeterministicNode(const size_t moment_size = 2); //mostly two, but variable for Discrete model
+      //mostly two, but variable for Discrete model
+      DeterministicNode(const size_t moment_size = 2); 
 
       void
       SetParentFactor(FactorNode<T>* f);
@@ -48,8 +48,8 @@ namespace ICR{
       //Model<T> m_Model; 
       FactorNode<T>* m_parent;
       std::vector<FactorNode<T>*> m_children;
-      Moments<T> m_Moments;//, m_ForwardedMoments;
-      mutable boost::mutex m_mutex;
+      Moments<T> m_Moments;
+      mutable Mutex m_mutex;
     };
 
   }
@@ -79,9 +79,12 @@ inline
 void
 ICR::ICA::DeterministicNode<Model,T>::AddChildFactor(FactorNode<T>* f)
 { 
-  //This could be called by different threads, so lock
-  boost::lock_guard<boost::mutex> lock(m_mutex);
-  m_children.push_back(f);
+  //Could be many factors, potentially added with many threads,
+  //therefore make the following critical
+#pragma omp critical
+  {
+    m_children.push_back(f);
+  }
 }
 
 template<class Model,class T>
@@ -89,12 +92,11 @@ inline
 const ICR::ICA::Moments<T>&
 ICR::ICA::DeterministicNode<Model,T>::GetMoments() const
 {
-  /*This value is update once in update stage,
-   * and called in a Factor update stage.
-   * These never overlap and so this is thead safe
+
+  /*This value is update in Iterate and called to evaluate other Hidden Nodes
+   * (also in iterate mode).  It therefore needs to be protected by a mutex.
    */
-
-
+  Lock lock(m_mutex);
   return m_Moments;
 }
    
@@ -104,28 +106,22 @@ inline
 const ICR::ICA::Moments<T>
 ICR::ICA::DeterministicNode<Model,T>::GetForwardedMoments() 
 {
-  /*This value is update once in update stage,
-   * and called in a Factor update stage.
-   * These never overlap and so this is thead safe
+  /* No stored value updated here so thread safe.
    */
 
-  //Need to collect this fresh!
+  //Need to collect this fresh, the moments from other parts 
+  //of the graph may have been updated since the last call.
 
   std::vector<NaturalParameters<T> > vChildrenNP(m_children.size());
-  //Get the NPs and put them in the vector
-  // for(size_t i=0;i<m_children.size();++i){
-  //   vChildrenNP[i] = m_children[i]->GetNaturalNot(this);
-  // }
-
 
   PARALLEL_TRANSFORM(m_children.begin(), m_children.end(), 
-  		     vChildrenNP.begin(), boost::bind(&FactorNode<T>::GetNaturalNot, _1, this)
+  		     vChildrenNP.begin(), 
+		     boost::bind(&FactorNode<T>::GetNaturalNot, _1, this)
   		     ); 
 
   BOOST_ASSERT(vChildrenNP.size() >0);
   NaturalParameters<T> ChildrenNP = PARALLEL_ACCUMULATE(vChildrenNP.begin(), vChildrenNP.end(), NaturalParameters<T>(vChildrenNP[0].size() )); 
-  Moments<T> ForwardedMoments = Model::CalcMoments(ChildrenNP);// ;  //update the moments and the model
-  //std::cout<<"chilren = "<<vChildrenNP.size()<<" FMoment = "<<ForwardedMoments<<std::endl;
+  const Moments<T> ForwardedMoments = Model::CalcMoments(ChildrenNP);// ;  //update the moments and the model
 
   return ForwardedMoments;
 }
@@ -138,30 +134,11 @@ ICR::ICA::DeterministicNode<Model,T>::Iterate(Coster& C)
 {
   //EVALUATE THE COST
 
-  //first get the Natural parameters from all the children.
-  //This assumes that the Children (factors) have already run.
-  //This is guarenteed by the Builder class.
+  //first get the NP from the parent
   NaturalParameters<T> ParentNP = (m_parent->GetNaturalNot(this));
-  //Add it to the total
-  
-  // std::vector<NaturalParameters<T> > vChildrenNP(m_children.size());
-  // //Get the NPs and put them in the vector
-  // PARALLEL_TRANSFORM(m_children.begin(), m_children.end(), 
-  // 		     vChildrenNP.begin(), boost::bind(&FactorNode<T>::GetNaturalNot, _1, this)
-  // 		     ); //from children
-
-  // //Add them up
-  // NaturalParameters<T> ChildrenNP = PARALLEL_ACCUMULATE(vChildrenNP.begin(), vChildrenNP.end(), NaturalParameters<T>(ParentNP.size() )); 
-  // //seems to be a bug here, do this one serially
-  // //NaturalParameters<T> NP = std::accumulate(ChildrenNP.begin(), ChildrenNP.end(), init ); //
-
-  //Get the moments and update the model
-  m_Moments = Model::CalcMoments(ParentNP);  //update the moments and the model
-  //m_ForwardedMoments = Model<t>::CalcMoments(ChildrenNP);// ;  //update the moments and the model
-  
-  //std::cout<<"m_Moments = "<<m_Moments<<std::endl;
-  // std::cout<<"m_ForwdM  = "<<m_ForwardedMoments<<std::endl;
-
-
-
+  //Calcualate the moments
+  {
+    Lock lock(m_mutex);
+    m_Moments = Model::CalcMoments(ParentNP);  
+  }
 }
