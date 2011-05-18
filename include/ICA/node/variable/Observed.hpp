@@ -108,7 +108,7 @@ ICR::ICA::ObvservedNode<Model,T>::SetParentFactor(FactorNode<T>* f)
 template<class Model, class T>
 inline
 void
-ICR::ICA::DataNode<Model,T>::Iterate(Coster& Total)
+ICR::ICA::ObservedNode<Model,T>::Iterate(Coster& Total)
 {
   //To be conservative (but very wastefull) uncomment the following
   //boost::lock_guard<boost::mutex> lock(m_mutex);
