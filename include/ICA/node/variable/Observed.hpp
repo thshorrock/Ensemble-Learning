@@ -27,8 +27,6 @@ namespace ICR{
 	  m_children()
       {}
       
-      
-      //No parent node possible
       void
       SetParentFactor(FactorNode<T>* f);
 
@@ -41,13 +39,10 @@ namespace ICR{
       const Moments<T>&
       GetMoments() const;
       
-      
-      //No contribution to cost, nothing to update
       void 
       Iterate(Coster& C);
       
     private:
-      //default
       Moments<T>
       make_Moments(const size_t s,const T& d, const Gaussian<T> )
       {
@@ -70,7 +65,7 @@ namespace ICR{
       }
       const Moments<T> m_Moments;
       FactorNode<T>* m_parent;
-      std::list<FactorNode<T>*> m_children;
+      std::vector<FactorNode<T>*> m_children;
     };
     
   }
@@ -81,7 +76,7 @@ inline
 const ICR::ICA::Moments<T>&
 ICR::ICA::ObservedNode<model,T>::GetMoments() const
 {
-  //Model is thread safe
+  //Obvserved moments are not modified and so this is thead safe.
   return m_Moments;
 }
 
@@ -90,21 +85,21 @@ inline
 void
 ICR::ICA::ObservedNode<model,T>::AddChildFactor(FactorNode<T>* f)
 {
-  //Could be many factors, potentially added with many threads
-  // boost::lock_guard<boost::mutex> lock(m_mutex);
-  m_children.push_back(f);
+  //Could be many factors, potentially added with many threads,
+  //therefore make the following critical
+#pragma omp critical
+  {
+    m_children.push_back(f);
+  }
 }
-    
+
 
 template<class Model, class T>
 inline
 void
 ICR::ICA::ObservedNode<Model,T>::SetParentFactor(FactorNode<T>* f)
 {
-  //Assuming only one factor: this should be called once per iteration 
-  //  and therefore be thread safe.  
-  //To be conservative (but very wastefull) uncomment the following
-  //boost::lock_guard<boost::mutex> lock(m_mutex);
+  //Only one factor: this should be called once (therefore thread safe)
   m_parent = f;
 }
   
@@ -114,24 +109,14 @@ inline
 void
 ICR::ICA::ObservedNode<Model,T>::Iterate(Coster& Total)
 {
-  //To be conservative (but very wastefull) uncomment the following
-  //boost::lock_guard<boost::mutex> lock(m_mutex);
-
-  //Get the natural parameters from the parent factor for this node.
-  // (Node, the Parent Factor must have been called before this node)
-  // (this is easily guareenteed by calling ALL the factor nodes prior to ANY of the variableNodes.
-  // (This is done by the Builder
+  //Constant nodes have no parents (and contribute nothing to the cost)
   if (m_parent!=0)
     {
-      NaturalParameters<T> ParentNP =m_parent->GetNaturalNot(this); 
+      //This is a data node...
+      //Assume thead-safety of other nodes so do not need to worry here.
+      const NaturalParameters<T> ParentNP =m_parent->GetNaturalNot(this); 
       //See page 41 of Winn's thesis for this formula
-      const T Cost = ParentNP*GetMoments() +  m_parent->CalcLogNorm();// + Model::GetDataPenalty(GetMoments()[0]);
+      const T Cost = ParentNP*GetMoments() +  m_parent->CalcLogNorm();
       Total += Cost;
     }
-  // std::cout<<"DataCost = "<<Cost<<std::endl;
-  //  std::cout<<"ParentNP = "<<ParentNP<<std::endl;
-  //  std::cout<<"Moments = "<<GetMoments()<<std::endl;
-  //  std::cout<<"ParentNorm = "<<m_parent->CalcLogNorm()<<std::endl;
-
-
 }
