@@ -1,6 +1,5 @@
 #pragma once
-#include <boost/thread.hpp>
-#include <boost/thread/mutex.hpp>
+#include "ICA/detail/Mutex.hpp"
 #include <boost/call_traits.hpp>
 
 namespace ICR {
@@ -34,7 +33,7 @@ namespace ICR {
       void
       operator+=(pDouble local)
       { 
-	boost::lock_guard<boost::mutex> lock(m_mutex); 
+	Lock lock(m_mutex); 
 	m_Cost+=local;
       }
 
@@ -44,7 +43,7 @@ namespace ICR {
       void 
       operator=(pDouble cost)
       {
-	boost::lock_guard<boost::mutex> lock(m_mutex); 
+	Lock lock(m_mutex); 
 	m_Cost = cost;
       }
 
@@ -52,11 +51,11 @@ namespace ICR {
        */
       operator double() const
       {
-	boost::lock_guard<boost::mutex> lock(m_mutex); 
+	Lock lock(m_mutex); 
 	return m_Cost;
       }
     private:
-      mutable boost::mutex m_mutex;
+      mutable Mutex m_mutex;
       double m_Cost;
     };
     
