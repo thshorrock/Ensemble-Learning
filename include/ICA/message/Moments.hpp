@@ -2,10 +2,11 @@
 //#include "NaturalParameters.hpp"
 #include "MomentsIterator.hpp"
 #include "ICA/node/Node.hpp"
+#include "ICA/detail/Mutex.hpp"
 #include "ICA/detail/parallel_algorithms.hpp"
-#include<boost/assign/list_of.hpp>
+#include <boost/assign/list_of.hpp>
 #include <boost/assign/std/vector.hpp>
-#include<iostream>
+#include <iostream>
 
 namespace ICR{
   namespace ICA{
@@ -17,8 +18,6 @@ namespace ICR{
     Moments
     {
     public:
-      // typedef  VariableNode<T>* Variable;
-      // typedef  VariableNode<T> const * ConstVariable;
       
       typedef typename boost::call_traits<std::vector<T> >::param_type 
       vector_parameter;
@@ -60,15 +59,12 @@ namespace ICR{
       typedef typename boost::call_traits<size_t>::const_reference  
       size_const_reference;
       
-      //typedef typename std::vector<T>::iterator 
       typedef  MomentsIterator<type, data_type>  
       iterator;
       
-      //typedef typename std::vector<T>::const_iterator 
       typedef  MomentsIterator<const type, const data_type>  
       const_iterator;
       
-      // Moments();
       Moments(size_parameter size = 0);
       Moments(vector_parameter data);
       Moments(data_parameter  d1, data_parameter d2);
@@ -157,7 +153,7 @@ namespace ICR{
 
 
       std::vector<T> m_data;
-      mutable boost::mutex m_mutex;
+      mutable Mutex m_mutex;
 
     };
 
@@ -204,23 +200,8 @@ namespace ICR{
       Moments<T> tmp = m;
       return tmp*=d;
     }
-    //typename Moments<T>::data_parameter d, 
-    //typename Moments<T>::parameter m)
-    
-    // typedef  MomentsIterator< Moments<double>, double>       DoubleMomentsIterator ;
-    // // typedef  typename MomentsIterator<const Moments<T>, T> const_iterator ;
-    
   }
 }
-
-
-// template<class T>
-// inline
-// ICR::ICA::Moments<T>::Moments()
-//   : m_data()
-// {}
-
-
 
 
 template<class T>
@@ -305,7 +286,7 @@ inline
 typename ICR::ICA::Moments<T>::data_const_reference
 ICR::ICA::Moments<T>::operator[](typename ICR::ICA::Moments<T>::size_parameter index) const
 {
-  boost::lock_guard<boost::mutex> lock(m_mutex); 
+  Lock lock(m_mutex); 
   return m_data[index];
 }
       
@@ -314,7 +295,7 @@ inline
 typename ICR::ICA::Moments<T>::data_reference
 ICR::ICA::Moments<T>::operator[](typename ICR::ICA::Moments<T>::size_parameter index)
 {
-  boost::lock_guard<boost::mutex> lock(m_mutex); 
+  Lock lock(m_mutex); 
   return m_data[index];
 }
       
@@ -324,7 +305,7 @@ typename ICR::ICA::Moments<T>::reference
 ICR::ICA::Moments<T>::operator+=(typename Moments<T>::parameter other)
 {
   //This could be called by different threads, so lock
-  boost::lock_guard<boost::mutex> lock(m_mutex);  
+  Lock lock(m_mutex);  
   PARALLEL_TRANSFORM(m_data.begin(), m_data.end(), other.begin(), m_data.begin(), plus());
   return *this;
 }
@@ -335,7 +316,7 @@ typename ICR::ICA::Moments<T>::reference
 ICR::ICA::Moments<T>::operator*=(typename Moments<T>::parameter other)
 {
   //This could be called by different threads, so lock
-  boost::lock_guard<boost::mutex> lock(m_mutex); 
+  Lock lock(m_mutex); 
   PARALLEL_TRANSFORM(m_data.begin(), m_data.end(), other.begin(), m_data.begin(), times() );
   return *this;
 }
@@ -346,7 +327,7 @@ typename ICR::ICA::Moments<T>::reference
 ICR::ICA::Moments<T>::operator*=(typename Moments<T>::data_parameter d)
 {
   //This could be called by different threads, so lock
-  boost::lock_guard<boost::mutex> lock(m_mutex); 
+  Lock lock(m_mutex); 
   PARALLEL_TRANSFORM(m_data.begin(), m_data.end(),  m_data.begin(), times_by(d));
   return *this;
 }

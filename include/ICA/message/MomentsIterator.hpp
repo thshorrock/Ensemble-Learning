@@ -1,6 +1,5 @@
 #pragma once
-#include <boost/thread.hpp>
-#include <boost/thread/mutex.hpp>
+#include "ICA/detail/Mutex.hpp"
 #include <boost/iterator/iterator_facade.hpp>
 #include <boost/type_traits/is_convertible.hpp>
 #include <boost/type_traits/is_same.hpp>
@@ -120,14 +119,14 @@ namespace ICR{
       void 
       increment() 
       {
-	boost::lock_guard<boost::mutex> lock(m_mutex); 
+	Lock lock(m_mutex); 
 	++m_index;
       };
       /** Decrement the iterator */
       void 
       decrement() 
       { 
-	boost::lock_guard<boost::mutex> lock(m_mutex); 
+	Lock lock(m_mutex); 
 	--m_index; 
       };
       
@@ -137,7 +136,7 @@ namespace ICR{
       void 
       advance(const typename F::difference_type n)
       {
-	boost::lock_guard<boost::mutex> lock(m_mutex); 
+	Lock lock(m_mutex); 
 	m_index+=n;
       };
       
@@ -148,7 +147,7 @@ namespace ICR{
       typename F::difference_type 
       distance_to(const MomentsIterator<Othermoments,other_type>& other   ) const 
       {
-	boost::lock_guard<boost::mutex> lock(m_mutex); 
+	Lock lock(m_mutex); 
 	return other.m_index - m_index;
       };
       //Equality check.
@@ -156,19 +155,19 @@ namespace ICR{
       bool 
       equal(const MomentsIterator<Othermoments,other_type>& other) const
       {
-      	boost::lock_guard<boost::mutex> lock(m_mutex); 
+      	Lock lock(m_mutex); 
       	return (other.m_index == m_index && m_Moments==other.m_Moments);
       }
       
       data_reference dereference() const
       { 
-	boost::lock_guard<boost::mutex> lock(m_mutex);
+	Lock lock(m_mutex);
 	return m_Moments->operator[](m_index);
       };
 
       data_reference dereference() 
       { 
-	boost::lock_guard<boost::mutex> lock(m_mutex);
+	Lock lock(m_mutex);
 	return m_Moments->operator[](m_index);
       };
 
@@ -177,7 +176,7 @@ namespace ICR{
       template <class, class> friend class MomentsIterator;
       moments* m_Moments;
       mutable  typename F::difference_type  m_index;
-      mutable boost::mutex m_mutex;
+      mutable Mutex m_mutex;
     };
     
     

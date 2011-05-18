@@ -1,4 +1,5 @@
 #pragma once
+#include <omp.h>
 
 namespace ICR{
   namespace ICA{
