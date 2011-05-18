@@ -109,9 +109,9 @@ namespace ICR{
      * DirichletModel Specialisation Double
      ******************************************************************************/
     template<>
-    class Factor<DirichletModel<double> > : public FactorNode<double>
+    class Factor<Dirichlet<double> > : public FactorNode<double>
     {
-      Factor(const Factor<DirichletModel<double> >& f) {};
+      Factor(const Factor<Dirichlet<double> >& f) {};
     public:
       
       typedef  boost::call_traits< VariableNode<double>* const>::param_type
@@ -134,7 +134,7 @@ namespace ICR{
       {
 	//Initialise up the tree first
 	m_prior_node->InitialiseMoments();
-	return DirichletModel<double>::CalcSample(m_prior_node);
+	return Dirichlet<double>::CalcSample(m_prior_node);
       }
 
 
@@ -229,14 +229,14 @@ namespace ICR{
     //template<>
     inline
     NaturalParameters<double>
-    Factor< DirichletModel<double> ,double>::GetNaturalNot( variable_parameter v) const
+    Factor< Dirichlet<double> ,double>::GetNaturalNot( variable_parameter v) const
     {
       if (v==m_child_node)
 	{
 	  Moments<double> prior = m_prior_node->GetMoments();
-	  m_LogNorm = DirichletModel<double>::CalcLogNorm(prior);
+	  m_LogNorm = Dirichlet<double>::CalcLogNorm(prior);
 
-	  return DirichletModel<double>::CalcNP2Data(prior);
+	  return Dirichlet<double>::CalcNP2Data(prior);
 
 	  //std::cout<<"returning child"<<m_NP2Child<<" from Dirichlet"<<std::endl;
 	  //return m_NP2Child;

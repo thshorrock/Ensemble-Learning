@@ -29,7 +29,7 @@ namespace ICR{
       typedef Factor<RectifiedGaussian<T> >      RectifiedGaussianFactor;
       typedef Factor<Gaussian<T> >      GaussianFactor;
       typedef Factor<Gamma<T> >         GammaFactor;
-      typedef Factor<DirichletModel<T> >     DirichletFactor;
+      typedef Factor<Dirichlet<T> >     DirichletFactor;
       typedef Factor<Discrete<T> >      DiscreteFactor;
       typedef Mixture<RectifiedGaussian<T> >     RectifiedGaussianMixtureFactor;
       typedef Mixture<Gaussian<T> >     GaussianMixtureFactor;
@@ -42,7 +42,7 @@ namespace ICR{
       typedef HiddenNode<Gaussian<T> >      GaussianType;
       typedef HiddenNode<RectifiedGaussian<T> >      RectifiedGaussianType;
       typedef HiddenNode<Gamma<T> >         GammaType;
-      typedef HiddenNode<DirichletModel<T> >     DirichletType;
+      typedef HiddenNode<Dirichlet<T> >     DirichletType;
       typedef DataNode<GaussianConstant<T> >     GaussianDataType;
       typedef DataNode<GammaConstant<T> >        GammaDataType;
       typedef ConstantNode<GaussianConstant<T> > GaussianConstType;
@@ -52,7 +52,7 @@ namespace ICR{
       typedef DeterministicNode<Gaussian<T>, T>    GaussianResultType;
 
       
-      typedef HiddenNode<DirichletModel<T> >     WeightsType;
+      typedef HiddenNode<Dirichlet<T> >     WeightsType;
       typedef HiddenNode<Discrete<T> >      CatagoryType;
       //      typedef ForwardingNode<Gaussian<T> >   GaussianMixtureType;
     public:
@@ -66,7 +66,7 @@ namespace ICR{
       typedef ConstantNode<GammaConstant<T> >*    GammaConstNode;
       typedef DeterministicNode<Gaussian<T>, T>*    GaussianResultNode;
       
-      typedef HiddenNode<DirichletModel<T> >*      WeightsNode;
+      typedef HiddenNode<Dirichlet<T> >*      WeightsNode;
       typedef HiddenNode<Discrete<T> >*       CatagoryNode;
       // typedef ForwardingNode<Gaussian<T> >*  GaussianMixtureNode;
       

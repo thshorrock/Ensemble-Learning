@@ -14,112 +14,142 @@
 namespace ICR{
   namespace ICA{
 
+    /**  Defines the properties of a Dirichlet distribution.
+     *   This includes how to calculate the Moments and natural parameters
+     *   between the different factors and variables.
+     */
     template<class T>
-    class DirichletModel // : public ExponentialModel<T>
+    class Dirichlet 
     {
     public:
 
+      typedef typename boost::call_traits< Moments<T> >::param_type
+      moments_parameter;
+      typedef typename boost::call_traits< Moments<T> >::value_type
+      moments_t;
+
+      typedef typename boost::call_traits< NaturalParameters<T> >::param_type
+      NP_parameter;
+      typedef typename boost::call_traits< NaturalParameters<T> >::value_type
+      NP_t;
+
+      typedef typename boost::call_traits<T>::value_type
+      data_t;
+      typedef typename boost::call_traits<T>::param_type
+      data_parameter;
+
+      typedef typename boost::call_traits<std::vector<T> >::param_type
+      vector_data_parameter;
+      typedef typename boost::call_traits<std::vector<T> >::param_type
+      vector_data_t;
+      
+      /** Calculate the natural log of the normalisation factor.
+       *  The normalisation is the inverse of the partition factor.
+       *  @param Us The moments from the Dirichlet constant node.
+       *  @return The log or the normalisation.
+        */
       //moments from parents (the u values)
       static
-      T
-      CalcLogNorm(const Moments<T>& Us) ;
+      data_t
+      CalcLogNorm(moments_parameter Us) ;
 
+      /** Calculate the natural log of the normalisation factor.
+       *  The normalisation is the inverse of the partition factor.
+       *  @param NP The natural parameters from which to obtain the mean and precision.
+       */
       static
-      T
-      CalcLogNorm(const NaturalParameters<T>& NP) ;
+      data_t
+      CalcLogNorm(NP_parameter NP) ;
       
+      /** Calculate a random sample for a Dirichlet distribution.
+       *  This is used for initialisation.
+       *  @param V  The Dirichlet Constant VariableNode.
+       *  @return A random sample for the moments based on the Dirichlet weights.
+       */
       static
-      T
-      CalcAvLog(const Moments<T>& values,
-		const Moments<T>& Data) ;
+      moments_t
+      CalcSample(const VariableNode<T>* V);
 
-      
-      struct take_log
-      {
-	double operator()(const double d){ return std::log(d);}
-      };
-
+      /** Calculate the Moments from the Natural Paramters.
+       *  @param NP The NaturalParameters from which to calcualate the moments.
+       *  @return The Calculated Moments.  
+       * 
+       *  This function is caled from HiddenMoments or CalculationMoments.
+       */
       static
-      Moments<T>
-      CalcSample(const VariableNode<T>* V) 
-      {
-	ICR::maths::rng* random = Random::Instance();
-	Moments<T> Mus = V->GetMoments();
-	const size_t     size   = Mus.size();
+      moments_t
+      CalcMoments(NP_parameter NP);
 
-	double u[size];
-	double x[size];
-	PARALLEL_COPY(Mus.begin(),Mus.end(),u);
-	random->dirichlet(size, u, x);
-	
-	
-	std::vector<double> M(size);
-	PARALLEL_TRANSFORM(x,x+size,M.begin(),take_log());
-	return Moments<T>(M);
-      }
-
-
+      /** Calculate the Natural Parameters to go the Mixture.
+       *  @param Us The moments from the Dirichlet constant Node.
+       *  @return The calculated NaturalParameters.  
+       */
       static
-      Moments<T>
-      CalcMoments(const NaturalParameters<T>& NP);
-
-      static
-      NaturalParameters<T>
-      CalcNP2Data(const Moments<T>& Us);
+      NP_t
+      CalcNP2Data(moments_parameter Us);
 
 
     private:
+
+      struct take_log
+      {
+	data_t operator()(data_parameter d){ return std::log(d);}
+      };
+
+      struct plus_one
+      {
+	data_t operator()(data_parameter d) {return d+1.0;}
+      };
+
+      struct minus_one
+      {
+	data_t operator()(data_parameter d) {return d-1.0;}
+      };
+
+      class
+      calculate_digamma_minus_digamma
+      {
+      public:
+	calculate_digamma_minus_digamma(data_parameter U)
+	  : m_subtract_me(gsl_sf_psi(U))
+	{}
+	data_t operator()(data_parameter u) 
+	{
+	  return gsl_sf_psi(u) - m_subtract_me;
+	}
+      private:
+	data_t m_subtract_me;
+      };
+      
       static
-      T
-      CalcLogNorm(const std::vector<T>& u) ;
+      data_t
+      CalcLogNorm(vector_data_parameter u) ;
     };
 
   }
 }
 
-namespace {
-  
-  struct plus_one
-  {
-    double operator()(const double d) {return d+1.0;}
-  };
 
-  struct minus_one
-  {
-    double operator()(const double d) {return d-1.0;}
-  };
+/**********************************************************
+ **********************************************************
+ *************** IMPLEMENTATION ***************************
+ **********************************************************
+ **********************************************************/
 
-  class
-  calculate_digamma_minus_digamma
-  {
-  public:
-    calculate_digamma_minus_digamma(const double U)
-      : m_subtract_me(gsl_sf_psi(U))
-    {}
-    double operator()(const double u) 
-    {
-      return gsl_sf_psi(u) - m_subtract_me;
-    }
-  private:
-    double m_subtract_me;
-  };
-  
-}
+
 
 template<class T>
 inline
-T 
-ICR::ICA::DirichletModel<T>::CalcLogNorm(const std::vector<T>& u)  
+typename ICR::ICA::Dirichlet<T>::data_t 
+ICR::ICA::Dirichlet<T>::CalcLogNorm(vector_data_parameter u)  
 {
-  // std::cout<<"DIRICHLET u = "<<Moments<T>(u)<<std::endl;
-
-  const T U = PARALLEL_ACCUMULATE(u.begin(), u.end(), 0.0);
+  const data_t U = PARALLEL_ACCUMULATE(u.begin(), u.end(), 0.0);
     
   //calculate Gamma(m_value[i]) for each i
   std::vector<T> Gamma_u(u.size());
   PARALLEL_TRANSFORM(u.begin(), u.end(), Gamma_u.begin(), gsl_sf_lngamma);
     
-  const T SumLnGamma_u = PARALLEL_ACCUMULATE(Gamma_u.begin(), Gamma_u.end(), 0.0);
+  const data_t SumLnGamma_u = PARALLEL_ACCUMULATE(Gamma_u.begin(), Gamma_u.end(), 0.0);
     
   return  gsl_sf_lngamma(U) - SumLnGamma_u;
 }
@@ -127,10 +157,9 @@ ICR::ICA::DirichletModel<T>::CalcLogNorm(const std::vector<T>& u)
 
 template<class T>
 inline
-T 
-ICR::ICA::DirichletModel<T>::CalcLogNorm(const Moments<T>& Us)  
+typename ICR::ICA::Dirichlet<T>::data_t 
+ICR::ICA::Dirichlet<T>::CalcLogNorm(moments_parameter Us)  
 {
-  // std::cout<<"DIRICHLET Mu = "<<Us<<std::endl;
   std::vector<T> u(Us.size());
   PARALLEL_COPY(Us.begin(),Us.end(), u.begin());
   return CalcLogNorm(u);
@@ -140,48 +169,58 @@ ICR::ICA::DirichletModel<T>::CalcLogNorm(const Moments<T>& Us)
 
 template<class T>
 inline
-T 
-ICR::ICA::DirichletModel<T>::CalcLogNorm(const NaturalParameters<T>& NP)  
+typename ICR::ICA::Dirichlet<T>::data_t 
+ICR::ICA::Dirichlet<T>::CalcLogNorm(NP_parameter NP)  
 {
-  // std::cout<<"DIRICHLET NPu = "<<NP<<std::endl;
-  std::vector<T> u(NP.size());
+  std::vector<data_t> u(NP.size());
   PARALLEL_TRANSFORM(NP.begin(),NP.end(), u.begin(), plus_one());
   return CalcLogNorm(u);
 }
 
 
 
-
 template<class T>
 inline
-ICR::ICA::Moments<T>
-ICR::ICA::DirichletModel<T>::CalcMoments(const NaturalParameters<T>& NP)
+typename ICR::ICA::Dirichlet<T>::moments_t
+ICR::ICA::Dirichlet<T>::CalcSample(const VariableNode<T>* V) 
 {
-  std::vector<T> u(NP.size());
-  PARALLEL_TRANSFORM( NP.begin(), NP.end(), u.begin(), plus_one());
+  ICR::maths::rng* random = Random::Instance();
+  const moments_t  Mus = V->GetMoments();
+  const size_t     size   = Mus.size();
 
-  const T U = PARALLEL_ACCUMULATE(u.begin(),u.end(), 0.0); //maybe save this value need to profile to see if worthwhile
-  std::vector<T> the_moments(u.size());
-  PARALLEL_TRANSFORM(u.begin(), u.end(), the_moments.begin(), calculate_digamma_minus_digamma(U) );
-  // std::cout<<"Dirichlet Moments = "<<Moments<T>(the_moments)<<std::endl;
-
-
-  return Moments<T>(the_moments);
-
+  data_t u[size];
+  data_t x[size];
+  PARALLEL_COPY(Mus.begin(),Mus.end(),u);
+  random->dirichlet(size, u, x);
+	
+  std::vector<data_t> M(size);
+  PARALLEL_TRANSFORM(x,x+size,M.begin(),take_log());
+  return moments_t(M);
 }
 
 
 template<class T>
 inline
-ICR::ICA::NaturalParameters<T>
-ICR::ICA::DirichletModel<T>::CalcNP2Data(const Moments<T>& Us)
+typename ICR::ICA::Dirichlet<T>::moments_t
+ICR::ICA::Dirichlet<T>::CalcMoments(NP_parameter NP)
 {
-  // std::cout<<"NP.size() = "<< NP.size()<<std::endl;
-  // std::cout<<"values.size() = "<< m_values.size()<<std::endl;
-  //BOOST_ASSERT(NP.size() == m_values.size());
-  ICR::ICA::NaturalParameters<T> NP = NaturalParameters<T>(Us.size());
-  PARALLEL_TRANSFORM( Us.begin(), Us.end(), NP.begin(), minus_one());
-  //std::cout<<"DIRICHLET NP2DISCRETE = "<<NP<<std::endl;
-  return NP;
+  std::vector<T> u(NP.size());
+  PARALLEL_TRANSFORM( NP.begin(), NP.end(), u.begin(), plus_one());
+  //maybe save this value need to profile to see if worthwhile?
+  const data_t U = PARALLEL_ACCUMULATE(u.begin(),u.end(), 0.0); 
+  std::vector<T> the_moments(u.size());
+  PARALLEL_TRANSFORM(u.begin(), u.end(), the_moments.begin(), calculate_digamma_minus_digamma(U) );
 
+  return moments_t(the_moments);
+}
+
+
+template<class T>
+inline
+typename ICR::ICA::Dirichlet<T>::NP_t
+ICR::ICA::Dirichlet<T>::CalcNP2Data(moments_parameter Us)
+{
+  NP_t NP = NP_t(Us.size());
+  PARALLEL_TRANSFORM( Us.begin(), Us.end(), NP.begin(), minus_one());
+  return NP;
 }

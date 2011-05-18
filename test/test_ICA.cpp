@@ -665,7 +665,7 @@ BOOST_AUTO_TEST_CASE( Gamma_test  )
   BOOST_CHECK_CLOSE(AvLog, NPData[0]*4.0 + NPData[1]*7.0 + LogNorm1, 0.0001);  
 } 
 
-BOOST_AUTO_TEST_CASE( DirichletModel_test  )
+BOOST_AUTO_TEST_CASE( Dirichlet_test  )
 {
   //Initialise
   std::vector<double> u(3,1.1);
@@ -674,13 +674,13 @@ BOOST_AUTO_TEST_CASE( DirichletModel_test  )
 
   //Collect
   NaturalParameters<double> NPData
-    = DirichletModel<double>::CalcNP2Data(Us);
+    = Dirichlet<double>::CalcNP2Data(Us);
   
 
-  Moments<double> Update =  DirichletModel<double>::CalcMoments(SumNP);
+  Moments<double> Update =  Dirichlet<double>::CalcMoments(SumNP);
 
-  double LogNorm1 = DirichletModel<double>::CalcLogNorm(Us);
-  double LogNorm2 = DirichletModel<double>::CalcLogNorm(SumNP);
+  double LogNorm1 = Dirichlet<double>::CalcLogNorm(Us);
+  double LogNorm2 = Dirichlet<double>::CalcLogNorm(SumNP);
   
 
   //Check
