@@ -4,7 +4,7 @@
 #include "ICA/node/variable/Constant.hpp"
 #include "ICA/node/variable/Data.hpp"
 #include "ICA/node/variable/Hidden.hpp"
-#include "ICA/node/variable/Dirichlet.hpp"
+// #include "ICA/node/variable/Dirichlet.hpp"
 #include "ICA/node/variable/Calculation.hpp"
 // #include "ICA/variable/Forwarding.hpp"
 

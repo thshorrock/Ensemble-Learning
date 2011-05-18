@@ -9,12 +9,12 @@
 // #include "ICA/Message.hpp"
 
 //#include "ICA/piping/Piping.hpp"
-#include "ICA/node/variable/Dirichlet.hpp"
 #include "ICA/node/variable/Hidden.hpp"
 #include "ICA/node/variable/Calculation.hpp"
 #include "ICA/exponential_model/Gaussian.hpp"
 #include "ICA/exponential_model/Gamma.hpp"
 #include "ICA/exponential_model/Discrete.hpp"
+#include "ICA/exponential_model/Dirichlet.hpp"
 #include <boost/shared_ptr.hpp>
 #include <boost/none.hpp>
 #include <vector>
