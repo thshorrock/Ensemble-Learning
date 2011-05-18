@@ -62,8 +62,7 @@ namespace ICR{
        *  The normalisation is the inverse of the partition factor.
        *  @param Mean The moments from the VariableNode that represents Mean
        *  @param Precision The moments from the VariableNode that represents the precision.
-       *
-       */
+        */
       static
       data_t
       CalcLogNorm(moments_parameter Mean,
