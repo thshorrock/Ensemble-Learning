@@ -1,9 +1,9 @@
 #include "ICA.hpp"
 
-#include "ICA/node/variable/Constant.hpp"
-#include "ICA/node/variable/Data.hpp"
+// #include "ICA/node/variable/Constant.hpp"
+// #include "ICA/node/variable/Data.hpp"
 #include "ICA/node/variable/Hidden.hpp"
-#include "ICA/node/variable/Dirichlet.hpp"
+// #include "ICA/node/variable/Dirichlet.hpp"
 #include "ICA/node/variable/Calculation.hpp"
 // #include "ICA/variable/Forwarding.hpp"
 
@@ -68,7 +68,7 @@ ICR::ICA::Builder<T>::~Builder()
 
 template<class T>
 typename ICR::ICA::Builder<T>::WeightsNode
-ICR::ICA::Builder<T>::Weights(const size_t size)
+ICR::ICA::Builder<T>::weights(const size_t size)
 {
   boost::shared_ptr<DirichletConstType > DirichletPrior(new DirichletConstType(size,1.0));
   boost::shared_ptr<DirichletType >      Dirichlet(new DirichletType(size));
@@ -85,7 +85,7 @@ ICR::ICA::Builder<T>::Weights(const size_t size)
 
 template<class T>
 typename ICR::ICA::Builder<T>::GaussianNode
-ICR::ICA::Builder<T>::Gaussian(Variable Mean, Variable Precision)
+ICR::ICA::Builder<T>::gaussian(Variable Mean, Variable Precision)
 {
 	
   boost::shared_ptr<GaussianType > Gaussian(new GaussianType());
@@ -99,27 +99,27 @@ ICR::ICA::Builder<T>::Gaussian(Variable Mean, Variable Precision)
 
 template<class T>
 typename ICR::ICA::Builder<T>::GaussianNode
-ICR::ICA::Builder<T>::Gaussian(GaussianNode Mean, const T& precision)
+ICR::ICA::Builder<T>::gaussian(GaussianNode Mean, const T& precision)
 {
 	
   boost::shared_ptr<GammaConstType > Precision(new GammaConstType(precision));
   m_Nodes.push_back(Precision);
-  return Gaussian(Mean,Precision.get());
+  return gaussian(Mean,Precision.get());
 }
     
 template<class T>  
 typename ICR::ICA::Builder<T>::GaussianNode
-ICR::ICA::Builder<T>::Gaussian(const T& mean, GammaNode Precision)
+ICR::ICA::Builder<T>::gaussian(const T& mean, GammaNode Precision)
 {
 	
   boost::shared_ptr<GaussianConstType > Mean(new GaussianConstType(mean));
   m_Nodes.push_back(Mean);
-  return Gaussian(Mean.get(),Precision);
+  return gaussian(Mean.get(),Precision);
 }
   
 template<class T>
 typename ICR::ICA::Builder<T>::GaussianNode
-ICR::ICA::Builder<T>::Gaussian(const T& mean, const T& precision)
+ICR::ICA::Builder<T>::gaussian(const T& mean, const T& precision)
 {
 	
   boost::shared_ptr<GaussianConstType > Mean(new GaussianConstType(mean));
@@ -128,13 +128,13 @@ ICR::ICA::Builder<T>::Gaussian(const T& mean, const T& precision)
   m_Nodes.push_back(Mean);
   m_Nodes.push_back(Precision);
 	
-  return Gaussian(Mean.get(),Precision.get());
+  return gaussian(Mean.get(),Precision.get());
 }
       
 
 template<class T>
 typename ICR::ICA::Builder<T>::RectifiedGaussianNode
-ICR::ICA::Builder<T>::RectifiedGaussian(Variable Mean,Variable  Precision)
+ICR::ICA::Builder<T>::rectified_gaussian(Variable Mean,Variable  Precision)
 {
 	
   boost::shared_ptr<RectifiedGaussianType > RectifiedGaussian(new RectifiedGaussianType());
@@ -148,27 +148,27 @@ ICR::ICA::Builder<T>::RectifiedGaussian(Variable Mean,Variable  Precision)
 
 template<class T>
 typename ICR::ICA::Builder<T>::RectifiedGaussianNode
-ICR::ICA::Builder<T>::RectifiedGaussian(GaussianNode Mean, const T& precision)
+ICR::ICA::Builder<T>::rectified_gaussian(GaussianNode Mean, const T& precision)
 {
 	
   boost::shared_ptr<GammaConstType > Precision(new GammaConstType(precision));
   m_Nodes.push_back(Precision);
-  return RectifiedGaussian(Mean,Precision.get());
+  return rectified_gaussian(Mean,Precision.get());
 }
     
 template<class T>  
 typename ICR::ICA::Builder<T>::RectifiedGaussianNode
-ICR::ICA::Builder<T>::RectifiedGaussian(const T& mean, GammaNode Precision)
+ICR::ICA::Builder<T>::rectified_gaussian(const T& mean, GammaNode Precision)
 {
 	
   boost::shared_ptr<GaussianConstType > Mean(new GaussianConstType(mean));
   m_Nodes.push_back(Mean);
-  return RectifiedGaussian(Mean.get(),Precision);
+  return rectified_gaussian(Mean.get(),Precision);
 }
   
 template<class T>
 typename ICR::ICA::Builder<T>::RectifiedGaussianNode
-ICR::ICA::Builder<T>::RectifiedGaussian(const T& mean, const T& precision)
+ICR::ICA::Builder<T>::rectified_gaussian(const T& mean, const T& precision)
 {
 	
   boost::shared_ptr<GaussianConstType > Mean(new GaussianConstType(mean));
@@ -177,14 +177,14 @@ ICR::ICA::Builder<T>::RectifiedGaussian(const T& mean, const T& precision)
   m_Nodes.push_back(Mean);
   m_Nodes.push_back(Precision);
 	
-  return RectifiedGaussian(Mean.get(),Precision.get());
+  return rectified_gaussian(Mean.get(),Precision.get());
 }
       
 	
 
 template<class T>
 typename ICR::ICA::Builder<T>::GaussianNode
-ICR::ICA::Builder<T>::GaussianMixture(std::vector<Variable>& vMean, std::vector<Variable>& vPrecision, WeightsNode Weights)
+ICR::ICA::Builder<T>::gaussian_mixture(std::vector<Variable>& vMean, std::vector<Variable>& vPrecision, WeightsNode Weights)
 {
   const size_t number = Weights->size();
 	
@@ -206,7 +206,7 @@ ICR::ICA::Builder<T>::GaussianMixture(std::vector<Variable>& vMean, std::vector<
 
 template<class T>	
 typename ICR::ICA::Builder<T>::RectifiedGaussianNode
-ICR::ICA::Builder<T>::RectifiedGaussianMixture(std::vector<Variable>& vMean, std::vector<Variable>& vPrecision, WeightsNode Weights)
+ICR::ICA::Builder<T>::rectified_gaussian_mixture(std::vector<Variable>& vMean, std::vector<Variable>& vPrecision, WeightsNode Weights)
 {
   const size_t number = Weights->size();
 	
@@ -228,7 +228,7 @@ ICR::ICA::Builder<T>::RectifiedGaussianMixture(std::vector<Variable>& vMean, std
 
 template<class T>
 typename ICR::ICA::Builder<T>::GammaNode
-ICR::ICA::Builder<T>::Gamma(const T& shape, const T& iscale)
+ICR::ICA::Builder<T>::gamma(const T& shape, const T& iscale)
 {
   if ((shape<=0) || (iscale <=0)) {
     std::cout<<"Shape and iscale must be greater than zero"<<std::endl;
@@ -255,7 +255,7 @@ ICR::ICA::Builder<T>::Gamma(const T& shape, const T& iscale)
 
 template<class T>
 typename ICR::ICA::Builder<T>::GaussianConstNode
-ICR::ICA::Builder<T>::GaussianConst(const T value)
+ICR::ICA::Builder<T>::gaussian_const(const T value)
 {
   boost::shared_ptr<GaussianConstType > Const(new GaussianConstType(value));
   m_Nodes.push_back(Const);
@@ -265,7 +265,7 @@ ICR::ICA::Builder<T>::GaussianConst(const T value)
       
 template<class T>
 typename ICR::ICA::Builder<T>::GammaConstNode
-ICR::ICA::Builder<T>::GammaConst(const T value)
+ICR::ICA::Builder<T>::gamma_const(const T value)
 {
   if (value<=0) {
     std::cout<<"Shape and iscale must be greater than zero"<<std::endl;
@@ -282,7 +282,7 @@ ICR::ICA::Builder<T>::GammaConst(const T value)
       
 template<class T>
 typename ICR::ICA::Builder<T>::GaussianDataNode
-ICR::ICA::Builder<T>::GaussianData(const T data)
+ICR::ICA::Builder<T>::gaussian_data(const T data)
 {
 	
   boost::shared_ptr<GaussianDataType > Data(new GaussianDataType(data));
@@ -294,7 +294,7 @@ ICR::ICA::Builder<T>::GaussianData(const T data)
 
 template<class T>
 typename ICR::ICA::Builder<T>::GammaDataNode
-ICR::ICA::Builder<T>::GammaData(const T data)
+ICR::ICA::Builder<T>::gamma_data(const T data)
 {
 	
   boost::shared_ptr<GammaDataType > Data(new GammaDataType(data));
@@ -305,7 +305,7 @@ ICR::ICA::Builder<T>::GammaData(const T data)
 
 template<class T>
 typename ICR::ICA::Builder<T>::GaussianResultNode
-ICR::ICA::Builder<T>::CalcGaussian(Expression<T>* Expr,  Context<T>& context)
+ICR::ICA::Builder<T>::calc_gaussian(Expression<T>* Expr,  Context<T>& context)
 {
   boost::shared_ptr<GaussianResultType > Child(new GaussianResultType());
   boost::shared_ptr<CalcGaussianFactor > ChildF
@@ -319,7 +319,7 @@ ICR::ICA::Builder<T>::CalcGaussian(Expression<T>* Expr,  Context<T>& context)
 
 template<class T>
 void 
-ICR::ICA::Builder<T>::Join(T& shape, GammaNode IScale ,  const T& data)
+ICR::ICA::Builder<T>::join(T& shape, GammaNode IScale ,  const T& data)
 {
 
   boost::shared_ptr<GammaDataType > Data(new GammaDataType(data));
@@ -334,7 +334,7 @@ ICR::ICA::Builder<T>::Join(T& shape, GammaNode IScale ,  const T& data)
 }
 template<class T>
 void
-ICR::ICA::Builder<T>::Join(T& shape, T& iscale, GammaDataNode Data  )
+ICR::ICA::Builder<T>::join(T& shape, T& iscale, GammaDataNode Data  )
 {
 
   boost::shared_ptr<NormalConstType > Shape(new NormalConstType(shape));
@@ -350,7 +350,7 @@ ICR::ICA::Builder<T>::Join(T& shape, T& iscale, GammaDataNode Data  )
 
 template<class T>
 void 
-ICR::ICA::Builder<T>::Join(T& shape, GammaNode IScale, GammaDataNode Data  )
+ICR::ICA::Builder<T>::join(T& shape, GammaNode IScale, GammaDataNode Data  )
 {
   boost::shared_ptr<NormalConstType > Shape (new NormalConstType(shape));
   boost::shared_ptr<GammaFactor > GammaF (new GammaFactor(Shape.get(), IScale, Data));
@@ -361,7 +361,7 @@ ICR::ICA::Builder<T>::Join(T& shape, GammaNode IScale, GammaDataNode Data  )
 
 template<class T>
 void 
-ICR::ICA::Builder<T>::Join(T& mean, T& precision, GaussianDataNode Data  )
+ICR::ICA::Builder<T>::join(T& mean, T& precision, GaussianDataNode Data  )
 {
 
   boost::shared_ptr<GaussianConstType > Mean(new GaussianConstType(mean));
@@ -376,7 +376,7 @@ ICR::ICA::Builder<T>::Join(T& mean, T& precision, GaussianDataNode Data  )
    
 template<class T>   
 void 
-ICR::ICA::Builder<T>::Join(Variable Mean, T& precision, GaussianDataNode Data  )
+ICR::ICA::Builder<T>::join(Variable Mean, T& precision, GaussianDataNode Data  )
 {
 
   boost::shared_ptr<GaussianConstType > Precision(new GaussianConstType(precision));
@@ -388,7 +388,7 @@ ICR::ICA::Builder<T>::Join(Variable Mean, T& precision, GaussianDataNode Data  )
   
 template<class T>    
 void 
-ICR::ICA::Builder<T>::Join(T& mean, GammaNode Precision, GaussianDataNode Data  )
+ICR::ICA::Builder<T>::join(T& mean, GammaNode Precision, GaussianDataNode Data  )
 {
 
   boost::shared_ptr<GaussianConstType > Mean(new GaussianConstType(mean));
@@ -401,7 +401,7 @@ ICR::ICA::Builder<T>::Join(T& mean, GammaNode Precision, GaussianDataNode Data  
   
 template<class T>    
 void 
-ICR::ICA::Builder<T>::Join(Variable Mean, GammaNode& Precision, GaussianDataNode& Data  )
+ICR::ICA::Builder<T>::join(Variable Mean, GammaNode& Precision, GaussianDataNode& Data  )
 {
   boost::shared_ptr<GaussianFactor> GaussianF(new GaussianFactor(Mean,Precision,Data));
   m_Factors.push_back(GaussianF);
@@ -409,7 +409,7 @@ ICR::ICA::Builder<T>::Join(Variable Mean, GammaNode& Precision, GaussianDataNode
 
 template<class T>
 void 
-ICR::ICA::Builder<T>::Join(Variable Mean, GammaNode Precision, const T data )
+ICR::ICA::Builder<T>::join(Variable Mean, GammaNode Precision, const T data )
 {
 	
   boost::shared_ptr<GaussianDataType > Data(new GaussianDataType(data));
@@ -421,7 +421,7 @@ ICR::ICA::Builder<T>::Join(Variable Mean, GammaNode Precision, const T data )
 
 template<class T>
 void 
-ICR::ICA::Builder<T>::Join(Variable Mean, GammaNode& Precision, GammaNode& Child  )
+ICR::ICA::Builder<T>::join(Variable Mean, GammaNode& Precision, GammaNode& Child  )
 {
   boost::shared_ptr<GammaFactor> GammaF(new GammaFactor(Mean,Precision,Child));
   m_Factors.push_back(GammaF);
@@ -430,7 +430,7 @@ ICR::ICA::Builder<T>::Join(Variable Mean, GammaNode& Precision, GammaNode& Child
    
 template<class T>   
 void 
-ICR::ICA::Builder<T>::Join(Variable Mean, GammaNode& Precision, GaussianNode& Child  )
+ICR::ICA::Builder<T>::join(Variable Mean, GammaNode& Precision, GaussianNode& Child  )
 {
   boost::shared_ptr<GaussianFactor> GaussianF(new GaussianFactor(Mean,Precision,Child));
   m_Factors.push_back(GaussianF);
@@ -440,7 +440,7 @@ ICR::ICA::Builder<T>::Join(Variable Mean, GammaNode& Precision, GaussianNode& Ch
    
 template<class T>   
 void
-ICR::ICA::Builder<T>::Join( std::vector<Variable>& vMean, GammaNode& Precision, WeightsNode Weights,const T data )
+ICR::ICA::Builder<T>::join( std::vector<Variable>& vMean, GammaNode& Precision, WeightsNode Weights,const T data )
 {
 
   boost::shared_ptr<GaussianDataType > Data(new GaussianDataType(data));
@@ -467,7 +467,7 @@ ICR::ICA::Builder<T>::Join( std::vector<Variable>& vMean, GammaNode& Precision, 
 
 template<class T>	
 void
-ICR::ICA::Builder<T>::Join( std::vector<Variable>& vMean, std::vector<Variable>& vPrecision, WeightsNode Weights,const T data )
+ICR::ICA::Builder<T>::join( std::vector<Variable>& vMean, std::vector<Variable>& vPrecision, WeightsNode Weights,const T data )
 {
 
   boost::shared_ptr<GaussianDataType > Data(new GaussianDataType(data));
@@ -490,14 +490,14 @@ ICR::ICA::Builder<T>::Join( std::vector<Variable>& vMean, std::vector<Variable>&
 
 template<class T>
 size_t
-ICR::ICA::Builder<T>::NumberOfNodes() const
+ICR::ICA::Builder<T>::number_of_nodes() const
 {
   return m_Nodes.size();
 }
 
 template<class T>
 size_t
-ICR::ICA::Builder<T>::NumberOfFactors() const
+ICR::ICA::Builder<T>::number_of_factors() const
 {
   return m_Factors.size();
 }
@@ -505,7 +505,7 @@ ICR::ICA::Builder<T>::NumberOfFactors() const
 
 template<class T>
 double
-ICR::ICA::Builder<T>::Iterate()
+ICR::ICA::Builder<T>::iterate()
 {
   // Initialise();
   if (m_Factors.size() == 0)
@@ -537,12 +537,12 @@ ICR::ICA::Builder<T>::Iterate()
 
 template<class T>
 bool
-ICR::ICA::Builder<T>::Run(const double& epsilon, const size_t& max_iterations )
+ICR::ICA::Builder<T>::run(const double& epsilon, const size_t& max_iterations )
 {
   Initialise();
 	
   for(size_t i=0;i<max_iterations;++i){
-    double Cost = Iterate();
+    double Cost = iterate();
 	  
     if (HasConverged(Cost, epsilon))
       return true;
@@ -589,5 +589,5 @@ ICR::ICA::Builder<T>::Initialise()
 
 
 template class ICR::ICA::Builder<double>;
-template class ICR::ICA::Builder<float>;
+//template class ICR::ICA::Builder<float>;
 

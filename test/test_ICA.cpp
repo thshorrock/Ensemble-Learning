@@ -1605,7 +1605,7 @@ BOOST_AUTO_TEST_CASE( ICA_test  )
 
     std::vector<WeightsNode> Weights(M);
     for(size_t m=0;m<M;++m){
-      Weights[m] = Build.Weights(Components);
+      Weights[m] = Build.weights(Components);
     }
     
     std::vector< std::vector<Variable> > ShypMean(M);
@@ -1625,7 +1625,7 @@ BOOST_AUTO_TEST_CASE( ICA_test  )
     for(size_t m=0;m<M;++m){ 
       S[m].resize(T);
       for(size_t t=0;t<T;++t){ 
-	S[m][t] = Build.RectifiedGaussianMixture(ShypMean[m],
+	S[m][t] = Build.rectified_gaussian_mixture(ShypMean[m],
 						 ShypPrec[m],
 						 Weights[m]);
       }
@@ -1716,18 +1716,18 @@ BOOST_AUTO_TEST_CASE( ICA_test  )
 	}
 	//context.Assign(NP, noiseMean[n]);
 	
-	AtimesSplusN[n][t] = Build.CalcGaussian(Expr,context);  
+	AtimesSplusN[n][t] = Build.calc_gaussian(Expr,context);  
       }
     }
 
     for(size_t n=0;n<N;++n){
       for(size_t t=0;t<T;++t){
-	Build.Join(AtimesSplusN[n][t],DPrecision[n], Data(n,t));
+	Build.join(AtimesSplusN[n][t],DPrecision[n], Data(n,t));
       }
     }
 
-    std::cout<<"NODES   = "<<Build.NumberOfNodes()<<std::endl;
-    std::cout<<"FACTORS = "<<Build.NumberOfFactors()<<std::endl;
+    std::cout<<"NODES   = "<<Build.number_of_nodes()<<std::endl;
+    std::cout<<"FACTORS = "<<Build.number_of_factors()<<std::endl;
 
     // // BOOST_CHECK(Build.NumberOfNodes()   ==  (size_t) 6 + data_points );
     // // BOOST_CHECK(Build.NumberOfFactors() ==  (size_t) 2 + data_points);
@@ -1808,7 +1808,7 @@ BOOST_AUTO_TEST_CASE( ICA_test  )
 	  }
 	}
 	
-	not_converged = !Build.Run(0.001,5);
+	not_converged = !Build.run(0.001,5);
 
 	// std::cout<<"WEIGHTS ["<<attempt<<"] = "<<std::endl;
 

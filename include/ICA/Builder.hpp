@@ -27,48 +27,48 @@ namespace ICR{
     class Builder
     {
 
-      typedef Factor<RectifiedGaussian<T> >      RectifiedGaussianFactor;
-      typedef Factor<Gaussian<T> >      GaussianFactor;
-      typedef Factor<Gamma<T> >         GammaFactor;
-      typedef Factor<Dirichlet<T> >     DirichletFactor;
-      typedef Factor<Discrete<T> >      DiscreteFactor;
-      typedef Mixture<RectifiedGaussian<T> >     RectifiedGaussianMixtureFactor;
-      typedef Mixture<Gaussian<T> >     GaussianMixtureFactor;
+      typedef Factor<RectifiedGaussian<T>, T >      RectifiedGaussianFactor;
+      typedef Factor<Gaussian<T>, T >      GaussianFactor;
+      typedef Factor<Gamma<T>, T >         GammaFactor;
+      typedef Factor<Dirichlet<T>, T >     DirichletFactor;
+      typedef Factor<Discrete<T>, T >      DiscreteFactor;
+      typedef Mixture<RectifiedGaussian<T>, T >     RectifiedGaussianMixtureFactor;
+      typedef Mixture<Gaussian<T>, T >     GaussianMixtureFactor;
 
       typedef Details::CalcGaussianFactor<Gaussian, T >  CalcGaussianFactor;
 
       // typedef DeterministicFactor<Gaussian,Det::Add, T >     AddFactor;
       // typedef DeterministicFactor<Gaussian,Det::Multiply, T >     MultiplyFactor;
 
-      typedef HiddenNode<Gaussian<T> >      GaussianType;
-      typedef HiddenNode<RectifiedGaussian<T> >      RectifiedGaussianType;
-      typedef HiddenNode<Gamma<T> >         GammaType;
-      typedef HiddenNode<Dirichlet<T> >     DirichletType;
-      typedef ObservedNode<Gaussian<T> >     GaussianDataType;
-      typedef ObservedNode<Gamma<T> >        GammaDataType;
-      typedef ObservedNode<Gaussian<T> > GaussianConstType;
-      typedef ObservedNode<Gamma<T> >    GammaConstType;
-      typedef ObservedNode<Gaussian<T> >   NormalConstType;
-      typedef ObservedNode<Dirichlet<T> >  DirichletConstType;
+      typedef HiddenNode<Gaussian<T>, T >      GaussianType;
+      typedef HiddenNode<RectifiedGaussian<T>, T >      RectifiedGaussianType;
+      typedef HiddenNode<Gamma<T>, T >         GammaType;
+      typedef HiddenNode<Dirichlet<T>, T >     DirichletType;
+      typedef ObservedNode<Gaussian<T>, T >     GaussianDataType;
+      typedef ObservedNode<Gamma<T>, T >        GammaDataType;
+      typedef ObservedNode<Gaussian<T>, T > GaussianConstType;
+      typedef ObservedNode<Gamma<T> , T>    GammaConstType;
+      typedef ObservedNode<Gaussian<T>, T >   NormalConstType;
+      typedef ObservedNode<Dirichlet<T>, T >  DirichletConstType;
       typedef DeterministicNode<Gaussian<T>, T>    GaussianResultType;
 
       
-      typedef HiddenNode<Dirichlet<T> >     WeightsType;
-      typedef HiddenNode<Discrete<T> >      CatagoryType;
+      typedef HiddenNode<Dirichlet<T>, T >     WeightsType;
+      typedef HiddenNode<Discrete<T>, T >      CatagoryType;
       //      typedef ForwardingNode<Gaussian<T> >   GaussianMixtureType;
     public:
       typedef VariableNode<T>*                    Variable;
-      typedef HiddenNode<RectifiedGaussian<T> >*      RectifiedGaussianNode;
-      typedef HiddenNode<Gaussian<T> >*      GaussianNode;
-      typedef HiddenNode<Gamma<T> >*         GammaNode;
-      typedef ObservedNode<Gaussian<T> >*     GaussianDataNode;
-      typedef ObservedNode<Gamma<T> >*        GammaDataNode;
-      typedef ObservedNode<Gaussian<T> >* GaussianConstNode;
-      typedef ObservedNode<Gamma<T> >*    GammaConstNode;
+      typedef HiddenNode<RectifiedGaussian<T>, T >*      RectifiedGaussianNode;
+      typedef HiddenNode<Gaussian<T>, T >*      GaussianNode;
+      typedef HiddenNode<Gamma<T>, T >*         GammaNode;
+      typedef ObservedNode<Gaussian<T>, T >*     GaussianDataNode;
+      typedef ObservedNode<Gamma<T>, T >*        GammaDataNode;
+      typedef ObservedNode<Gaussian<T>, T >* GaussianConstNode;
+      typedef ObservedNode<Gamma<T>, T >*    GammaConstNode;
       typedef DeterministicNode<Gaussian<T>, T>*    GaussianResultNode;
       
-      typedef HiddenNode<Dirichlet<T> >*      WeightsNode;
-      typedef HiddenNode<Discrete<T> >*       CatagoryNode;
+      typedef HiddenNode<Dirichlet<T>, T >*      WeightsNode;
+      typedef HiddenNode<Discrete<T>, T >*       CatagoryNode;
       // typedef ForwardingNode<Gaussian<T> >*  GaussianMixtureNode;
       
       
@@ -76,7 +76,7 @@ namespace ICR{
       ~Builder();
 
       WeightsNode
-      Weights(const size_t size);
+      weights(const size_t size);
 
       GaussianNode
       gaussian(Variable Mean, Variable Precision);
@@ -105,81 +105,81 @@ namespace ICR{
 
 
       GaussianNode
-      GaussianMixture(std::vector<Variable>& vMean, std::vector<Variable>& vPrecision, WeightsNode Weights);
+      gaussian_mixture(std::vector<Variable>& vMean, std::vector<Variable>& vPrecision, WeightsNode Weights);
 	
       RectifiedGaussianNode
-      RectifiedGaussianMixture(std::vector<Variable>& vMean, std::vector<Variable>& vPrecision, WeightsNode Weights);
+      rectified_gaussian_mixture(std::vector<Variable>& vMean, std::vector<Variable>& vPrecision, WeightsNode Weights);
       
       GammaNode
       gamma(const T& shape, const T& iscale);
 
       GaussianConstNode
-      GaussianConst(const T value);
+      gaussian_const(const T value);
       
       GammaConstNode
-      GammaConst(const T value);
+      gamma_const(const T value);
       
       GaussianDataNode
-      GaussianData(const T data);
+      gaussian_data(const T data);
 
       GammaDataNode
-      GammaData(const T data);
+      gamma_data(const T data);
 
       GaussianResultNode
-      CalcGaussian(Expression<T>* Expr,  Context<T>& context);
+      calc_gaussian(Expression<T>* Expr,  Context<T>& context);
 
       void 
-      Join(T& shape, GammaNode IScale ,  const T& data );
+      join(T& shape, GammaNode IScale ,  const T& data );
 
       void 
-      Join(T& shape, T& iscale, GammaDataNode Data  );
+      join(T& shape, T& iscale, GammaDataNode Data  );
 
       void 
-      Join(T& shape, GammaNode IScale, GammaDataNode Data  );
+      join(T& shape, GammaNode IScale, GammaDataNode Data  );
 
       void 
-      Join(T& mean, T& precision, GaussianDataNode Data  );
+      join(T& mean, T& precision, GaussianDataNode Data  );
       
       void 
-      Join(Variable Mean, T& precision, GaussianDataNode Data  );
+      join(Variable Mean, T& precision, GaussianDataNode Data  );
       
       void 
-      Join(T& mean, GammaNode Precision, GaussianDataNode Data  );
+      join(T& mean, GammaNode Precision, GaussianDataNode Data  );
       
       
       void 
-      Join(Variable Mean, GammaNode& Precision, GaussianDataNode& Data  );
+      join(Variable Mean, GammaNode& Precision, GaussianDataNode& Data  );
 
       void 
-      Join(Variable Mean, GammaNode Precision, const T data );
+      join(Variable Mean, GammaNode Precision, const T data );
 
 
       void 
-      Join(Variable Mean, GammaNode& Precision, GammaNode& Child  );
+      join(Variable Mean, GammaNode& Precision, GammaNode& Child  );
       
       void 
-      Join(Variable Mean, GammaNode& Precision, GaussianNode& Child  );
+      join(Variable Mean, GammaNode& Precision, GaussianNode& Child  );
       
       
       void
-      Join( std::vector<Variable>& vMean, GammaNode& Precision, WeightsNode Weights,const T data );
+      join( std::vector<Variable>& vMean, GammaNode& Precision, WeightsNode Weights,const T data );
 
       void
-      Join( std::vector<Variable>& vMean, std::vector<Variable>& vPrecision, WeightsNode Weights,const T data );
+      join( std::vector<Variable>& vMean, std::vector<Variable>& vPrecision, WeightsNode Weights,const T data );
 	
 
       size_t
-      NumberOfNodes() const;
+      number_of_nodes() const;
 
       size_t
-      NumberOfFactors() const;
+      number_of_factors() const;
 
 
       double
-      Iterate();
+      iterate();
 
       bool
-      Run(const double& epsilon = 1e-6, const size_t& max_iterations = 100);
+      run(const double& epsilon = 1e-6, const size_t& max_iterations = 100);
       
     private:
       bool
