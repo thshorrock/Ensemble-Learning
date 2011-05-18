@@ -188,8 +188,8 @@ ICR::ICA::Dirichlet<T>::CalcSample(const VariableNode<T>* V)
   const moments_t  Mus = V->GetMoments();
   const size_t     size   = Mus.size();
 
-  data_t u[size];
-  data_t x[size];
+  double u[size]; //double to go to rng
+  double x[size];
   PARALLEL_COPY(Mus.begin(),Mus.end(),u);
   random->dirichlet(size, u, x);
 	

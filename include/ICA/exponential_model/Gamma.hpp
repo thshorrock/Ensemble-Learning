@@ -13,7 +13,7 @@ namespace ICR{
      *   This includes how to calculate the Moments and natural parameters
      *   between the different factors and variables.
      */
-    template<class T=double>
+    template<class T>
     class Gamma 
     {
     public:
@@ -214,7 +214,7 @@ ICR::ICA::Gamma<T>::CalcSample(variable_parameter Shape,
   //cannot be zero so add something small incase of numerical error.
   const data_t x=  random->gamma(shape,1.0/iscale) + 1e-16; 
 
-  return Moments<double>(x,std::log(x));
+  return Moments<T>(x,std::log(x));
 }
       
 

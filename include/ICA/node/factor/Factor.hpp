@@ -24,13 +24,13 @@ namespace ICR{
     
    
     /******************************************************************************
-     * Default Specialisation Double - Gaussian, RectifiedGaussian, Gamma
+     * Default Specialisation - Gaussian, RectifiedGaussian, Gamma
      ******************************************************************************/
-    template<class Model, class T = double>
+    template<class Model, class T>
     class Factor : public FactorNode<T>
     {
       //Non-copiable
-      Factor(const Factor<Model>& f) {};
+      Factor(const Factor<Model,T>& f) {};
     public:
       typedef typename boost::call_traits< VariableNode<T>* const>::param_type
       variable_parameter;
@@ -136,9 +136,9 @@ namespace ICR{
      * DirichletModel Specialisation 
      ******************************************************************************/
     template<class T>
-    class Factor<Dirichlet<T> > : public FactorNode<T>
+    class Factor<Dirichlet<T>,T > : public FactorNode<T>
     {
-      Factor(const Factor<Dirichlet<T> >& f) {};
+      Factor(const Factor<Dirichlet<T>, T>& f) {};
     public:
       
       typedef typename boost::call_traits< VariableNode<T>* const>::param_type
@@ -228,7 +228,7 @@ namespace ICR{
      * Discrete Specialisation
      ******************************************************************************/
     template<class T>
-    class Factor<Discrete<T> > : public FactorNode<T>
+    class Factor<Discrete<T>, T> : public FactorNode<T>
     {
     public:
       

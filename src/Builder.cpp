@@ -589,5 +589,5 @@ ICR::ICA::Builder<T>::Initialise()
 
 
 template class ICR::ICA::Builder<double>;
-//template class ICR::ICA::Builder<float>;
+template class ICR::ICA::Builder<float>;
 

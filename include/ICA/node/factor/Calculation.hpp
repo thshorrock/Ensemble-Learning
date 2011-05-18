@@ -28,7 +28,7 @@ namespace ICR{
       
       
       template<template<class> class Model,  class T>
-      class CalcGaussianFactor : public FactorNode<double>
+      class CalcGaussianFactor : public FactorNode<T>
       {
       public:
       

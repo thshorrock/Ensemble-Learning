@@ -21,11 +21,11 @@ namespace ICR{
      * Default Specialisation
      ******************************************************************************/
     /** Factor Linking Mixture nodes */
-    template<class Model, class T = double>
+    template<class Model, class T>
     class Mixture : public FactorNode<T>
     {
       //Non-copieable
-      Mixture(const Mixture<Model>& f) {};
+      Mixture(const Mixture<Model, T>& f) {};
     public:
       
       typedef typename boost::call_traits< VariableNode<T>* const>::param_type
@@ -36,10 +36,16 @@ namespace ICR{
       variable_vector_parameter;
       typedef typename boost::call_traits< std::vector<VariableNode<T>*> >::value_type
       variable_vector_t;
+
+      typedef typename boost::call_traits<HiddenNode<Discrete<T>,T >*>::value_type
+      discrete_t;
+      typedef typename boost::call_traits<HiddenNode<Discrete<T>,T >*>::value_type
+      discrete_parameter;
+
       
       Mixture(variable_vector_parameter Parent1, 
 	      variable_vector_parameter Parent2,  
-	      HiddenNode<Discrete<T> >* Weights,
+	      discrete_parameter Weights,
 	      variable_parameter child
 	      
 	       )
@@ -88,7 +94,7 @@ namespace ICR{
     private: 
 
       variable_vector_parameter m_parent1_nodes, m_parent2_nodes;
-      HiddenNode<Discrete<T> > *m_weights_node;
+      discrete_t m_weights_node;
       variable_t  m_child_node;
       
       mutable T m_LogNorm;

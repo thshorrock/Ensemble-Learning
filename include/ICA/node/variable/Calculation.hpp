@@ -9,7 +9,7 @@
 namespace ICR{
   namespace ICA{
     
-    template <class Model, class T = double>
+    template <class Model, class T>
     class DeterministicNode : public VariableNode<T>
     {
     public:

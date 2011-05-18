@@ -38,10 +38,10 @@ namespace ICR{
     // };
 
     //forward
-    template<class T=double>
+    template<class T>
     class FactorNode;
     
-    template<class T=double>
+    template<class T>
     class VariableNode  // : public Node
     {
     public:

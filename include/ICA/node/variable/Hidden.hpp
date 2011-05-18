@@ -8,7 +8,7 @@
 namespace ICR{
   namespace ICA{
     
-    template <class Model, class T = double>
+    template <class Model, class T>
     class HiddenNode : public VariableNode<T>
     {
     public:

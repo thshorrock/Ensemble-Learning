@@ -10,7 +10,7 @@
 namespace ICR{
   namespace ICA{
     
-    template<class Model, class T=double>
+    template<class Model, class T>
     class ObservedNode : public VariableNode<T>
     {
     public:
