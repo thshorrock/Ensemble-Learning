@@ -1,9 +1,10 @@
 #ifndef BUILDER_HPP
 #define BUILDER_HPP
 
-#include "ICA/node/variable/Constant.hpp"
-#include "ICA/node/variable/Data.hpp"
+// #include "ICA/node/variable/Constant.hpp"
+// #include "ICA/node/variable/Data.hpp"
 #include "ICA/node/variable/Hidden.hpp"
+#include "ICA/node/variable/Observed.hpp"
 // #include "ICA/node/variable/Dirichlet.hpp"
 #include "ICA/node/variable/Calculation.hpp"
 // #include "ICA/variable/Forwarding.hpp"
@@ -43,12 +44,12 @@ namespace ICR{
       typedef HiddenNode<RectifiedGaussian<T> >      RectifiedGaussianType;
       typedef HiddenNode<Gamma<T> >         GammaType;
       typedef HiddenNode<Dirichlet<T> >     DirichletType;
-      typedef DataNode<GaussianConstant<T> >     GaussianDataType;
-      typedef DataNode<GammaConstant<T> >        GammaDataType;
-      typedef ConstantNode<GaussianConstant<T> > GaussianConstType;
-      typedef ConstantNode<GammaConstant<T> >    GammaConstType;
-      typedef ConstantNode<NormalConstant<T> >   NormalConstType;
-      typedef ConstantNode<DirichletConstant<T> >  DirichletConstType;
+      typedef ObservedNode<Gaussian<T> >     GaussianDataType;
+      typedef ObservedNode<Gamma<T> >        GammaDataType;
+      typedef ObservedNode<Gaussian<T> > GaussianConstType;
+      typedef ObservedNode<Gamma<T> >    GammaConstType;
+      typedef ObservedNode<Gaussian<T> >   NormalConstType;
+      typedef ObservedNode<Dirichlet<T> >  DirichletConstType;
       typedef DeterministicNode<Gaussian<T>, T>    GaussianResultType;
 
       
@@ -60,10 +61,10 @@ namespace ICR{
       typedef HiddenNode<RectifiedGaussian<T> >*      RectifiedGaussianNode;
       typedef HiddenNode<Gaussian<T> >*      GaussianNode;
       typedef HiddenNode<Gamma<T> >*         GammaNode;
-      typedef DataNode<GaussianConstant<T> >*     GaussianDataNode;
-      typedef DataNode<GammaConstant<T> >*        GammaDataNode;
-      typedef ConstantNode<GaussianConstant<T> >* GaussianConstNode;
-      typedef ConstantNode<GammaConstant<T> >*    GammaConstNode;
+      typedef ObservedNode<Gaussian<T> >*     GaussianDataNode;
+      typedef ObservedNode<Gamma<T> >*        GammaDataNode;
+      typedef ObservedNode<Gaussian<T> >* GaussianConstNode;
+      typedef ObservedNode<Gamma<T> >*    GammaConstNode;
       typedef DeterministicNode<Gaussian<T>, T>*    GaussianResultNode;
       
       typedef HiddenNode<Dirichlet<T> >*      WeightsNode;
