@@ -38,7 +38,7 @@ namespace ICR{
       
       Mixture(variable_vector_parameter Parent1, 
 	      variable_vector_parameter Parent2,  
-	      HiddenNode<DiscreteModel<T> >* Weights,
+	      HiddenNode<Discrete<T> >* Weights,
 	      variable_parameter child
 	      
 	       )
@@ -87,7 +87,7 @@ namespace ICR{
     private: 
 
       variable_vector_parameter m_parent1_nodes, m_parent2_nodes;
-      HiddenNode<DiscreteModel<T> > *m_weights_node;
+      HiddenNode<Discrete<T> > *m_weights_node;
       variable_t  m_child_node;
       
       mutable T m_LogNorm;

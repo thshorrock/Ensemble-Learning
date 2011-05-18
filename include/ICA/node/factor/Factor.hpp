@@ -159,10 +159,10 @@ namespace ICR{
       mutable boost::mutex m_mutex;
     };
     /******************************************************************************
-     * DiscreteModel Specialisation
+     * Discrete Specialisation
      ******************************************************************************/
     template<>
-    class Factor<DiscreteModel<double> > : public FactorNode<double>
+    class Factor<Discrete<double> > : public FactorNode<double>
     {
     public:
       
@@ -184,7 +184,7 @@ namespace ICR{
       Moments<double>
       InitialiseMoments() const
       {
-	return DiscreteModel<double>::CalcSample(m_prior_node);
+	return Discrete<double>::CalcSample(m_prior_node);
       }
 
 
@@ -256,21 +256,21 @@ namespace ICR{
 
     inline
     NaturalParameters<double>
-    Factor<DiscreteModel<double>,double>::GetNaturalNot( variable_parameter v) const
+    Factor<Discrete<double>,double>::GetNaturalNot( variable_parameter v) const
     {
       boost::mutex::scoped_lock lock(m_mutex);
       if (v==m_prior_node)
        	{
       Moments<double> child  = m_child_node->GetMoments();
-       return DiscreteModel<double>::CalcNP2Prior(child);/// = child;
+       return Discrete<double>::CalcNP2Prior(child);/// = child;
 
       	}
       else 
        	{
 	  Moments<double> prior  = m_prior_node->GetMoments(); 
-	  m_LogNorm = DiscreteModel<double>::CalcLogNorm(prior);
+	  m_LogNorm = Discrete<double>::CalcLogNorm(prior);
 
-	  return  DiscreteModel<double>::CalcNP2Data(prior);/// = child;
+	  return  Discrete<double>::CalcNP2Data(prior);/// = child;
 	  // return m_NP2Child;
 	}
     }

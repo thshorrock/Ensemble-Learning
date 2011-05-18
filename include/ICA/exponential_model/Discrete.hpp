@@ -16,7 +16,7 @@ namespace ICR{
      *   between the different factors and variables.
      */
     template<class T=double>
-    class DiscreteModel 
+    class Discrete 
     {
     public:
 
@@ -144,8 +144,8 @@ namespace ICR{
 
 template<class T>
 inline
-typename ICR::ICA::DiscreteModel<T>::data_t
-ICR::ICA::DiscreteModel<T>::CalcLogNorm(vector_data_parameter unLogProbs) 
+typename ICR::ICA::Discrete<T>::data_t
+ICR::ICA::Discrete<T>::CalcLogNorm(vector_data_parameter unLogProbs) 
 {
   /* Unnormalised
    *If all the probs are very small then can easily get servere numerical errors,
@@ -170,8 +170,8 @@ ICR::ICA::DiscreteModel<T>::CalcLogNorm(vector_data_parameter unLogProbs)
 
 template<class T>
 inline
-typename ICR::ICA::DiscreteModel<T>::data_t 
-ICR::ICA::DiscreteModel<T>::CalcLogNorm(moments_parameter Dirichlet) 
+typename ICR::ICA::Discrete<T>::data_t 
+ICR::ICA::Discrete<T>::CalcLogNorm(moments_parameter Dirichlet) 
 {
   //the log probs are provided by Dirichlet, need to pass them on
   std::vector<T> unLogProbs(Dirichlet.size());
@@ -182,8 +182,8 @@ ICR::ICA::DiscreteModel<T>::CalcLogNorm(moments_parameter Dirichlet)
 
 template<class T>
 inline
-typename ICR::ICA::DiscreteModel<T>::data_t 
-ICR::ICA::DiscreteModel<T>::CalcLogNorm(NP_parameter NP) 
+typename ICR::ICA::Discrete<T>::data_t 
+ICR::ICA::Discrete<T>::CalcLogNorm(NP_parameter NP) 
 {
   //The NP are the log probs
   std::vector<T> unLogProbs(NP.size());
@@ -194,8 +194,8 @@ ICR::ICA::DiscreteModel<T>::CalcLogNorm(NP_parameter NP)
 
 template<class T>
 inline
-typename ICR::ICA::DiscreteModel<T>::moments_t
-ICR::ICA::DiscreteModel<T>::CalcSample(variable_parameter prior) 
+typename ICR::ICA::Discrete<T>::moments_t
+ICR::ICA::Discrete<T>::CalcSample(variable_parameter prior) 
 {
   const moments_t PM = prior->GetMoments();
   std::vector<data_t> M(PM.size());
@@ -206,8 +206,8 @@ ICR::ICA::DiscreteModel<T>::CalcSample(variable_parameter prior)
 
 template<class T>
 inline
-typename ICR::ICA::DiscreteModel<T>::moments_t
-ICR::ICA::DiscreteModel<T>::CalcMoments(NP_parameter NP)
+typename ICR::ICA::Discrete<T>::moments_t
+ICR::ICA::Discrete<T>::CalcMoments(NP_parameter NP)
 {
   //NPs are unnormalised log probabilities.
 
@@ -229,8 +229,8 @@ ICR::ICA::DiscreteModel<T>::CalcMoments(NP_parameter NP)
 
 template<class T>  
 inline 
-typename ICR::ICA::DiscreteModel<T>::NP_t
-ICR::ICA::DiscreteModel<T>::CalcNP2Prior(moments_parameter Discrete)
+typename ICR::ICA::Discrete<T>::NP_t
+ICR::ICA::Discrete<T>::CalcNP2Prior(moments_parameter Discrete)
 {
   //The probabilities are provided by Discrete and need to be passsed onto Prior
   // Want to simply foward these:
@@ -242,8 +242,8 @@ ICR::ICA::DiscreteModel<T>::CalcNP2Prior(moments_parameter Discrete)
    
 template<class T>   
 inline 
-typename ICR::ICA::DiscreteModel<T>::NP_t
-ICR::ICA::DiscreteModel<T>::CalcNP2Data(moments_parameter Dirichlet)
+typename ICR::ICA::Discrete<T>::NP_t
+ICR::ICA::Discrete<T>::CalcNP2Data(moments_parameter Dirichlet)
 {
   //the log probs are provided by Dirichlet, need to pass them on
   //Want to simply copy these

@@ -30,7 +30,7 @@ namespace ICR{
       typedef Factor<Gaussian<T> >      GaussianFactor;
       typedef Factor<Gamma<T> >         GammaFactor;
       typedef Factor<DirichletModel<T> >     DirichletFactor;
-      typedef Factor<DiscreteModel<T> >      DiscreteFactor;
+      typedef Factor<Discrete<T> >      DiscreteFactor;
       typedef Mixture<RectifiedGaussian<T> >     RectifiedGaussianMixtureFactor;
       typedef Mixture<Gaussian<T> >     GaussianMixtureFactor;
 
@@ -53,7 +53,7 @@ namespace ICR{
 
       
       typedef HiddenNode<DirichletModel<T> >     WeightsType;
-      typedef HiddenNode<DiscreteModel<T> >      CatagoryType;
+      typedef HiddenNode<Discrete<T> >      CatagoryType;
       //      typedef ForwardingNode<Gaussian<T> >   GaussianMixtureType;
     public:
       typedef VariableNode<T>*                    Variable;
@@ -67,7 +67,7 @@ namespace ICR{
       typedef DeterministicNode<Gaussian<T>, T>*    GaussianResultNode;
       
       typedef HiddenNode<DirichletModel<T> >*      WeightsNode;
-      typedef HiddenNode<DiscreteModel<T> >*       CatagoryNode;
+      typedef HiddenNode<Discrete<T> >*       CatagoryNode;
       // typedef ForwardingNode<Gaussian<T> >*  GaussianMixtureNode;
       
       

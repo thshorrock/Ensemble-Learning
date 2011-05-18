@@ -700,7 +700,7 @@ BOOST_AUTO_TEST_CASE( DirichletModel_test  )
 } 
 
 
-BOOST_AUTO_TEST_CASE( DiscreteModel_test  )
+BOOST_AUTO_TEST_CASE( Discrete_test  )
 {
   //Initialise
   std::vector<double> p(3);
@@ -712,21 +712,21 @@ BOOST_AUTO_TEST_CASE( DiscreteModel_test  )
   logp[1] = -0.9;
   logp[2] = -0.5;
 
-  Moments<double> Dirichlet(logp);
-  Moments<double> Discrete(p);
+  Moments<double> dirichlet(logp);
+  Moments<double> discrete(p);
   NaturalParameters<double> SumNP(logp);
 
   //Collect
   NaturalParameters<double> NPData
-    = DiscreteModel<double>::CalcNP2Data(Dirichlet);
+    = Discrete<double>::CalcNP2Data(dirichlet);
   NaturalParameters<double> NPPrior
-    = DiscreteModel<double>::CalcNP2Prior(Discrete);
+    = Discrete<double>::CalcNP2Prior(discrete);
   
 
-  Moments<double> Update =  DiscreteModel<double>::CalcMoments(SumNP);
+  Moments<double> Update =  Discrete<double>::CalcMoments(SumNP);
 
-  double LogNorm1 = DiscreteModel<double>::CalcLogNorm(Dirichlet);
-  double LogNorm2 = DiscreteModel<double>::CalcLogNorm(SumNP);
+  double LogNorm1 = Discrete<double>::CalcLogNorm(dirichlet);
+  double LogNorm2 = Discrete<double>::CalcLogNorm(SumNP);
   
   //Check
    BOOST_CHECK_CLOSE(NPData[0],  -500 , 0.0001);  //1.1-1
