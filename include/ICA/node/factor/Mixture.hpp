@@ -20,10 +20,11 @@ namespace ICR{
     /******************************************************************************
      * Default Specialisation
      ******************************************************************************/
-
+    /** Factor Linking Mixture nodes */
     template<class Model, class T = double>
     class Mixture : public FactorNode<T>
     {
+      //Non-copieable
       Mixture(const Mixture<Model>& f) {};
     public:
       
@@ -48,7 +49,7 @@ namespace ICR{
 	   m_child_node(child),
 	   m_LogNorm(0)
       {
-	
+	//Need to be as many parents to both.
 	BOOST_ASSERT(Parent1.size() == Parent2.size());
 	
 	for(size_t i=0;i<Parent1.size();++i){
@@ -91,7 +92,6 @@ namespace ICR{
       variable_t  m_child_node;
       
       mutable T m_LogNorm;
-      mutable boost::mutex m_mutex;
     };
     
   
