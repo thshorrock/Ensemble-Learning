@@ -69,12 +69,14 @@ namespace ICR{
       bool equal(FunctionIterator<other_function> const& other) const
       {
         return this->m_function == other.m_function;
+	}
       }
       
       //desend the tree
       void increment()
-      { m_previous = m_function;
-	m_function = m_function->GetParent(); 
+      { 
+	  m_previous = m_function;
+	  m_function = m_function->GetParent(); 
       }
 
       //dereference

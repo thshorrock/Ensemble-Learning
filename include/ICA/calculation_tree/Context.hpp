@@ -236,6 +236,8 @@ namespace ICR{
       subcontext_t
       operator[](size_parameter i) const
       {
+	//Defer thread safety to the variable
+	// (m_map not being altered here)
 	SubContext<T> c;
 	for(typename DataContainer::const_iterator it = m_map.begin();
 	    it != m_map.end();
@@ -266,10 +268,12 @@ namespace ICR{
       void
       AddChildFactor(Details::CalcGaussianFactor<Model,U>* factor ) const
       {
+	//Defer thread safety to the variable
+	// (m_map not being altered here)
 	typename DataContainer::const_iterator it;
 	for(  it = m_map.begin();
-	     it!= m_map.end();
-	     ++it)
+	      it!= m_map.end();
+	      ++it)
 	  {
 	    it->first->AddChildFactor(factor);
 	  }
@@ -290,16 +294,17 @@ namespace ICR{
 	       const SubContext<T>& c)
     {
       //lock
-      boost::mutex mutex;
-      boost::lock_guard<boost::mutex> lock(mutex); 
-  
-      typename std::map<const Placeholder<T>*,  T>::const_iterator it;
-      for(it = c.m_map.begin();
-	  it!= c.m_map.end();
-	  ++it)
-	{
-	  out<<it->second<<" ";
-	}
+#pragma omp critical
+      {
+	
+	typename std::map<const Placeholder<T>*,  T>::const_iterator it;
+	for(it = c.m_map.begin();
+	    it!= c.m_map.end();
+	    ++it)
+	  {
+	    out<<it->second<<" ";
+	  }
+      }
       return out;
     }
 
@@ -310,18 +315,18 @@ namespace ICR{
     operator<<(std::ostream& out, 
 	       const Context<T>&  c)
     { 
-      //lock
-      boost::mutex mutex;
-      boost::lock_guard<boost::mutex> lock(mutex); 
 
-      typedef std::map<VariableNode<T>* const ,const Placeholder<T>* > DataContainer;
-      typename DataContainer::const_iterator it;
-      for(it = c.m_map.begin();
-	  it!= c.m_map.end();
-	  ++it)
-	{
-	  out<<it->first<<" ";
-	}
+#pragma omp critical
+      {
+	typedef std::map<VariableNode<T>* const ,const Placeholder<T>* > DataContainer;
+	typename DataContainer::const_iterator it;
+	for(it = c.m_map.begin();
+	    it!= c.m_map.end();
+	    ++it)
+	  {
+	    out<<it->first<<" ";
+	  }
+      }
       return out;
     }
 
@@ -356,11 +361,15 @@ ICR::ICA::SubContext<T>::Assign(typename SubContext<T>::placeholder_parameter P,
   typename DataContainer::iterator it;
   std::pair<typename DataContainer::iterator,bool> ret;
 
-  ret = m_map.insert( Datum(P, V) );
-  if (ret.second == false) //already exists
-    {
-      ret.first->second = V;
-    }
+  //make sure not trying to assign to things at once.
+#pragma omp critical
+  {
+    ret = m_map.insert( Datum(P, V) );
+    if (ret.second == false) //already exists
+      {
+	ret.first->second = V;
+      }
+  }
 }
 
 
@@ -397,9 +406,13 @@ ICR::ICA::Context<T>::Assign(placeholder_parameter P,
 {
   std::pair<typename DataContainer::iterator,bool> ret;
 
-  ret = m_map.insert( Datum ( V,P) );
-  if (ret.second == false) //already exists
-    {
-      ret.first->second = P;
-    }
+  //make sure not trying to assign to things at once.
+#pragma omp critical
+  {
+    ret = m_map.insert( Datum ( V,P) );
+    if (ret.second == false) //already exists
+      {
+	ret.first->second = P;
+      }
+  }
 }
