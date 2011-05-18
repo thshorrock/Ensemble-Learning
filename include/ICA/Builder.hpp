@@ -28,7 +28,7 @@ namespace ICR{
 
       typedef Factor<RectifiedGaussian<T> >      RectifiedGaussianFactor;
       typedef Factor<Gaussian<T> >      GaussianFactor;
-      typedef Factor<GammaModel<T> >         GammaFactor;
+      typedef Factor<Gamma<T> >         GammaFactor;
       typedef Factor<DirichletModel<T> >     DirichletFactor;
       typedef Factor<DiscreteModel<T> >      DiscreteFactor;
       typedef Mixture<RectifiedGaussian<T> >     RectifiedGaussianMixtureFactor;
@@ -41,7 +41,7 @@ namespace ICR{
 
       typedef HiddenNode<Gaussian<T> >      GaussianType;
       typedef HiddenNode<RectifiedGaussian<T> >      RectifiedGaussianType;
-      typedef HiddenNode<GammaModel<T> >         GammaType;
+      typedef HiddenNode<Gamma<T> >         GammaType;
       typedef HiddenNode<DirichletModel<T> >     DirichletType;
       typedef DataNode<GaussianConstant<T> >     GaussianDataType;
       typedef DataNode<GammaConstant<T> >        GammaDataType;
@@ -59,7 +59,7 @@ namespace ICR{
       typedef VariableNode<T>*                    Variable;
       typedef HiddenNode<RectifiedGaussian<T> >*      RectifiedGaussianNode;
       typedef HiddenNode<Gaussian<T> >*      GaussianNode;
-      typedef HiddenNode<GammaModel<T> >*         GammaNode;
+      typedef HiddenNode<Gamma<T> >*         GammaNode;
       typedef DataNode<GaussianConstant<T> >*     GaussianDataNode;
       typedef DataNode<GammaConstant<T> >*        GammaDataNode;
       typedef ConstantNode<GaussianConstant<T> >* GaussianConstNode;
@@ -275,7 +275,7 @@ namespace ICR{
 
 
       GammaNode
-      Gamma(const T& shape, const T& iscale)
+      gamma(const T& shape, const T& iscale)
       {
 	if ((shape<=0) || (iscale <=0)) {
 	  std::cout<<"Shape and iscale must be greater than zero"<<std::endl;

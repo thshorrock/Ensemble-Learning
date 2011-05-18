@@ -627,7 +627,7 @@ BOOST_AUTO_TEST_CASE( RectifiedGaussian_test  )
   BOOST_CHECK_CLOSE(AvLog, NPData[0]*4 + NPData[1]*17 + LogNorm1, 0.0001);  
 } 
 
-BOOST_AUTO_TEST_CASE( GammaModel_test  )
+BOOST_AUTO_TEST_CASE( Gamma_test  )
 {
   //Initialise
   Moments<double> Shape(2,5);
@@ -637,16 +637,16 @@ BOOST_AUTO_TEST_CASE( GammaModel_test  )
 
   //Collect
   NaturalParameters<double> NPIScale
-    = GammaModel<double>::CalcNP2Parent2(Shape,Data);
+    = Gamma<double>::CalcNP2Parent2(Shape,Data);
   NaturalParameters<double> NPData
-    = GammaModel<double>::CalcNP2Data(Shape,IScale);
+    = Gamma<double>::CalcNP2Data(Shape,IScale);
   
 
-  Moments<double> Update =  GammaModel<double>::CalcMoments(SumNP);
+  Moments<double> Update =  Gamma<double>::CalcMoments(SumNP);
 
-  double LogNorm1 = GammaModel<double>::CalcLogNorm(Shape,IScale);
-  double LogNorm2 = GammaModel<double>::CalcLogNorm(SumNP);
-  double AvLog    = GammaModel<double>::CalcAvLog(Shape,IScale,Data);
+  double LogNorm1 = Gamma<double>::CalcLogNorm(Shape,IScale);
+  double LogNorm2 = Gamma<double>::CalcLogNorm(SumNP);
+  double AvLog    = Gamma<double>::CalcAvLog(Shape,IScale,Data);
   
 
   //Check
@@ -1182,7 +1182,7 @@ BOOST_AUTO_TEST_SUITE_END()
 	
 //   boost::shared_ptr<DataNode<GammaConstant> > Data(new DataNode<GammaConstant>(3));
   
-//   boost::shared_ptr<Factor<GammaModel> > GammaF (new Factor<GammaModel>(Shape.get(), IScale.get(), Data.get()));
+//   boost::shared_ptr<Factor<Gamma> > GammaF (new Factor<Gamma>(Shape.get(), IScale.get(), Data.get()));
 
   
   
@@ -1615,7 +1615,7 @@ BOOST_AUTO_TEST_CASE( ICA_test  )
       ShypPrec[m].resize(Components);
       for(size_t c=0;c<Components;++c){
 	ShypMean[m][c]=	Build.gaussian(0.0,0.1);
-	ShypPrec[m][c]= Build.Gamma(0.1,0.1);
+	ShypPrec[m][c]= Build.gamma(0.1,0.1);
       }
 
 
@@ -1637,7 +1637,7 @@ BOOST_AUTO_TEST_CASE( ICA_test  )
     }
     std::vector<GammaNode> APrecision(M);
     for(size_t m=0;m<M;++m){
-      APrecision[m] = Build.Gamma(0.1,0.1);
+      APrecision[m] = Build.gamma(0.1,0.1);
     }
     
     std::vector< std::vector<RectifiedGaussianNode> > A(N);
@@ -1658,7 +1658,7 @@ BOOST_AUTO_TEST_CASE( ICA_test  )
     
     std::vector<GammaNode> DPrecision(N);
     for(size_t n=0;n<N;++n){
-      DPrecision[n] = Build.Gamma(0.1,0.1);
+      DPrecision[n] = Build.gamma(0.1,0.1);
     }
     
     //Deterministic Node.  Need to make the expression.
