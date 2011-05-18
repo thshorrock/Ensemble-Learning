@@ -2,16 +2,14 @@
 #include "ICA/node/Node.hpp"
 #include "ICA/message/Moments.hpp"
 #include "ICA/message/NaturalParameters.hpp"
-#include <boost/thread/locks.hpp>
 #include "ICA/detail/parallel_algorithms.hpp"
+#include "ICA/detail/Mutex.hpp"
 
 namespace ICR{
   namespace ICA{
     
     template <class Model, class T = double>
-    class HiddenNode : public VariableNode<T>// , 
-		       // public LearningNode<T>// ,
-		       // public CanMakeMixture<T>
+    class HiddenNode : public VariableNode<T>
     {
     public:
       
@@ -36,26 +34,15 @@ namespace ICR{
       const Moments<T>&
       GetMoments() const;
 
-      
-      /** The Av Log of exponential distribution.
-       *
-       * This is needed when calculating the log proability distribution
-       * in a Mixture model (passed to Discrete Node).
-       * (See page 46 of Winn's thesis).
-       */
-      // double
-      // GetAvLog() const;
-      
       size_t 
       size() const {return m_Moments.size();}
       
     private:
       
-      //Model<T> m_Model; 
       FactorNode<T>* m_parent;
       std::vector<FactorNode<T>*> m_children;
       Moments<T> m_Moments;
-      mutable boost::mutex m_mutex;
+      mutable Mutex m_mutex;
     };
 
     template <class T>
@@ -99,9 +86,11 @@ inline
 void
 ICR::ICA::HiddenNode<Model,T>::AddChildFactor(FactorNode<T>* f)
 { 
-  //This could be called by different threads, so lock
-  boost::lock_guard<boost::mutex> lock(m_mutex);
-  m_children.push_back(f);
+  //This could be called simultaneously by different threads, so call it critical
+#pragma omp critical
+  {
+    m_children.push_back(f);
+  }
 }
 
 template<class Model,class T>
@@ -109,36 +98,12 @@ inline
 const ICR::ICA::Moments<T>&
 ICR::ICA::HiddenNode<Model,T>::GetMoments() const
 {
-  /*This value is update once in update stage,
-   * and called in a Factor update stage.
-   * These never overlap and so this is thead safe
+  /*This value is update in Iterate and called to evaluate other Hidden Nodes
+   * (also in iterate mode).  It therefore needs to be protected by a mutex.
    */
-  //std::cout<<"Moments from "<<this<<" = "<<m_Moments<<std::endl;
-
+  Lock lock(m_mutex);
   return m_Moments;
 }
-   
-// template<class Model,class T> 
-// inline  
-// double
-// ICR::ICA::HiddenNode<Model,T>::GetAvLog() const 
-// {
-//   /*This value is update once in update stage,
-//    * and called in a Factor update stage.
-//    * These never overlap and so this is thead safe
-//    */
-//   return m_AvLog;
-// }
-      
-// T
-// ICR::ICA::HiddenNode<Model,T>::CalcLogNorm() const 
-// {
-  
-//   return m_Model.CalcLogNorm();
-// }
-
-
-
    
 template<class Model,class T>
 inline
@@ -147,81 +112,31 @@ ICR::ICA::HiddenNode<Model,T>::Iterate(Coster& C)
 {
   //EVALUATE THE COST
 
-  //first get the Natural parameters from all the children.
-  //This assumes that the Children (factors) have already run.
-  //This is guarenteed by the Builder class.
-
-  // std::cout<<"THIS = "<<this<<std::endl;
-  NaturalParameters<T> ParentNP = (m_parent->GetNaturalNot(this));
-  //Add it to the total
+  //first get the NP from the parent
+  const NaturalParameters<T> ParentNP = (m_parent->GetNaturalNot(this));
+  //The initial value in the total
   NaturalParameters<T> NP = ParentNP; //total
 
-  // std::cout<<"P NP"<<NP<<std::endl;
-
-
+  //get the Natural parameters from all the children.
   std::vector<NaturalParameters<T> > ChildrenNP(m_children.size());
-  //  NaturalParameters<T> TotalChildrenNP(ParentNP.size())
-  //Get the NPs and put them in the vector
+  //and put them in the vector
   PARALLEL_TRANSFORM(m_children.begin(), m_children.end(), 
 		     ChildrenNP.begin(), boost::bind(&FactorNode<T>::GetNaturalNot, _1, this)
 		     ); //from children
 
-  // //Add them up
-  // //std::cout<<"MM size = "<<m_Moments.size()<<std::endl;
-  // NaturalParameters<T> init(m_Moments.size());
-  // //std::cout<<"init size= "<<init.size()<<std::endl;
-
+  //Add them up
+  //(Note: Bug 48750 in gcc in parallel accumulate causes crash at next line: 
+  //  fixed in 4.6.1)
   NP = PARALLEL_ACCUMULATE(ChildrenNP.begin(), ChildrenNP.end(), NP ); 
-  //seems to be a bug here, do this one serially
-  //NaturalParameters<T> NP = std::accumulate(ChildrenNP.begin(), ChildrenNP.end(), init ); 
-  // std::cout<<"total NP"<<NP<<std::endl;
-
-
-  // typename std::vector<NaturalParameters<T> >::iterator it = ChildrenNP.begin();
-  // while ( it!= ChildrenNP.end()){
-  //   init = init + *it++;  // or: init=binary_op(init,*first++) for the binary_op version
-    
-  // }
-  // NaturalParameters<T> NP = init;
-
-  //std::cout<<"init = "<<init<<std::endl;
-  //NP from the parent factor
-  
 
   //Get the moments and update the model
-  //std::cout<<"NP size = "<<NP.size()<<std::endl;
-
-  T LogNorm = Model::CalcLogNorm(NP);
-
-  m_Moments = Model::CalcMoments(NP);  //update the moments and the model
-
-    // std::cout<<"Cost Contr = "<<(ParentNP - NP)*m_Moments +m_parent->CalcLogNorm() -  LogNorm<<std::endl;
-
-
+  const T LogNorm = Model::CalcLogNorm(NP);
+  
+  {
+    Lock lock(m_mutex);
+    m_Moments = Model::CalcMoments(NP);  //update the moments and the model
+  }
   C +=  (ParentNP - NP)*m_Moments +m_parent->CalcLogNorm() -  LogNorm;
 
-
-   // std::cout<<"Parent Norm = "<<m_parent->CalcLogNorm()<<std::endl;
-   // std::cout<<"Model Norm  = "<<LogNorm<<std::endl;
-   // std::cout<<"m_Moments  = "<<m_Moments<<std::endl;
-   // std::cout<<"Parent NP = "<<ParentNP<<std::endl;
-   // std::cout<<"NP  = "<<NP<<std::endl;
-  
-
-
-  //printf("NODE: %p \t",  this);
-  //std::cout<<"Moments: "<<this<<std::endl;
-
-
-  //The common part to AvLog and Cost
-  // double val1 = ParentNP*m_Moments+ m_parent->CalcLogNorm();  
-  
-
-  //The AvLog
-  // m_AvLog = val1 +  m_parent->GetFFunction();
-  //The cost -- see page 40 (eqn 2.34 of Winn's thesis)
-  // std::cout<<"Cost Contr = "<<val1 - NP*m_Moments -  Model::CalcLogNorm()<<std::endl;
-
-  
 
 }
