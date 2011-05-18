@@ -11,129 +11,158 @@
 namespace ICR{
   namespace ICA{
 
+    /**  Defines the properties of a Discrete distribution.
+     *   This includes how to calculate the Moments and natural parameters
+     *   between the different factors and variables.
+     */
     template<class T=double>
-    class DiscreteModel //: public ExponentialModel<T>
+    class DiscreteModel 
     {
     public:
 
-      static
-      T
-      CalcLogNorm(const Moments<T>& );
+      typedef typename boost::call_traits< VariableNode<T>* const>::param_type
+      variable_parameter;
       
-      static
-      T
-      CalcLogNorm(const NaturalParameters<T>& NP);
+      typedef typename boost::call_traits< Moments<T> >::param_type
+      moments_parameter;
+      typedef typename boost::call_traits< Moments<T> >::const_reference
+      moments_const_reference;
+      typedef typename boost::call_traits< Moments<T> >::value_type
+      moments_t;
       
-      struct exponentiate
-      {
-	double operator()(const double d) {return std::exp(d);}
-      };
-      
-      static
-      Moments<T>
-      CalcSample(const VariableNode<T>* prior) 
-      {
-	Moments<T> PM = prior->GetMoments();
-	std::vector<double> M(PM.size());
-	std::transform(PM.begin(),PM.end(),M.begin(),exponentiate());
-	return Moments<T>(M);
-      }
+      typedef typename boost::call_traits< NaturalParameters<T> >::param_type
+      NP_parameter;
+      typedef typename boost::call_traits< NaturalParameters<T> >::value_type
+      NP_t;
 
-      static
-      Moments<T>
-      CalcMoments(const NaturalParameters<T>& NP);
-
-      static
-      NaturalParameters<T>
-      CalcNP2Prior(const Moments<T>& Discrete);
+      typedef typename boost::call_traits<T>::value_type
+      data_t;
+      typedef typename boost::call_traits<T>::param_type
+      data_parameter;
       
+      typedef typename boost::call_traits<std::vector<T> >::param_type
+      vector_data_parameter;
+      typedef typename boost::call_traits<std::vector<T> >::param_type
+      vector_data_t;
+      
+      /** Calculate the natural log of the normalisation factor.
+       *  The normalisation is the inverse of the partition factor.
+       *  @param Dirichlet The moments from the Dirichlet
+       *     model provide the log probabilities.
+       *  @return The log or the normalisation.
+        */
       static
-      NaturalParameters<T>
-      CalcNP2Data(const Moments<T>& Dirichlet);
+      data_t
+      CalcLogNorm(moments_parameter Dirichlet);
+      
+      /** Calculate the natural log of the normalisation factor.
+       *  The normalisation is the inverse of the partition factor.
+       *  @param NP The natural parameters from which to obtain the mean and precision.
+       */
+      static
+      data_t
+      CalcLogNorm(NP_parameter NP);
+      
+      /** The discrete variable holds the probabilities and is not sampled.
+       *  This function returns the probabilities.
+       *  This is used for initialisation.
+       *  @param prior The log probabilites from the Dirichlet distribution.
+       *  @return The probabilities.
+       */
+      static
+      moments_t
+      CalcSample(variable_parameter prior);
+      
+      /** Calculate the Moments from the Natural Paramters.
+       *  @param NP The NaturalParameters from which to calcualate the moments.
+       *  @return The Calculated Moments.  
+       * 
+       *  This function is caled from HiddenMoments or CalculationMoments.
+       */
+      static
+      moments_t
+      CalcMoments(NP_parameter NP);
+ 
+      /** Calculate the Natural Parameters to go the Dirichlet Prior.
+       *  @param Discrete The moments from the Discrete factor
+       *    (connected to the Mixture Model).
+       *  @return The calculated NaturalParameters.  
+       */
+      static
+      NP_t
+      CalcNP2Prior(moments_parameter Discrete);
+      
+      /** Calculate the Natural Parameters to go the Mixture.
+       *  @param Dirichlet The moments from the Dirichlet factor
+       *  @return The calculated NaturalParameters.  
+       */
+      static
+      NP_t
+      CalcNP2Data(moments_parameter Dirichlet);
 
 
     private:
 
+      struct exponentiate
+      {
+	data_t operator()(data_parameter d) {return std::exp(d);}
+      };
+      struct take_log
+      {
+	data_t operator()(data_parameter d){ return std::log(d);}
+      };
+      struct divide_by
+      {
+	divide_by(data_parameter d) : m_d(d) {};
+	data_t operator()(data_parameter n){ return n/m_d;}
+	data_t m_d;
+      };
+ 
+      struct subtract
+      {
+	subtract(data_parameter d) : m_d(d) {};
+	data_t operator()(data_parameter m){ return m-m_d;}
+	data_t m_d;
+      };
+ 
       static
-      T
-      CalcLogNorm(const std::vector<T>& LogProbs) ;
-      // void SetLogNorm()
-      // {
-	
-      // 	T norm = 0;
-      // 	for(size_t i=0;i<m_LogPi.size();++i){
-      // 	  T lp = (m_LogPi[i]);
-      // 	  T e = std::exp(m_LogPi[i]);
-      // 	  std::cout<<"LP["<<i<<"]="<<lp<<std::endl;
-      // 	  std::cout<<"P["<<i<<"]="<<e<<std::endl;
-    
-      // 	  norm+=e;
-      // 	}
-      // 	m_LogNorm  = -std::log(norm);
-      // 	std::cout<<"log norm = "<<m_LogNorm<<std::endl;
-
-      // }
-
-
-      // std::vector<T> m_LogQ;
-      // std::vector<T> m_data;
+      data_t
+      CalcLogNorm(vector_data_parameter LogProbs) ;
     };
 
   }
 }
 
-namespace {
-  struct exponentiate
-  {
-    // exponentiate(double norm) :m_norm(norm) {}
-    double operator()(const double d) {return std::exp(d);}
-    // double m_norm;
-  };
-  struct take_log
-  {
-    double operator()(const double d){ return std::log(d);}
-  };
-  struct divide_by
-  {
-    divide_by(const double d) : m_d(d) {};
-    double operator()(const double n){ return n/m_d;}
-    double m_d;
-  };
- 
-  struct subtract
-  {
-    subtract(const double d) : m_d(d) {};
-    double operator()(const double m){ return m-m_d;}
-    double m_d;
-  };
- 
- 
-}
+
+/**********************************************************
+ **********************************************************
+ *************** IMPLEMENTATION ***************************
+ **********************************************************
+ **********************************************************/
+
+
 
 template<class T>
 inline
-T 
-ICR::ICA::DiscreteModel<T>::CalcLogNorm(const std::vector<T>& unLogProbs) 
+typename ICR::ICA::DiscreteModel<T>::data_t
+ICR::ICA::DiscreteModel<T>::CalcLogNorm(vector_data_parameter unLogProbs) 
 {
-
-  // std::cout<<"DISCRETE "<<std::endl;
-
-  //un normalised
-  
-  //If all the probs are very small then can easily get servere numerical errors,
-  // eg. norm = 0.
-  // To solve this we subtract most significant log before exponetating (and add it again after).
-  T LogMax = *PARALLEL_MAX(unLogProbs.begin(),unLogProbs.end());
+  /* Unnormalised
+   *If all the probs are very small then can easily get servere numerical errors,
+   * eg. norm = 0.
+   * To solve this we subtract most significant log before exponetating 
+   *   (and add it again after).
+   */
+  const data_t LogMax = *PARALLEL_MAX(unLogProbs.begin(),unLogProbs.end());
 
   std::vector<T> unLogProbsTmp(unLogProbs.size());  
-  PARALLEL_TRANSFORM( unLogProbs.begin(),unLogProbs.end(), unLogProbsTmp.begin(), subtract(LogMax));
-
-
-
+  PARALLEL_TRANSFORM( unLogProbs.begin(),unLogProbs.end(), unLogProbsTmp.begin(), 
+		      subtract(LogMax));
   //exponentiate log (prob/max)
   std::vector<T> unProbs(unLogProbsTmp.size());
-  PARALLEL_TRANSFORM( unLogProbsTmp.begin(),unLogProbsTmp.end(), unProbs.begin(), exponentiate());
-  T norm = PARALLEL_ACCUMULATE(unProbs.begin(), unProbs.end(),0.0) ;
+  PARALLEL_TRANSFORM( unLogProbsTmp.begin(),unLogProbsTmp.end(), unProbs.begin(), 
+		      exponentiate());
+  const data_t norm = PARALLEL_ACCUMULATE(unProbs.begin(), unProbs.end(),0.0) ;
   
   return -std::log(norm)- LogMax;
 
@@ -141,8 +170,8 @@ ICR::ICA::DiscreteModel<T>::CalcLogNorm(const std::vector<T>& unLogProbs)
 
 template<class T>
 inline
-T 
-ICR::ICA::DiscreteModel<T>::CalcLogNorm(const Moments<T>& Dirichlet) 
+typename ICR::ICA::DiscreteModel<T>::data_t 
+ICR::ICA::DiscreteModel<T>::CalcLogNorm(moments_parameter Dirichlet) 
 {
   //the log probs are provided by Dirichlet, need to pass them on
   std::vector<T> unLogProbs(Dirichlet.size());
@@ -153,8 +182,8 @@ ICR::ICA::DiscreteModel<T>::CalcLogNorm(const Moments<T>& Dirichlet)
 
 template<class T>
 inline
-T 
-ICR::ICA::DiscreteModel<T>::CalcLogNorm(const NaturalParameters<T>& NP) 
+typename ICR::ICA::DiscreteModel<T>::data_t 
+ICR::ICA::DiscreteModel<T>::CalcLogNorm(NP_parameter NP) 
 {
   //The NP are the log probs
   std::vector<T> unLogProbs(NP.size());
@@ -165,93 +194,47 @@ ICR::ICA::DiscreteModel<T>::CalcLogNorm(const NaturalParameters<T>& NP)
 
 template<class T>
 inline
-ICR::ICA::Moments<T>
-ICR::ICA::DiscreteModel<T>::CalcMoments(const NaturalParameters<T>& NP)
+typename ICR::ICA::DiscreteModel<T>::moments_t
+ICR::ICA::DiscreteModel<T>::CalcSample(variable_parameter prior) 
+{
+  const moments_t PM = prior->GetMoments();
+  std::vector<data_t> M(PM.size());
+  std::transform(PM.begin(),PM.end(),M.begin(),exponentiate());
+  return moments_t(M);
+}
+
+
+template<class T>
+inline
+typename ICR::ICA::DiscreteModel<T>::moments_t
+ICR::ICA::DiscreteModel<T>::CalcMoments(NP_parameter NP)
 {
   //NPs are unnormalised log probabilities.
 
-  std::vector<T> unLogProbs(NP.size());
-  std::vector<T> LogProbs(NP.size());
-  std::vector<T> Probs(NP.size());
+  std::vector<data_t> unLogProbs(NP.size());  //unnormalised
+  std::vector<data_t> LogProbs(NP.size());    //log normalised
+  std::vector<data_t> Probs(NP.size());       //normalised
   PARALLEL_COPY( NP.begin(), NP.end(), unLogProbs.begin());
+  //calculate the log partition factor, Z.  The normalisation is 1/Z.
+  const data_t LogNorm = -CalcLogNorm(unLogProbs); //Thats why there is a minus here
+  PARALLEL_TRANSFORM(  unLogProbs.begin(),  unLogProbs.end(), 
+		       LogProbs.begin(), subtract(LogNorm));
   
-  T LogNorm = -CalcLogNorm(unLogProbs);
-  PARALLEL_TRANSFORM(  unLogProbs.begin(),  unLogProbs.end(), LogProbs.begin(), subtract(LogNorm));
-  
-  PARALLEL_TRANSFORM(  LogProbs.begin(),  LogProbs.end(), Probs.begin(), exponentiate());
+  PARALLEL_TRANSFORM(  LogProbs.begin(),  LogProbs.end(), 
+		       Probs.begin(), exponentiate());
 
-  return Moments<T>(Probs);
+  return moments_t(Probs);
 }
 
-  //std::cout<<"NP size = "<<NP.size()<<std::endl;
-  // std::vector<T> probs_star(NP.size());
-  // std::vector<T> probs(NP.size()); //normalised
-  //std::cout<<"m_LogPi.size() = "<<m_LogPi.size()<<std::endl;
-  //BOOST_ASSERT(NP.size() == m_LogPi.size());
-
-  //update values
-  //std::cout<<"NP = "<<NP<<std::endl;
-  //PARALLEL_COPY( NP.begin(), NP.end(), m_LogPi.begin());
-  //std::cout<<"m_LogPi.size = "<<m_LogPi.size()<<std::endl;
-
-  // PARALLEL_TRANSFORM(  probs_star.begin(),  probs_star.end(), probs, divide_by(norm));
-  
-  // std::cout<<"log norm = "<<std::log(norm)<<std::endl;
- 
-  // SetLogNorm();
-
-      // for(size_t i=0;i<m_NP2Weights.size();++i){
-      // 	m_NP2Weights[i] -=lognorm;
-      // }
-
-  // double norm2 = 0;
-  // T lognorm = 1;
-  //  for(size_t i=0;i<m_LogPi.size();++i){
-    
-  //    lognorm*=m_LogPi[i];
-  //    //std::cout<<"m_val = "<<m_LogPi[i]<<std::endl;
-  //  }
-  // std::cout<<"log norm = "<<lognorm<<std::endl;
-  // std::cout<<"norm2 = "<<norm2<<std::endl;
-
-  // for(size_t i=0;i<m_LogPi.size();++i){
-    
-  //   m_LogPi[i]/=norm2;
-  //   //    norm2+=m_LogPi[i];
-  //   //std::cout<<"m_val = "<<m_LogPi[i]<<std::endl;
-  // }
-  //No change for discrete the_moments = m_LogPi
-
-  // Moments<T> m =  Moments<T>(m_LogPi);
-  // for(size_t i=0;i<m.size();++i){
-  //   std::cout<<"m[i] + m_LogNorm = "<<m[i] - m_LogNorm<<std::endl;
-
-  //   m[i] = std::exp(m[i]+m_LogNorm); //
-  // }
-
-
-  // PARALLEL_TRANSFORM( m.begin(), m.end(), m.begin(), exponentiate());
-  
-
-  // std::cout<<"DISCRETE MOMENTS = "<<Moments<T>(m)<<std::endl;
-
-
-// template<class T>
-// inline 
-// void
-// ICR::ICA::DiscreteModel<T>::SetData(const Moments<T>& child)
-// {
-//   PARALLEL_COPY(child.begin(), child.end(), m_data.begin());
-// }
 
 template<class T>  
 inline 
-ICR::ICA::NaturalParameters<T>
-ICR::ICA::DiscreteModel<T>::CalcNP2Prior(const Moments<T>& Discrete)
+typename ICR::ICA::DiscreteModel<T>::NP_t
+ICR::ICA::DiscreteModel<T>::CalcNP2Prior(moments_parameter Discrete)
 {
   //The probabilities are provided by Discrete and need to be passsed onto Prior
   // Want to simply foward these:
-  NaturalParameters<T> NP(Discrete.size());
+  NP_t NP(Discrete.size());
   PARALLEL_COPY(Discrete.begin(), Discrete.end(), NP.begin());
   return NP;
 }
@@ -259,19 +242,13 @@ ICR::ICA::DiscreteModel<T>::CalcNP2Prior(const Moments<T>& Discrete)
    
 template<class T>   
 inline 
-ICR::ICA::NaturalParameters<T>
-ICR::ICA::DiscreteModel<T>::CalcNP2Data(const Moments<T>& Dirichlet)
+typename ICR::ICA::DiscreteModel<T>::NP_t
+ICR::ICA::DiscreteModel<T>::CalcNP2Data(moments_parameter Dirichlet)
 {
   //the log probs are provided by Dirichlet, need to pass them on
   //Want to simply copy these
-  NaturalParameters<T> NP(Dirichlet.size());
+  NP_t NP(Dirichlet.size());
   PARALLEL_COPY(Dirichlet.begin(), Dirichlet.end(), NP.begin());
-  
   return  NP;
-  //  BOOST_ASSERT(NP.size() == m_LogPi.size());
-  //PARALLEL_COPY( m_LogPi.begin(), m_LogPi.end(), NP.begin(), take_log() );
-  //PARALLEL_TRANSFORM( m_LogPi.begin(), m_LogPi.end(), NP.begin(), take_log() );
-  //std::cout<<"  DISCRETE NP2DATA = "<<NP<<std::endl;
-
 }
    

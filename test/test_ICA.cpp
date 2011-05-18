@@ -1472,10 +1472,10 @@ private:
 
 
 
-      // struct exponentiate
-      // {
-      // 	double operator()(const double d) {return std::exp(d);}
-      // };
+struct exponentiate
+{
+  double operator()(const double d) {return std::exp(d);}
+};
       
 
 BOOST_AUTO_TEST_CASE( ICA_test  )
