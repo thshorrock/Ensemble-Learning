@@ -26,16 +26,6 @@ namespace ICR{
   namespace ICA{
     namespace Details{
       
-      // template<template<class> class Model,  class T>
-      // struct idenity : FactorWrapper<T>;
-      // {
-      // 	identity(FactorNode<T>* I)
-      // 	  : m_identity(I) {}
-	
-      // 	FactorNode<T>* get() {return m_identity;}
-      // private:
-      // 	FactorNode<T>* m_identity;
-      // }
       
       template<template<class> class Model,  class T>
       class CalcGaussianFactor : public FactorNode<double>
@@ -54,19 +44,9 @@ namespace ICR{
 	    m_child_node(Child)
 	{
 
-  
-	  // for(typename Context<T>::const_iterator it = context.begin();
-	  //     it!= context.end();
-	  //     ++it)
-	  //   {
-	  //     it->first->AddChildFactor(this);
-	  //   }
-	  //context.template AddChildFactor<CalcGaussianFactor<Model<T>,T> >(this);
 	  context.AddChildFactor(this);
 	  Child->SetParentFactor(this);
 	  
-	  // std::cout<<"Moments = "<<context<<std::endl;
-
 	};
       
 	Moments<T>
@@ -79,8 +59,6 @@ namespace ICR{
 	NaturalParameters<T>
 	GetNaturalNot( variable_parameter v) const
 	{
-	  // std::cout<<"v"<<v<<std::endl;
-
 	  if (v == m_child_node) 
 	    {
 	      return Model<T>::CalcNP2Deterministic(m_expr,m_context);
