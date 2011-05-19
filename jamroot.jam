@@ -26,6 +26,16 @@ alias threaded-library
       : <include>$(BOOST_BASE) 	 
 	<toolset>msvc:<link>static ;
 
+alias program_options-library     
+      : $(BOOST_BASE)/libs/program_options/build//boost_program_options
+      : <include>$(BOOST_BASE) <toolset>msvc:<link>static
+      ;
+
+alias filesystem-library     
+      : $(BOOST_BASE)/libs/filesystem/build//boost_filesystem
+      : <include>$(BOOST_BASE) <toolset>msvc:<link>static
+      ;
+
 alias asio-library
      : $(BOOST_BASE)/libs/system/build//boost_system	
      $(BOOST_BASE)/libs/regex/build//boost_regex
@@ -90,18 +100,14 @@ alias maths-library
 #Name the directory structure
 use-project /lib/ICA : ./build ;
 
-
-
-
 #build libraries
 build-project ./build ;
 
 #test libraries
 build-project ./build/test ;
 
-
 #build app
-#build-project ./src/apps/maths/build ;
+build-project ./example/ICA/build ;
 
 
 
