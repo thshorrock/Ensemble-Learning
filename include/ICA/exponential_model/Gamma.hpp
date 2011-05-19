@@ -207,7 +207,7 @@ typename ICR::ICA::Gamma<T>::moments_t
 ICR::ICA::Gamma<T>::CalcSample(variable_parameter Shape,
 				    variable_parameter IScale) 
 {
-  ICR::maths::rng* random = Random::Instance();
+  rng* random = Random::Instance();
   const data_t shape  = Shape->GetMoments()[0];
   const data_t iscale = IScale->GetMoments()[0];
 

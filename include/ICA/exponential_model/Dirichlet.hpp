@@ -184,7 +184,7 @@ inline
 typename ICR::ICA::Dirichlet<T>::moments_t
 ICR::ICA::Dirichlet<T>::CalcSample(const VariableNode<T>* V) 
 {
-  ICR::maths::rng* random = Random::Instance();
+  rng* random = Random::Instance();
   const moments_t  Mus = V->GetMoments();
   const size_t     size   = Mus.size();
 

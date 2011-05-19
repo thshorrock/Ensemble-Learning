@@ -250,7 +250,7 @@ typename ICR::ICA::Gaussian<T>::moments_t
 ICR::ICA::Gaussian<T>::CalcSample(variable_parameter Mean,
 				  variable_parameter Precision) 
 {
-  ICR::maths::rng* random = Random::Instance();
+  rng* random = Random::Instance();
   const_data_t mean = Mean->GetMoments()[0];
   const_data_t prec = Precision->GetMoments()[0];
   const_data_t x=  random->gaussian(1.0/std::sqrt(prec),mean);
@@ -284,7 +284,7 @@ ICR::ICA::Gaussian<T>::CalcSample(variable_vector_parameter mean_nodes,
   moments_t AvPrec(0,0);
   AvPrec = PARALLEL_INNERPRODUCT(weights.begin(), weights.end(),precision.begin(), AvPrec);
 
-  ICR::maths::rng* random = Random::Instance();
+  rng* random = Random::Instance();
   const_data_t mean0 = AvMean[0];
   const_data_t prec0 = AvPrec[0];
   const_data_t x=  random->gaussian(1.0/std::sqrt(prec0),mean0);
@@ -390,7 +390,7 @@ ICR::ICA::Gaussian<T>::CalcNP2Parent(variable_parameter ParentA,
   
   //Now do the same thing for the average of the squares
   const std::pair<T,T> inv_op_data1 = P->Invert(fdata, C1);
-  const_data_t unsummed1 =inv_op_data1.first;
+  //const_data_t unsummed1 =inv_op_data1.first;
   const_data_t factor1   =inv_op_data1.second;
 
   //The usual (mean*precision, -0.5*precision) (with a scale factor)

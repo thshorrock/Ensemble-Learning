@@ -269,7 +269,7 @@ ICR::ICA::RectifiedGaussian<T>::CalcSample(variable_parameter Mean,
 					   variable_parameter Precision) 
 {
 
-  ICR::maths::rng* random = Random::Instance();
+  rng* random = Random::Instance();
   const data_t mean = Mean->GetMoments()[0];
   const data_t prec = Precision->GetMoments()[0];
   const data_t x=  random->gaussian_tail(1.0/std::sqrt(prec),mean);
@@ -306,7 +306,7 @@ ICR::ICA::RectifiedGaussian<T>::CalcSample(variable_vector_parameter m_mean_node
   moments_t AvPrec(0,0);
   AvPrec = PARALLEL_INNERPRODUCT(weights.begin(), weights.end(),precision.begin(), AvPrec);
 
-  ICR::maths::rng* random = Random::Instance();
+  rng* random = Random::Instance();
   const data_t mean0 = AvMean[0];
   const data_t prec0 = AvPrec[0];
   const data_t x=  random->gaussian_tail(1.0/std::sqrt(prec0),mean0);
