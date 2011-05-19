@@ -71,12 +71,19 @@ namespace ICR{
       InitialiseMoments() const
       {
 	//Initialise up the tree first
-	PARALLEL_FOREACH(m_parent1_nodes.begin(), m_parent1_nodes.end(),
-			 boost::bind(&VariableNode<T>::InitialiseMoments, _1)
-			 );
-	PARALLEL_FOREACH(m_parent2_nodes.begin(), m_parent2_nodes.end(),
-			 boost::bind(&VariableNode<T>::InitialiseMoments, _1)
-			 );
+	//std::cout<<"p1size = "<<m_parent1_nodes.size()<<std::endl;
+
+	for(size_t i=0;i<m_parent1_nodes.size();++i){
+	  m_parent1_nodes[i]->InitialiseMoments();
+	  m_parent2_nodes[i]->InitialiseMoments();
+	}
+
+	// std::for_each(m_parent1_nodes.begin(), m_parent1_nodes.end(),
+	// 		 boost::bind(&VariableNode<T>::InitialiseMoments, _1)
+	// 		 );
+	// std::for_each(m_parent2_nodes.begin(), m_parent2_nodes.end(),
+	// 		 boost::bind(&VariableNode<T>::InitialiseMoments, _1)
+	// 		 );
 	m_weights_node->InitialiseMoments();
 	return Model::CalcSample(m_parent1_nodes,m_parent2_nodes, m_weights_node );
       }
@@ -93,7 +100,7 @@ namespace ICR{
       
     private: 
 
-      variable_vector_parameter m_parent1_nodes, m_parent2_nodes;
+      variable_vector_t m_parent1_nodes, m_parent2_nodes;
       discrete_t m_weights_node;
       variable_t  m_child_node;
       
