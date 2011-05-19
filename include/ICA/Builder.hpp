@@ -72,7 +72,19 @@ namespace ICR{
       // typedef ForwardingNode<Gaussian<T> >*  GaussianMixtureNode;
       
       
-      Builder();
+      /** A constructor.
+       *  @param cost_file The output filename to plot the evidence.
+       *   If the filename is blank (the default) 
+       *   then the evidence is not plotted.
+       */
+      Builder(const std::string& cost_file = "");
+      
+      /** Set the output file for the evidence
+       *  @param cost_file The output filename
+       */
+      void
+      set_cost_file(const std::string& cost_file);
+
       ~Builder();
 
       WeightsNode
@@ -193,6 +205,7 @@ namespace ICR{
       std::vector<boost::shared_ptr<FactorNode<T> > > m_Factors;
       std::vector<boost::shared_ptr<VariableNode<T> > > m_Nodes;
       bool m_initialised;
+      std::string m_cost_file;
     };
 
   }
