@@ -48,17 +48,32 @@
 
       
 template<class T>
-ICR::ICA::Builder<T>::Builder()
+ICR::ICA::Builder<T>::Builder(const std::string& cost_file)
   : m_PrevCost(-1.0/0.0), // minus infty
     m_Factors(),
     m_Nodes(),
-    m_initialised(false)
+    m_initialised(false),
+    m_cost_file(cost_file)
 {
   //clear it
-  std::ofstream CostFile("Cost.txt");
-  CostFile<<"#Data";
+  if (m_cost_file != "") { 
+    std::ofstream CostFile(m_cost_file.c_str());
+    CostFile<<"#Data";
+  }
   // CostFile = new std::ofstream("Cost.txt");
   // CostFile.close();
+}  
+
+template<class T>
+void 
+ICR::ICA::Builder<T>::set_cost_file(const std::string& cost_file)
+{
+  m_cost_file = cost_file;
+  if (m_cost_file != "") { 
+    std::ofstream CostFile(m_cost_file.c_str());
+    CostFile<<"#Data";
+  }
+  
 }
 
 template<class T>
@@ -551,7 +566,8 @@ ICR::ICA::Builder<T>::run(const double& epsilon, const size_t& max_iterations )
   return false;
 
 }
-      
+    
+     
       
 template<class T>
 bool
@@ -560,9 +576,11 @@ ICR::ICA::Builder<T>::HasConverged(const T Cost, const T epsilon)
 #pragma omp critical
   {
     std::cout<<"COST = "<<Cost<<" PREV COST = "<<m_PrevCost<<" DIFF = "<<Cost-m_PrevCost<<std::endl;
-    std::ofstream CostFile("Cost.txt",std::ios_base::app);
+  if (m_cost_file != "") { 
+    std::ofstream CostFile(m_cost_file.c_str(),std::ios_base::app);
     // CostFile->open("Cost.txt",std::ios_base::app);
     CostFile<<Cost<<"\n";
+  }
   }
   // CostFile->close();
   // if (Cost<m_PrevCost) 
