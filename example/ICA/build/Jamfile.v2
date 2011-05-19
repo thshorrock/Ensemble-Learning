@@ -1,0 +1,18 @@
+
+project  ICA-exe
+	: source-location ../src
+	: #default-build  <threading>multi 
+	: build-dir $(TOP)/build
+  	: usage-requirements <include>../include
+	: requirements 
+	<include>../include/
+	<include>$(BOOST_BASE)/
+;
+
+exe ICA-exe  : ICA.cpp  
+    /lib/ICA  
+    $(TOP)//program_options-library
+    $(TOP)//filesystem-library
+;
+
+install ICA_install-exe : ICA-exe : <location>$(TOP)/bin ;
