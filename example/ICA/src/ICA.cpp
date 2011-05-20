@@ -23,7 +23,6 @@ main  (int ac, char **av)
   bool   positive_mixing = false;
   bool   model_noise_offset = false;
   bool   example = false;
-  size_t example_sources;
   double convergence_criterium;
   size_t max_iterations;
   
@@ -124,21 +123,62 @@ main  (int ac, char **av)
   }
 
   matrix<double> Data;
-  if ( !fs::exists(data_file) ) {
-    if (example)
-      {
-	//data examples
-	Data = DataRecords(10,3,500,positive_source,positive_mixing);
-	AddNoise(Data,500);
-      } 
-    else
-      {
-     	std::cout << "Data file  '"<<data_file<<"' does not exist - and the example option is not set\n\n"
-		  << visible  << "\n";
-	return 1;
+  if ( !fs::exists(data_file) )
+    {
+      if (example)
+	{
+	  //data examples
+	  Data = DataRecords(10,3,500,positive_source,positive_mixing);
+	  AddNoise(Data,500);
+	} 
+      else
+	{
+	  std::cout << "Data file  '"<<data_file<<"' does not exist - and the example option is not set\n\n"
+		    << visible  << "\n";
+	  return 1;
+	}
+    }
+  else
+    {
+      //load the data.
+      std::cout<<"loading data"<<std::endl;
+
+      std::string line;
+      std::ifstream myfile (data_file.c_str());
+      std::vector< std::vector<double> > data;
+      while ( getline( myfile, line ) )
+	//for(size_t i=0;i<4;++i){
+
+
+	//getline( myfile, line );
+	{
+	  std::stringstream ss(line);
+	  std::vector<double> v;
+	  std::copy( 
+	  	    std::istream_iterator<double>(ss), 
+	  	    std::istream_iterator<double>( ),
+	  	    std::back_inserter(v)
+		     ); // copies all data into bufferdata[i]
+	  data.push_back(v);
+	}
+
+      const size_t rows = data.size();
+      const size_t cols = data[0].size(); //assume all the same size.
+      
+      Data = matrix<double>(rows,cols);
+      for(size_t r=0;r<Data.size1();++r){
+	for(size_t c=0;c<Data.size2();++c){
+	  Data(r,c) = data[r][c];
+	}
       }
-  }
+      std::cout<<"data loaded"<<std::endl;
+
+    }
   
+  
+  std::cout<<"sizeof data = "<<sizeof(Data)<<std::endl;
+
+
   std::cout<<"output direcotry = "<<output_directory<<std::endl;
   std::cout<<"input file = "<<data_file<<std::endl;
 
@@ -150,11 +190,13 @@ main  (int ac, char **av)
   
   if (use_float) 
     {
+      std::cout<<"Building Model"<<std::endl;
       BuildModel<float> Model(Data, assumed_sources, mixing_components,
 			      positive_source, positive_mixing, 
 			      model_noise_offset);
       ICR::ICA::Builder<float> Build = Model.get_builder();
       Build.set_cost_file(cost_file.string());
+      std::cout<<"Running!"<<std::endl;
       Build.run(convergence_criterium,max_iterations);
       std::ofstream sources(source_file.string().c_str());
       std::ofstream mixing_matrix(mixing_file.string().c_str());
@@ -162,15 +204,17 @@ main  (int ac, char **av)
       matrix<float> S(assumed_sources,Data.size2());
       Model.get_normalised_means(A,S);
       sources<<S;
-      mixing_matrix<<A;
+      mixing_matrix<< matrix<float>(trans(A));
     }
   else
     {
+      std::cout<<"Building Model"<<std::endl;
       BuildModel<double>Model(Data, assumed_sources, mixing_components,
 			      positive_source, positive_mixing, 
 			      model_noise_offset);
       ICR::ICA::Builder<double> Build = Model.get_builder();
       Build.set_cost_file(cost_file.string());
+      std::cout<<"Running!"<<std::endl;
       Build.run(convergence_criterium,max_iterations);
       std::ofstream sources(source_file.string().c_str());
       std::ofstream mixing_matrix(mixing_file.string().c_str());
@@ -178,7 +222,7 @@ main  (int ac, char **av)
       matrix<double> S(assumed_sources,Data.size2());
       Model.get_normalised_means(A,S);
       sources<<S;
-      mixing_matrix<<A;
+      mixing_matrix<< matrix<double>(trans(A));
     }
 
 

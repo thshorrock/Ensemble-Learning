@@ -23,13 +23,14 @@ public:
 	     bool noise_offset
 	     )
     : m_Build(), 
+      m_Factory(),
       m_A(data.size1(),assumed_sources),
       m_S(assumed_sources, data.size2()),
-      m_noiseMean(data.size1()),
-      m_noisePrecision(data.size1())
+      m_noiseMean(data.size1())//,
+      //m_noisePrecision(data.size1()),
+      // m_noisePrecision()
   {
  
-  std::cout<<"here1"<<std::endl;
 
     const size_t Components = mixing_components;
     const size_t M = assumed_sources; //assumed sources
@@ -47,8 +48,9 @@ public:
     for(size_t m=0;m<M;++m){
       Weights[m] = m_Build.weights(Components);
     }
+    std::cout<<"build weights - nodes = "<< m_Build.number_of_nodes() <<std::endl;
+
     
-  std::cout<<"here2"<<std::endl;
     //m_Build hyper mean and hyper precision for each source mixture component.
     std::vector< std::vector<Variable> > ShypMean(M);
     std::vector< std::vector<Variable> > ShypPrec(M);
@@ -57,11 +59,11 @@ public:
       ShypPrec[m].resize(Components);
       for(size_t c=0;c<Components;++c){
 	ShypMean[m][c]=	m_Build.gaussian(0.0,0.1);
-	ShypPrec[m][c]= m_Build.gamma(0.1,0.1);
+	ShypPrec[m][c]= m_Build.gamma(1.0,1.0);
       }
     }
-  std::cout<<"here3"<<std::endl;
-    
+    std::cout<<"built hyperparams - nodes = "<< m_Build.number_of_nodes() <<std::endl;
+     
     //m_Build the source approximation
     for(size_t m=0;m<M;++m){ 
       for(size_t t=0;t<T;++t){ 
@@ -76,13 +78,14 @@ public:
       }
     }
     
-  std::cout<<"here4"<<std::endl;
+    std::cout<<"built sources - nodes = "<< m_Build.number_of_nodes() <<std::endl;
+     
     //m_Build approximation to the mixing matrix
     vector<GaussianNode> AMean(M);
     vector<GammaNode> APrecision(M);
     for(size_t m=0;m<M;++m){
       AMean[m] = m_Build.gaussian(0.0,0.1);
-      APrecision[m] = m_Build.gamma(0.1,0.1);
+      APrecision[m] = m_Build.gamma(1.0,1.0);
     }
     for(size_t n=0;n<N;++n){
       for(size_t m=0;m<M;++m){ 
@@ -92,17 +95,19 @@ public:
 	  m_A(n,m) = m_Build.gaussian(AMean[m], APrecision[m]);
       }
     }
-  std::cout<<"here5"<<std::endl;
+    std::cout<<"built mixing - nodes = "<< m_Build.number_of_nodes() <<std::endl;
+     
 
     //m_Build the noise mean approximation
     // m_noiseMean(N);
     //  m_noisePrecision(N);
     for(size_t n=0;n<N;++n){
-      m_noiseMean[n] = m_Build.gaussian(0.00,0.01);
-      m_noisePrecision[n] = m_Build.gamma(0.1,0.1);
+      m_noiseMean[n] = m_Build.gaussian(0.00,0.1);
+      //m_noisePrecision[n] = m_Build.gamma(1.0,1.0);
     }
     
-    
+    m_noisePrecision = m_Build.gamma(1.0,1.0);
+      
     //Deterministic Node.  Need to make the expression.
     //The inner product plus noise
     /** The inner product is summed over M.
@@ -112,7 +117,7 @@ public:
     //Make a set of placeholders for all the elements in the expression.
     vector<ICR::ICA::Placeholder<data_t>*> SP(M);
     vector<ICR::ICA::Placeholder<data_t>*> AP(M);
-    ICR::ICA::Placeholder<data_t>* NP;
+    ICR::ICA::Placeholder<data_t>* NP = m_Factory.placeholder();
     for(size_t m=0;m<M;++m){
       SP[m] = m_Factory.placeholder();  
       AP[m] = m_Factory.placeholder(); 
@@ -140,7 +145,6 @@ public:
       
     }
     
-  std::cout<<"here6"<<std::endl;
     
     matrix<ResultNode> AtimesSplusN(N,T);
     for(size_t n=0;n<N;++n){ 
@@ -159,19 +163,23 @@ public:
     	AtimesSplusN(n,t) = m_Build.calc_gaussian(Expr,context);  
       }
     }
+    std::cout<<"built context - nodes = "<< m_Build.number_of_nodes() <<std::endl;
+     
     //join to the data
     for(size_t n=0;n<N;++n){
       for(size_t t=0;t<T;++t){
-    	m_Build.join(AtimesSplusN(n,t),m_noisePrecision(n), data(n,t));
+    	m_Build.join(AtimesSplusN(n,t),m_noisePrecision, data(n,t));
       }
     }
 
+    std::cout<<"built data - nodes = "<< m_Build.number_of_nodes() <<std::endl;
+     
   }
   ICR::ICA::Builder<data_t>& get_builder() {return m_Build;}
   matrix<Variable>& get_sources() {return m_S;}
   matrix<Variable>& get_mixing_matrix(){return m_A;}
   vector<Variable>& get_noiseMean(){return m_noiseMean;}
-  vector<Variable>& get_noisePrecision(){return m_noisePrecision;}
+  //vector<Variable>& get_noisePrecision(){return m_noisePrecision;}
   
   void get_normalised_means(matrix<data_t>& A, matrix<data_t>& S)
   {
@@ -207,7 +215,8 @@ private:
   matrix<Variable> m_A;
   matrix<Variable> m_S;
   vector<GaussianNode> m_noiseMean;
-  vector<GammaNode>     m_noisePrecision;
+  //vector<GammaNode>     m_noisePrecision;
+  GammaNode     m_noisePrecision;
 };
 
 template<class data_t>
