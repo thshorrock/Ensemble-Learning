@@ -53,6 +53,7 @@ ICR::ICA::Builder<T>::Builder(const std::string& cost_file)
     m_Factors(),
     m_Nodes(),
     m_initialised(false),
+    m_data_nodes(0),
     m_cost_file(cost_file)
 {
   //clear it
@@ -301,6 +302,7 @@ ICR::ICA::Builder<T>::gaussian_data(const T data)
 {
 	
   boost::shared_ptr<GaussianDataType > Data(new GaussianDataType(data));
+  ++m_data_nodes;
   m_Nodes.push_back(Data);
 	
   return Data.get();
@@ -313,6 +315,7 @@ ICR::ICA::Builder<T>::gamma_data(const T data)
 {
 	
   boost::shared_ptr<GammaDataType > Data(new GammaDataType(data));
+  ++m_data_nodes;
   m_Nodes.push_back(Data);
 	
   return Data.get();
@@ -338,6 +341,7 @@ ICR::ICA::Builder<T>::join(T& shape, GammaNode IScale ,  const T& data)
 {
 
   boost::shared_ptr<GammaDataType > Data(new GammaDataType(data));
+  ++m_data_nodes;
   boost::shared_ptr<NormalConstType > Shape(new NormalConstType(shape));
 	
   boost::shared_ptr<GammaFactor > GammaF (new GammaFactor(Shape.get(), IScale, Data.get()));
@@ -345,6 +349,7 @@ ICR::ICA::Builder<T>::join(T& shape, GammaNode IScale ,  const T& data)
   m_Factors.push_back(GammaF);
   m_Nodes.push_back(Data);
   m_Nodes.push_back(Shape);
+  
 	
 }
 template<class T>
@@ -428,6 +433,7 @@ ICR::ICA::Builder<T>::join(Variable Mean, GammaNode Precision, const T data )
 {
 	
   boost::shared_ptr<GaussianDataType > Data(new GaussianDataType(data));
+  ++m_data_nodes;
   boost::shared_ptr<GaussianFactor> GaussianF(new GaussianFactor(Mean,Precision,Data.get()));
   m_Factors.push_back(GaussianF);
   m_Nodes.push_back(Data);
@@ -459,6 +465,7 @@ ICR::ICA::Builder<T>::join( std::vector<Variable>& vMean, GammaNode& Precision, 
 {
 
   boost::shared_ptr<GaussianDataType > Data(new GaussianDataType(data));
+  ++m_data_nodes;
 
 
   const size_t number = Weights->size();
@@ -486,6 +493,7 @@ ICR::ICA::Builder<T>::join( std::vector<Variable>& vMean, std::vector<Variable>&
 {
 
   boost::shared_ptr<GaussianDataType > Data(new GaussianDataType(data));
+  ++m_data_nodes;
 
   const size_t number = Weights->size();
 	
@@ -554,10 +562,14 @@ template<class T>
 bool
 ICR::ICA::Builder<T>::run(const double& epsilon, const size_t& max_iterations )
 {
+  std::cout<<"initialising"<<std::endl;
+
   Initialise();
+  
+  std::cout<<" ... initialised"<<std::endl;
 	
   for(size_t i=0;i<max_iterations;++i){
-    double Cost = iterate();
+    double Cost = iterate()/m_data_nodes;
 	  
     if (HasConverged(Cost, epsilon))
       return true;
@@ -575,7 +587,7 @@ ICR::ICA::Builder<T>::HasConverged(const T Cost, const T epsilon)
 {
 #pragma omp critical
   {
-    std::cout<<"COST = "<<Cost<<" PREV COST = "<<m_PrevCost<<" DIFF = "<<Cost-m_PrevCost<<std::endl;
+    std::cout<<"COST = "<<Cost<<" PREV COST = "<<m_PrevCost<<" pc DIFF = "<<100.0*(((Cost-m_PrevCost)/std::fabs(Cost)))<<std::endl;
   if (m_cost_file != "") { 
     std::ofstream CostFile(m_cost_file.c_str(),std::ios_base::app);
     // CostFile->open("Cost.txt",std::ios_base::app);
@@ -585,7 +597,7 @@ ICR::ICA::Builder<T>::HasConverged(const T Cost, const T epsilon)
   // CostFile->close();
   // if (Cost<m_PrevCost) 
   //   std::cerr<<"WARNING:: BOUND HAS DECREASED - THIS IS A BAD SIGN - try making the priors less commital!\n";
-  if (std::fabs(Cost - m_PrevCost)<epsilon) 
+  if (100.0*std::fabs((Cost - m_PrevCost)/Cost)<epsilon) 
     return true;
 	
   m_PrevCost = Cost;

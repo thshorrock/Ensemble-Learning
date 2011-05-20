@@ -205,6 +205,7 @@ namespace ICR{
       std::vector<boost::shared_ptr<FactorNode<T> > > m_Factors;
       std::vector<boost::shared_ptr<VariableNode<T> > > m_Nodes;
       bool m_initialised;
+      size_t m_data_nodes;
       std::string m_cost_file;
     };
 
