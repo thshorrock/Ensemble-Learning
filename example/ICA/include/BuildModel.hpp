@@ -26,8 +26,8 @@ public:
       m_Factory(),
       m_A(data.size1(),assumed_sources),
       m_S(assumed_sources, data.size2()),
-      m_noiseMean(data.size1())//,
-      //m_noisePrecision(data.size1()),
+      m_noiseMean(data.size1()),
+      m_noisePrecision(data.size1())
       // m_noisePrecision()
   {
  
@@ -103,10 +103,10 @@ public:
     //  m_noisePrecision(N);
     for(size_t n=0;n<N;++n){
       m_noiseMean[n] = m_Build.gaussian(0.00,0.1);
-      //m_noisePrecision[n] = m_Build.gamma(1.0,1.0);
+      m_noisePrecision[n] = m_Build.gamma(1.0,1.0);
     }
     
-    m_noisePrecision = m_Build.gamma(1.0,1.0);
+    //m_noisePrecision = m_Build.gamma(1.0,1.0);
       
     //Deterministic Node.  Need to make the expression.
     //The inner product plus noise
@@ -168,7 +168,7 @@ public:
     //join to the data
     for(size_t n=0;n<N;++n){
       for(size_t t=0;t<T;++t){
-    	m_Build.join(AtimesSplusN(n,t),m_noisePrecision, data(n,t));
+    	m_Build.join(AtimesSplusN(n,t),m_noisePrecision(n), data(n,t));
       }
     }
 
@@ -215,8 +215,8 @@ private:
   matrix<Variable> m_A;
   matrix<Variable> m_S;
   vector<GaussianNode> m_noiseMean;
-  //vector<GammaNode>     m_noisePrecision;
-  GammaNode     m_noisePrecision;
+  vector<GammaNode>     m_noisePrecision;
+  //GammaNode     m_noisePrecision;
 };
 
 template<class data_t>

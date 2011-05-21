@@ -97,7 +97,6 @@ main  (int ac, char **av)
       return 1;
     }
 
-
   if (vm.count("help")) {
     std::cout << visible  << "\n";
     return 1;
