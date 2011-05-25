@@ -1,8 +1,9 @@
 #pragma once
-#include "rng.hpp"
+//#include "rng.hpp"
 
 #include <gsl/gsl_rng.h>     
 #include <gsl/gsl_randist.h>
+#include <ctime>
 
 namespace ICR{
   namespace ICA{
