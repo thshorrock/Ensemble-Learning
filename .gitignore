@@ -11,6 +11,8 @@
 
 #EMACS BACKUPS
 *~ 
+Makefile
+cmake_install.cmake
 
 #files
 git_forever_remove
@@ -20,6 +22,7 @@ get_boost_files.sh
 bin.v2/
 bin/
 backups/
+CMakeFiles/
 
 # Packages #
 ############
