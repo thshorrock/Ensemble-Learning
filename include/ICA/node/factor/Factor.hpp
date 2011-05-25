@@ -26,6 +26,11 @@ namespace ICR{
     /******************************************************************************
      * Default Specialisation - Gaussian, RectifiedGaussian, Gamma
      ******************************************************************************/
+    /** A Factor that joins various VariableNode.
+     * @tparam Model The model used by the Factor.
+     *  This general templated class is suitable for Gaussian, RectifiedGaussian and Gamma models.  The Dirichlet and Discrete models have partial specialisations.
+     * @tparam T The data type used - either float or double.
+     */
     template<class Model, class T>
     class Factor : public FactorNode<T>
     {
@@ -135,6 +140,9 @@ namespace ICR{
     /******************************************************************************
      * DirichletModel Specialisation 
      ******************************************************************************/
+    /** A partial specialisation to a Factor node using the Dirichlet Model.
+     *  @tparam T The data type, double or float
+     */
     template<class T>
     class Factor<Dirichlet<T>,T > : public FactorNode<T>
     {
@@ -227,6 +235,9 @@ namespace ICR{
     /******************************************************************************
      * Discrete Specialisation
      ******************************************************************************/
+    /** A partial specialisation to a Factor node using the Discrete model.
+     *  @tparam T The data type, double or float
+     */
     template<class T>
     class Factor<Discrete<T>, T> : public FactorNode<T>
     {

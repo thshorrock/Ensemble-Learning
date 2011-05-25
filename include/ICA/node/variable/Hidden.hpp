@@ -5,14 +5,28 @@
 #include "ICA/detail/parallel_algorithms.hpp"
 #include "ICA/detail/Mutex.hpp"
 
+#include <boost/bind.hpp>
+#include <vector>
+
+
+
 namespace ICR{
   namespace ICA{
     
+    /** A Hidden Variable Node.
+     *  HiddenNode's store moments that are inferred by Ensemble Learning.
+     *  The model used (for example Gaussian/Gamma) is passed by template parameter.
+     *  @tparam Model  The model to use for the inferred data.
+     *  @tparam T The data type (float or double)
+     */
     template <class Model, class T>
     class HiddenNode : public VariableNode<T>
     {
     public:
-      
+      /** A constructor.
+       *  @param moment_size The number of elements in the stored moments.
+       *  This is usually two but varies for discrete nodes.
+       */
       HiddenNode(const size_t moment_size = 2); //mostly two, but variable for Discrete model
 
       void
@@ -34,6 +48,7 @@ namespace ICR{
       const Moments<T>&
       GetMoments() const;
 
+      /** The number of elements in the stored Moments */
       size_t 
       size() const {return m_Moments.size();}
       

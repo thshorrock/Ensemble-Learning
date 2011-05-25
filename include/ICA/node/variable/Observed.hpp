@@ -10,22 +10,37 @@
 namespace ICR{
   namespace ICA{
     
+    /** An observed node.
+     *  A node that contains data that is a known constant.
+     *  Examples include data nodes (where the data is experimentally determined)
+     *   and prior knowledge - the mean of the data is 4.0, say).
+     *  @tparam Model The model catagory into which the data falls.
+     *    For example, Data might be modelled by a Gaussian distribution.
+     *  @tparam T The data type used in calculations - either float or double.
+     */
     template<class Model, class T>
     class ObservedNode : public VariableNode<T>
     {
     public:
-      
+      /** A Constructor.
+       *  @param value The observed value of the node.
+       */
       ObservedNode( const T& value)
 	: m_Moments(make_Moments(2, value, Model() ) ), 
 	  m_parent(0),
 	  m_children()
       {}
 
+      /** A Constructor.
+       * @param  elements The number of elements in the observed node.
+       * @param  value The value of each of the elements 
+       */
       ObservedNode(const size_t& elements, const T& value)
 	: m_Moments(make_Moments(elements,value, Model() ) ), 
 	  m_parent(0), 
 	  m_children()
       {}
+      
       
       void
       SetParentFactor(FactorNode<T>* f);

@@ -4,16 +4,30 @@
 #include "ICA/message/NaturalParameters.hpp"
 #include "ICA/detail/Mutex.hpp"
 #include "ICA/detail/parallel_algorithms.hpp"
-#include <numeric>
+
+#include <boost/bind.hpp>
+#include <vector>
 
 namespace ICR{
   namespace ICA{
     
+    /** A Deterministic Node.
+     *  DeterministicNode's are not inferred,
+     *  rather they are staging posts to pass moments that are calculated 
+     *  from other (hidden) nodes.
+     *  The model used (for example Gaussian/Gamma) is passed by template parameter.
+     *  @tparam Model  The model to use for the inferred data.
+     *  @tparam T The data type (float or double)
+     */
     template <class Model, class T>
     class DeterministicNode : public VariableNode<T>
     {
     public:
       //mostly two, but variable for Discrete model
+      /** A constructor.
+       *  @param moment_size The number of elements in the stored moments.
+       *  This is usually two but varies for discrete nodes.
+       */
       DeterministicNode(const size_t moment_size = 2); 
 
       void
@@ -32,6 +46,7 @@ namespace ICR{
       const Moments<T>
       GetForwardedMoments() ;
 
+      /** The number of elements in the stored Moments */
       size_t 
       size() const {return m_Moments.size();}
       
@@ -45,7 +60,6 @@ namespace ICR{
       
     private:
       
-      //Model<T> m_Model; 
       FactorNode<T>* m_parent;
       std::vector<FactorNode<T>*> m_children;
       Moments<T> m_Moments;

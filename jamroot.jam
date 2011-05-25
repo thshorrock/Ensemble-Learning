@@ -109,5 +109,5 @@ build-project ./build/test ;
 #build app
 build-project ./example/ICA/build ;
 
-
-
+#docs
+build-project ./build/docs ;
