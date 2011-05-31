@@ -40,6 +40,8 @@ namespace ICR{
       typedef typename boost::call_traits< VariableNode<T>* const>::value_type
       variable_t;
 
+      typedef typename boost::call_traits<std::vector<T> >::value_type
+      vector_data_t;
 
       /** Calculate the natural log of the normalisation factor.
        *  The normalisation is the inverse of the partition factor.
@@ -89,6 +91,24 @@ namespace ICR{
       CalcSample(variable_parameter Shape,
 		 variable_parameter IScale);
         
+      /** Calculate the Mean from the Natural Paramters.
+       *  @param NP The NaturalParameters from which to calcualate the moments.
+       *  @return The mean of the distribution.  
+       * 
+       */
+      static
+      vector_data_t
+      CalcMean(NP_parameter NP)  ;
+      
+      /** Calculate the standard deviation from the Natural Paramters.
+       *  @param NP The NaturalParameters from which to calcualate the moments.
+       *  @return The mean of the distribution.  
+       * 
+       */
+      static
+      vector_data_t
+      CalcPrecision(NP_parameter NP)  ;
+
       /** Calculate the Moments from the Natural Paramters.
        *  @param NP The NaturalParameters from which to calcualate the moments.
        *  @return The Calculated Moments.  
@@ -218,7 +238,34 @@ ICR::ICA::Gamma<T>::CalcSample(variable_parameter Shape,
 
   return Moments<T>(x,std::log(x));
 }
-      
+   
+
+template<class T>
+inline
+typename ICR::ICA::Gamma<T>::vector_data_t
+ICR::ICA::Gamma<T>::CalcMean(NP_parameter NP)
+{
+  
+  const data_t shape  = NP[1]+1.0;
+  const data_t iscale = -NP[0];
+  vector_data_t vmean(1);
+  vmean[0] = shape/iscale;
+  return vmean;
+}
+
+template<class T>
+inline
+typename ICR::ICA::Gamma<T>::vector_data_t
+ICR::ICA::Gamma<T>::CalcPrecision(NP_parameter NP)
+{
+  const data_t shape  = NP[1]+1.0;
+  const data_t iscale = -NP[0];
+  vector_data_t vprec(1);
+  vprec[0] =  iscale*iscale/shape;
+  return vprec;
+}
+
+   
 
 template<class T>
 inline

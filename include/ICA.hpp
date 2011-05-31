@@ -1,4 +1,5 @@
 
+#include "ICA/Output.hpp"
 #include "ICA/Builder.hpp"
 #include "ICA/calculation_tree/Factory.hpp"
 

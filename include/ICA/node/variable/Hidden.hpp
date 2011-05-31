@@ -48,12 +48,21 @@ namespace ICR{
       const Moments<T>&
       GetMoments() const;
 
+      const std::vector<T>
+      GetMean() ;
+      
+      const std::vector<T>
+      GetVariance() ;
+
       /** The number of elements in the stored Moments */
       size_t 
       size() const {return m_Moments.size();}
       
     private:
       
+      const NaturalParameters<T>
+      GetNP();
+
       FactorNode<T>* m_parent;
       std::vector<FactorNode<T>*> m_children;
       Moments<T> m_Moments;
@@ -111,8 +120,8 @@ ICR::ICA::HiddenNode<Model,T>::GetMoments() const
    
 template<class Model,class T>
 inline
-void 
-ICR::ICA::HiddenNode<Model,T>::Iterate(Coster& C)
+const ICR::ICA::NaturalParameters<T>
+ICR::ICA::HiddenNode<Model,T>::GetNP()
 {
   //EVALUATE THE COST
 
@@ -132,14 +141,44 @@ ICR::ICA::HiddenNode<Model,T>::Iterate(Coster& C)
   //(Note: Bug 48750 in gcc in parallel accumulate causes crash at next line: 
   //  fixed in 4.6.1)
   NP = PARALLEL_ACCUMULATE(ChildrenNP.begin(), ChildrenNP.end(), NP ); 
+  return NP;
+}
 
+template<class Model,class T>
+inline
+const std::vector<T>
+ICR::ICA::HiddenNode<Model,T>::GetMean() 
+{
+  return Model::CalcMean(GetNP());
+}
+   
+template<class Model,class T>
+inline
+const std::vector<T>
+ICR::ICA::HiddenNode<Model,T>::GetVariance() 
+{
+  std::vector<T> prec = Model::CalcPrecision(GetNP());
+  std::vector<T> var(prec.size());
+  for(size_t i=0;i<prec.size();++i){
+    var[i] = 1.0/prec[i];
+  }
+  return var;
+}
+
+template<class Model,class T>
+inline
+void 
+ICR::ICA::HiddenNode<Model,T>::Iterate(Coster& C)
+{
+  const NaturalParameters<T> NP = GetNP();
   //Get the moments and update the model
   const T LogNorm = Model::CalcLogNorm(NP);
-  
   {
     Lock lock(m_mutex);
     m_Moments = Model::CalcMoments(NP);  //update the moments and the model
   }
+  //first get the NP from the parent
+  const NaturalParameters<T> ParentNP = (m_parent->GetNaturalNot(this));
   C +=  (ParentNP - NP)*m_Moments +m_parent->CalcLogNorm() -  LogNorm;
 
 

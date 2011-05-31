@@ -50,6 +50,12 @@ namespace ICR{
       size_t 
       size() const {return m_Moments.size();}
       
+      const std::vector<T>
+      GetMean() ;
+      
+      const std::vector<T>
+      GetVariance() ;
+
       void
       InitialiseMoments()
       {
@@ -140,7 +146,26 @@ ICR::ICA::DeterministicNode<Model,T>::GetForwardedMoments()
   return ForwardedMoments;
 }
    
+ 
+  
 
+template<class Model,class T>
+inline
+const std::vector<T>
+ICR::ICA::DeterministicNode<Model,T>::GetMean() 
+{
+  std::vector<T> Mean(1, m_Moments[0]);
+  return Mean;
+}
+   
+template<class Model,class T>
+inline
+const std::vector<T>
+ICR::ICA::DeterministicNode<Model,T>::GetVariance() 
+{
+  std::vector<T> Var(1,0.0);
+  return Var;
+}
    
 template<class Model,class T>
 void 

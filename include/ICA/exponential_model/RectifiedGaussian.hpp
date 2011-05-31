@@ -50,6 +50,9 @@ namespace ICR{
       typedef typename boost::call_traits<T>::param_type
       data_parameter;
       
+      typedef typename boost::call_traits<std::vector<T> >::value_type
+      vector_data_t;
+      
       
       /** Calculate the natural log of the normalisation factor.
        *  The normalisation is the inverse of the partition factor.
@@ -113,6 +116,24 @@ namespace ICR{
 		 variable_vector_parameter precision_nodes,
 		 variable_parameter weights_node);
 
+
+      /** Calculate the Mean from the Natural Paramters.
+       *  @param NP The NaturalParameters from which to calcualate the moments.
+       *  @return The mean of the distribution.  
+       * 
+       */
+      static
+      vector_data_t
+      CalcMean(NP_parameter NP)  ;
+      
+      /** Calculate the standard deviation from the Natural Paramters.
+       *  @param NP The NaturalParameters from which to calcualate the moments.
+       *  @return The mean of the distribution.  
+       * 
+       */
+      static
+      vector_data_t
+      CalcPrecision(NP_parameter NP)  ;
 
       /** Calculate the Moments from the Natural Paramters.
        *  @param NP The NaturalParameters from which to calcualate the moments.
@@ -316,6 +337,28 @@ ICR::ICA::RectifiedGaussian<T>::CalcSample(variable_vector_parameter m_mean_node
   return moments_t(x, x*x +1.0/prec0);
 }
 
+
+template<class T>
+inline
+typename ICR::ICA::RectifiedGaussian<T>::vector_data_t
+ICR::ICA::RectifiedGaussian<T>::CalcMean(NP_parameter NP)
+{
+  vector_data_t vmean(1);
+  vmean[0] =  NP[0]/(CalcPrecision(NP)[0]); 
+  return vmean;
+}
+
+template<class T>
+inline
+typename ICR::ICA::RectifiedGaussian<T>::vector_data_t
+ICR::ICA::RectifiedGaussian<T>::CalcPrecision(NP_parameter NP)
+{
+  vector_data_t vprec(1);
+  vprec[0] = -NP[1]*2.0;
+  return vprec;
+}
+
+
 template<class T>
 inline
 typename ICR::ICA::RectifiedGaussian<T>::moments_t
@@ -323,8 +366,8 @@ ICR::ICA::RectifiedGaussian<T>::CalcMoments(NP_parameter NP)
 {
   //NP must have a size of 2
   BOOST_ASSERT(NP.size() == 2);
-  const data_t precision    = -NP[1]*2.0;
-  const data_t mean         =  NP[0]/(precision);
+  const data_t precision    =  -NP[1]*2.0;
+  const data_t mean         =  NP[0]/(precision); 
   //Mean squared on HiddenVariable  is local and not averaged.
   const data_t mean_squared =  (mean)*(mean); 
   const data_t precision_squared =  (precision)*(precision); 

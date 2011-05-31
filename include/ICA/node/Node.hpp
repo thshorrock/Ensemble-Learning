@@ -3,6 +3,7 @@
 
 #include "ICA/message/Coster.hpp"
 #include <boost/call_traits.hpp>
+#include <vector>
 #include <iostream>
 
 namespace ICR{
@@ -61,6 +62,24 @@ namespace ICR{
       void
       AddChildFactor(FactorNode<T>* f) = 0;
       
+      /** Collect a vector of means from the node.
+       *  @return A vector containing all the means of the node.
+       *  Typically this vector will contain only one element,
+       *   but Dirichlet models contain the mean for every component of the mixture model.
+       */
+      virtual
+      const std::vector<T>
+      GetMean()  = 0;
+      
+      /** Collect a vector of variances from the node.
+       *  @return A vector containing all the variances of the node.
+       *  Typically this vector will contain only one element,
+       *   but Dirichlet models contain the variance for every component of the mixture model.
+       */
+      virtual
+      const std::vector<T>
+      GetVariance()  = 0;
+
       /** Collect the messages of adjacent factors and update the stored moments.
        *  @param Cost The total cost of the approximation to which this node contributes.
        */

@@ -42,7 +42,7 @@ namespace ICR{
       
       typedef typename boost::call_traits<std::vector<T> >::param_type
       vector_data_parameter;
-      typedef typename boost::call_traits<std::vector<T> >::param_type
+      typedef typename boost::call_traits<std::vector<T> >::value_type
       vector_data_t;
       
       /** Calculate the natural log of the normalisation factor.
@@ -74,6 +74,24 @@ namespace ICR{
       moments_t
       CalcSample(variable_parameter prior);
       
+      /** Calculate the Mean from the Natural Paramters.
+       *  @param NP The NaturalParameters from which to calcualate the moments.
+       *  @return The mean of the distribution.  
+       * 
+       */
+      static
+      vector_data_t
+      CalcMean(NP_parameter NP)  ;
+      
+      /** Calculate the standard deviation from the Natural Paramters.
+       *  @param NP The NaturalParameters from which to calcualate the moments.
+       *  @return The mean of the distribution.  
+       * 
+       */
+      static
+      vector_data_t
+      CalcPrecision(NP_parameter NP)  ;
+
       /** Calculate the Moments from the Natural Paramters.
        *  @param NP The NaturalParameters from which to calcualate the moments.
        *  @return The Calculated Moments.  
@@ -204,6 +222,39 @@ ICR::ICA::Discrete<T>::CalcSample(variable_parameter prior)
   return moments_t(M);
 }
 
+
+template<class T>
+inline
+typename ICR::ICA::Discrete<T>::vector_data_t
+ICR::ICA::Discrete<T>::CalcMean(NP_parameter NP)
+{
+  //Get the probabilities from the moments
+  moments_t moments= CalcMoments(NP);
+  data_t mean = 0;
+  for(size_t i=0;i<moments.size();++i){
+    mean += i*moments[i];
+  }
+  std::vector<data_t> vmean(1);
+  vmean[0]=mean;
+  return vmean;
+}
+
+template<class T>
+inline
+typename ICR::ICA::Discrete<T>::vector_data_t
+ICR::ICA::Discrete<T>::CalcPrecision(NP_parameter NP)
+{
+  //Get the probabilities from the moments
+  moments_t moments= CalcMoments(NP);
+  data_t mean = CalcMean(NP)[0];
+  data_t variance = 0;
+  for(size_t i=0;i<moments.size();++i){
+    variance += moments[i]*(i-mean)*(i-mean);
+  }
+  std::vector<data_t> vprec(1);
+  vprec[0]=1.0/variance;
+  return vprec;
+}
 
 template<class T>
 inline

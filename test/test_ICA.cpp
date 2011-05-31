@@ -1595,7 +1595,7 @@ BOOST_AUTO_TEST_CASE( ICA_test  )
     typedef Builder<double>::Variable    Variable;
     typedef Builder<double>::GaussianResultNode    ResultNode;
    
-    Builder<double> Build;
+    Builder<double> Build("Cost.txt");
 
 
     const size_t Components = 3;
@@ -1808,7 +1808,7 @@ BOOST_AUTO_TEST_CASE( ICA_test  )
 	  }
 	}
 	
-	not_converged = !Build.run(0.001,5);
+	not_converged = !Build.run(0.1,50);
 
 	// std::cout<<"WEIGHTS ["<<attempt<<"] = "<<std::endl;
 
@@ -1822,7 +1822,7 @@ BOOST_AUTO_TEST_CASE( ICA_test  )
 	std::ofstream InferredResult("ICAInferedResult.txt");
 	for(size_t t=0;t<T;++t){
 	  for(size_t n=0;n<N;++n){
-	    InferredResult<<AtimesSplusN[n][t]->GetMoments()[0]<<"\t";
+	    InferredResult<<Mean(AtimesSplusN[n][t])<<"\t";
 	  }
 	  InferredResult<<"\n";
 
@@ -1875,7 +1875,7 @@ BOOST_AUTO_TEST_CASE( ICA_test  )
     
 	for(size_t n=0;n<N;++n){
 	  for(size_t m=0;m<M;++m){
-	    AInf(n,m)  = A[n][m]->GetMoments()[0];
+	    AInf(n,m)  = Mean(A[n][m]);
 	    // A2Inf(n,m) = A[n][m]->GetMoments()[1];
 	    // AVarianceScale(m,t) = GSL_POW_2(SInf(m,t))/SInf2(m,t);
 	  }
@@ -1885,7 +1885,7 @@ BOOST_AUTO_TEST_CASE( ICA_test  )
 
 	for(size_t m=0;m<M;++m){
 	  for(size_t t=0;t<T;++t){
-	    SInf(m,t) = S[m][t]->GetMoments()[0];
+	    SInf(m,t) = Mean(S[m][t]);
 	    // SInf2(m,t) = S[m][t]->GetMoments()[1];
 	    // SVarianceScale(m,t) = GSL_POW_2(SInf(m,t))/SInf2(m,t);
 	  }
@@ -1923,21 +1923,24 @@ BOOST_AUTO_TEST_CASE( ICA_test  )
 
 	std::ofstream InferredNoise("ICAInferedNoise.txt");
 	for(size_t n=0;n<N;++n){
-	  InferredNoise<<noiseMean[n]->GetMoments()[0]<<"\t";
+	  InferredNoise<<Mean(noiseMean[n])<<"\t";
 	}
 
 	std::ofstream  InferredWeights("ICAWeights.txt");
+	std::ofstream  InferredWeightsSD("ICAWeightsSD.txt");
 	std::ofstream  InfHypMeans("ICAHypMean.txt");
 	std::ofstream  InfHypPrec("ICAHypPrec.txt");
 	for(size_t m=0;m<M;++m){
 	  for(size_t c=0;c<Components;++c){
-	    InfHypMeans<<ShypMean[m][c]->GetMoments()[0]<<"\t";
-	    InfHypPrec <<ShypPrec[m][c]->GetMoments()[0]<<"\t";
-	    InferredWeights<<std::exp(Weights[m]->GetMoments()[c])<<"\t";
+	    InfHypMeans<<Mean(ShypMean[m][c])<<"\t";
+	    InfHypPrec <<Mean(ShypPrec[m][c])<<"\t";
+	    InferredWeights<<Mean(Weights[m],c)<<"\t";
+	    InferredWeightsSD<<StandardDeviation(Weights[m],c)<<"\t";
 	  }
 	  InfHypMeans <<"\n";
 	  InfHypPrec  <<"\n";
 	  InferredWeights<<"\n";
+	  InferredWeightsSD<<"\n";
 	}
     
 

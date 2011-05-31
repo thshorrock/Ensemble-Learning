@@ -54,6 +54,12 @@ namespace ICR{
       const Moments<T>&
       GetMoments() const;
       
+      const std::vector<T>
+      GetMean() ;
+      
+      const std::vector<T>
+      GetVariance() ;
+
       void 
       Iterate(Coster& C);
       
@@ -118,6 +124,24 @@ ICR::ICA::ObservedNode<Model,T>::SetParentFactor(FactorNode<T>* f)
   m_parent = f;
 }
   
+
+template<class Model,class T>
+inline
+const std::vector<T>
+ICR::ICA::ObservedNode<Model,T>::GetMean() 
+{
+  std::vector<T> Mean(1, m_Moments[0]);
+  return Mean;
+}
+   
+template<class Model,class T>
+inline
+const std::vector<T>
+ICR::ICA::ObservedNode<Model,T>::GetVariance() 
+{
+  std::vector<T> Var(1,0.0);
+  return Var;
+}
 
 template<class Model, class T>
 inline

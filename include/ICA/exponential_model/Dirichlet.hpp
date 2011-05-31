@@ -40,7 +40,7 @@ namespace ICR{
 
       typedef typename boost::call_traits<std::vector<T> >::param_type
       vector_data_parameter;
-      typedef typename boost::call_traits<std::vector<T> >::param_type
+      typedef typename boost::call_traits<std::vector<T> >::value_type
       vector_data_t;
       
       //moments from parents (the u values)
@@ -70,6 +70,24 @@ namespace ICR{
       static
       moments_t
       CalcSample(const VariableNode<T>* V);
+
+      /** Calculate the Mean from the Natural Paramters.
+       *  @param NP The NaturalParameters from which to calcualate the moments.
+       *  @return The mean of the distribution.  
+       * 
+       */
+      static
+      vector_data_t
+      CalcMean(NP_parameter NP)  ;
+      
+      /** Calculate the standard deviation from the Natural Paramters.
+       *  @param NP The NaturalParameters from which to calcualate the moments.
+       *  @return The mean of the distribution.  
+       * 
+       */
+      static
+      vector_data_t
+      CalcPrecision(NP_parameter NP)  ;
 
       /** Calculate the Moments from the Natural Paramters.
        *  @param NP The NaturalParameters from which to calcualate the moments.
@@ -120,6 +138,21 @@ namespace ICR{
 	}
       private:
 	data_t m_subtract_me;
+      };
+      
+      class
+      divide_by
+      {
+      public:
+	divide_by(data_parameter U)
+	  : m_divide_me(U)
+	{}
+	data_t operator()(data_parameter u) 
+	{
+	  return u/m_divide_me;
+	}
+      private:
+	data_t m_divide_me;
       };
       
       static
@@ -197,6 +230,39 @@ ICR::ICA::Dirichlet<T>::CalcSample(const VariableNode<T>* V)
   std::vector<data_t> M(size);
   PARALLEL_TRANSFORM(x,x+size,M.begin(),take_log());
   return moments_t(M);
+}
+
+template<class T>
+inline
+typename ICR::ICA::Dirichlet<T>::vector_data_t
+ICR::ICA::Dirichlet<T>::CalcMean(NP_parameter NP)
+{
+  std::vector<T> u(NP.size());
+  PARALLEL_TRANSFORM( NP.begin(), NP.end(), u.begin(), plus_one());
+  //maybe save this value need to profile to see if worthwhile?
+  const data_t U = PARALLEL_ACCUMULATE(u.begin(),u.end(), 0.0); 
+  std::vector<T> means(u.size());
+  PARALLEL_TRANSFORM(u.begin(), u.end(), means.begin(), divide_by(U));
+  return means;
+}
+
+template<class T>
+inline
+typename ICR::ICA::Dirichlet<T>::vector_data_t
+ICR::ICA::Dirichlet<T>::CalcPrecision(NP_parameter NP)
+{
+  std::vector<T> u(NP.size());
+  PARALLEL_TRANSFORM( NP.begin(), NP.end(), u.begin(), plus_one());
+  //maybe save this value need to profile to see if worthwhile?
+  const data_t U = PARALLEL_ACCUMULATE(u.begin(),u.end(), 0.0); 
+  const data_t UplusOne = U+1;
+  std::vector<T> means = CalcMean(NP);
+  std::vector<T> Prec(means.size());
+  for(size_t i=0;i<Prec.size();++i){
+    Prec[i] = UplusOne/(means[i]*(1-means[i]));
+  }
+  
+  return Prec;
 }
 
 

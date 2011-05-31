@@ -51,12 +51,16 @@ namespace ICR{
       
       typedef typename boost::call_traits<T>::value_type
       data_t;
+      typedef typename boost::call_traits<T>::const_reference
+      data_const_reference;
       typedef typename boost::call_traits<T>::param_type
       data_parameter;
       
       typedef typename boost::call_traits<const T>::value_type
       const_data_t;
       
+      typedef typename boost::call_traits<std::vector<T> >::value_type
+      vector_data_t;
       
       /** Calculate the natural log of the normalisation factor.
        *  The normalisation is the inverse of the partition factor.
@@ -117,6 +121,25 @@ namespace ICR{
 		 variable_vector_parameter precision_nodes,
 		 variable_t weights_node);
       
+
+      /** Calculate the Mean from the Natural Paramters.
+       *  @param NP The NaturalParameters from which to calcualate the moments.
+       *  @return The mean of the distribution.  
+       * 
+       */
+      static
+      vector_data_t
+      CalcMean(NP_parameter NP)  ;
+      
+      /** Calculate the standard deviation from the Natural Paramters.
+       *  @param NP The NaturalParameters from which to calcualate the moments.
+       *  @return The mean of the distribution.  
+       * 
+       */
+      static
+      vector_data_t
+      CalcPrecision(NP_parameter NP)  ;
+
       /** Calculate the Moments from the Natural Paramters.
        *  @param NP The NaturalParameters from which to calcualate the moments.
        *  @return The Calculated Moments.  
@@ -296,12 +319,32 @@ ICR::ICA::Gaussian<T>::CalcSample(variable_vector_parameter mean_nodes,
 
 template<class T>
 inline
+typename ICR::ICA::Gaussian<T>::vector_data_t
+ICR::ICA::Gaussian<T>::CalcMean(NP_parameter NP)
+{
+  vector_data_t vmean(1);
+  vmean[0] =  NP[0]/(CalcPrecision(NP)[0]); 
+  return vmean;
+}
+
+template<class T>
+inline
+typename ICR::ICA::Gaussian<T>::vector_data_t
+ICR::ICA::Gaussian<T>::CalcPrecision(NP_parameter NP)
+{
+  vector_data_t vprec(1);
+  vprec[0] = -NP[1]*2.0;
+  return vprec;
+}
+
+template<class T>
+inline
 typename ICR::ICA::Gaussian<T>::moments_t
 ICR::ICA::Gaussian<T>::CalcMoments(NP_parameter NP)
 {
   //Get the data from the natural paremetes.
   const_data_t precision    = -NP[1]*2.0;
-  const_data_t mean         =  NP[0]/(precision); 
+  const_data_t mean         =  NP[0]/precision; 
   //Mean squared on HiddenVariable  is local and not averaged.
   const_data_t mean_squared =  (mean)*(mean);
   return  moments_t(mean, mean_squared + 1.0 /precision);
