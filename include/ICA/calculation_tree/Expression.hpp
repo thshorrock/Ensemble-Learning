@@ -58,7 +58,7 @@ namespace ICR{
        * @param C The context from which to evaluate the expression.
        * @return  The result of the expression.
        */
-      virtual data_t Evaluate(subcontext_parameter) const = 0;
+      virtual data_t Evaluate(subcontext_parameter C) const = 0;
 
     protected:
       friend class Plus<T>;

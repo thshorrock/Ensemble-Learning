@@ -11,7 +11,10 @@ namespace ICR{
     //forward declaration
     template<class> class Moments;
     
-    /**Threadsafe iterator for the Moments class. */ 
+    /**Threadsafe iterator for the Moments class.
+     * @tparam moments The moments class, intended to be either Moments<T> or Moments<T> const.
+     * @tparam T The data type used in the iterator, intended to be either float or double.
+     */ 
     template<class moments, class T>
     class  MomentsIterator
       : public boost::iterator_facade<MomentsIterator<moments,T>, T, boost::random_access_traversal_tag >
@@ -93,6 +96,7 @@ namespace ICR{
        *  @tparam Othermoments A Moments class of different constness.
        *  @tparam other_data_type The data type of different constness.
        *  @param other A Moments class. 
+       *  @return A reference to the current MomentsIterator.
        *  This function will fail if the constness is decreased, 
        *  (i.e. converting from const to non-const)
        *  with the  error  that 

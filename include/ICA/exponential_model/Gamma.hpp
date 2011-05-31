@@ -45,6 +45,7 @@ namespace ICR{
        *  The normalisation is the inverse of the partition factor.
        *  @param Shape The moments from the VariableNode that represents the shape
        *  @param IScale The moments from the VariableNode that represents the inverse scale.
+       *  @return The log or the normalisation.
         */
       static
       data_t
@@ -57,6 +58,7 @@ namespace ICR{
        *  The normalisation is the inverse of the partition factor.
        *  @param NP The natural parameters from which to obtain the shape and 
        *  inverse scale.
+       *  @return The log or the normalisation.
        */
       static
       data_t

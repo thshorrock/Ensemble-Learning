@@ -9,6 +9,11 @@
 namespace ICR{
   namespace ICA{
 
+
+    /** @defgroup Calculation Evaluate the Calculation Nodes.
+     *  
+     */
+
     /** A Factory to help contruct expressions.
      *  This factory should be the user's sole interface with placeholders and mathmatical operations.
      *
@@ -29,16 +34,14 @@ namespace ICR{
      *
      * @tparam T The data type.  This will be either float or double.
      *
-     * @attension  The Factory looks after the memory management of the placeholders 
+     * @attention  The Factory looks after the memory management of the placeholders 
      *  and expression for you.  
      *  The expression will be destroyed when the factory object is destroyed.  
      *  Do not use the delete keyword.
      *  
-     *  @todo Extend the framework to implement a minus and divide expression.
-     *
      * 
      *  @ingroup UserInterface
-     *  @ingroup Calculation.
+     *  @ingroup Calculation
      */
     template<class T>
     class ExpressionFactory{
@@ -108,8 +111,8 @@ ICR::ICA::ExpressionFactory<T>::placeholder()
 
 template<class T>
 typename ICR::ICA::ExpressionFactory<T>::expression_t
-ICR::ICA::ExpressionFactory<T>::Add(typename ExpressionFactory<T>::expression_parameter a, 
-				    typename ExpressionFactory<T>::expression_parameter b)
+ICR::ICA::ExpressionFactory<T>::Add(expression_parameter a, 
+				    expression_parameter b)
 {
   typedef boost::shared_ptr<Expression<T> > ExpPtr;
   ExpPtr r(new Plus<T>(a,b));
@@ -119,8 +122,8 @@ ICR::ICA::ExpressionFactory<T>::Add(typename ExpressionFactory<T>::expression_pa
 
 template<class T>
 typename ICR::ICA::ExpressionFactory<T>::expression_t
-ICR::ICA::ExpressionFactory<T>::Multiply(typename ExpressionFactory<T>::expression_parameter a, 
-				      typename ExpressionFactory<T>::expression_parameter b)
+ICR::ICA::ExpressionFactory<T>::Multiply(expression_parameter a, 
+					 expression_parameter b)
 {
   typedef boost::shared_ptr<Expression<T> > ExpPtr;
   ExpPtr r(new Times<T>(a,b));

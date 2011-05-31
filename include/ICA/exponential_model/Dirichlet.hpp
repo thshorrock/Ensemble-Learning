@@ -43,12 +43,12 @@ namespace ICR{
       typedef typename boost::call_traits<std::vector<T> >::param_type
       vector_data_t;
       
+      //moments from parents (the u values)
       /** Calculate the natural log of the normalisation factor.
        *  The normalisation is the inverse of the partition factor.
        *  @param Us The moments from the Dirichlet constant node.
        *  @return The log or the normalisation.
         */
-      //moments from parents (the u values)
       static
       data_t
       CalcLogNorm(moments_parameter Us) ;
@@ -56,6 +56,7 @@ namespace ICR{
       /** Calculate the natural log of the normalisation factor.
        *  The normalisation is the inverse of the partition factor.
        *  @param NP The natural parameters from which to obtain the mean and precision.
+       *  @return The log or the normalisation.
        */
       static
       data_t

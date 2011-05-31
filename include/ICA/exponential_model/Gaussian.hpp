@@ -62,6 +62,7 @@ namespace ICR{
        *  The normalisation is the inverse of the partition factor.
        *  @param Mean The moments from the VariableNode that represents Mean
        *  @param Precision The moments from the VariableNode that represents the precision.
+       *  @return The log or the normalisation.
         */
       static
       data_t
@@ -72,6 +73,7 @@ namespace ICR{
       /** Calculate the natural log of the normalisation factor.
        *  The normalisation is the inverse of the partition factor.
        *  @param NP The natural parameters from which to obtain the mean and precision.
+       *  @return The log or the normalisation.
        */
       static
       data_t
@@ -165,6 +167,7 @@ namespace ICR{
        *  This is evaluated from all the other variables and the data.
        *  @param Parent The Node that the messag is to go to.
        *  @param Data The moments from the Child(or Data) Variable.
+       *  @param C The context (the parent variables are obtainable from this)
        *  @return The calculated NaturalParameters.  
        */
       static

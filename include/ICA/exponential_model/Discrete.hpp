@@ -58,6 +58,7 @@ namespace ICR{
       /** Calculate the natural log of the normalisation factor.
        *  The normalisation is the inverse of the partition factor.
        *  @param NP The natural parameters from which to obtain the mean and precision.
+       *  @return The log or the normalisation.
        */
       static
       data_t

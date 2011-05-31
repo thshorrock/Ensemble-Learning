@@ -79,6 +79,9 @@ namespace ICR{
       function_t m_parent;
     };
     
+    /** Multiply two functions together.
+     *  @tparam T The data type, either float or double.
+     */
     template<class T>
     class Times : public Function<T>
     {
@@ -116,7 +119,7 @@ namespace ICR{
        *  @return The result of the addition.
        */
       data_t 
-      Evaluate(subcontext_parameter) const;
+      Evaluate(subcontext_parameter C) const;
     private:
 
 
@@ -160,8 +163,8 @@ namespace ICR{
 
 template<class T>
 inline
-ICR::ICA::Plus<T>::Plus(typename Plus<T>::expression_parameter a,
-			typename Plus<T>::expression_parameter b)
+ICR::ICA::Plus<T>::Plus(expression_parameter a,
+			expression_parameter b)
   : Function<T>(), 
     m_a(a),
     m_b(b),
@@ -174,7 +177,7 @@ ICR::ICA::Plus<T>::Plus(typename Plus<T>::expression_parameter a,
 template<class T>
 inline
 typename  ICR::ICA::Plus<T>::data_t
-ICR::ICA::Plus<T>::Evaluate(typename Plus<T>::subcontext_parameter c) const
+ICR::ICA::Plus<T>::Evaluate(subcontext_parameter c) const
 {
   return  
     m_a -> Evaluate(c) +
@@ -183,8 +186,8 @@ ICR::ICA::Plus<T>::Evaluate(typename Plus<T>::subcontext_parameter c) const
 
 template<class T>
 inline
-ICR::ICA::Times<T>::Times(typename Times<T>::expression_parameter a, 
-			  typename Times<T>::expression_parameter b)
+ICR::ICA::Times<T>::Times(expression_parameter a, 
+			  expression_parameter b)
   : Function<T>(), 
     m_a(a),
     m_b(b),
@@ -197,7 +200,7 @@ ICR::ICA::Times<T>::Times(typename Times<T>::expression_parameter a,
 template<class T>
 inline
 typename ICR::ICA::Times<T>::data_t
-ICR::ICA::Times<T>::Evaluate(typename Times<T>::subcontext_parameter c) const
+ICR::ICA::Times<T>::Evaluate(subcontext_parameter c) const
 {
   return  
     m_a -> Evaluate(c) *

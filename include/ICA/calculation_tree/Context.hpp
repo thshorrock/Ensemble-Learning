@@ -99,6 +99,7 @@ namespace ICR{
       /** Output the SubContext to a stream. 
        *  @param c The subcontext.
        *  @param out The output stream.
+       *  @return A reference to the output stream.
        *  This function is thread safe.
        */
       template<class U>
@@ -216,8 +217,8 @@ namespace ICR{
 
 
       /** Splice a Context into Subcontext.
-       *  To evaluate an expression the average means of a variable, <x>,
-       *   or the average of the square of the means <x^2> need to be obtained 
+       *  To evaluate an expression the average means of a variable, \f$<x>\f$,
+       *   or the average of the square of the means \f$<x^2>\f$ need to be obtained 
        *   from the Varibale Moments that contain all such information.
        *   Subcontext's are obtained from this function.
        *  @param i The index of the subcontext requested
@@ -228,7 +229,7 @@ namespace ICR{
        *  //The context provides the Moments of every element in expression.
        *  Context<double>& M
        *  SubContext<double> M0 = M[0];  //All the first moments  (the <x>'s of every element in expr)
-       *  SubContext<doube> M1 = M[1];  //The second moment (the <x^2> of every element of expression)
+       *  SubContext<double> M1 = M[1];  //The second moment (the <x^2> of every element of expression)
        *  //Precision is 1.0/ (<expr(x^2)> - <expr(x)>^2)
        *  double precision = 1.0/(Expr->Evaluate(M1) - Expr->Evaluate(M0*M0) );
        *  @endcode
@@ -252,6 +253,7 @@ namespace ICR{
       /** Output the Context to a stream. 
        *  @param c The context.
        *  @param out The output stream.
+       *  @return A reference to the output stream.
        *  This function is thread safe.
        */
       template<class U>
@@ -344,7 +346,7 @@ namespace ICR{
 template<class T>
 inline
 typename ICR::ICA::SubContext<T>::data_const_reference
-ICR::ICA::SubContext<T>::Lookup(typename SubContext<T>::placeholder_parameter P) const
+ICR::ICA::SubContext<T>::Lookup(placeholder_parameter P) const
 {
   return  m_map.find(P)->second;
 };
@@ -352,8 +354,8 @@ ICR::ICA::SubContext<T>::Lookup(typename SubContext<T>::placeholder_parameter P)
 
 template<class T>
 void
-ICR::ICA::SubContext<T>::Assign(typename SubContext<T>::placeholder_parameter P, 
-				typename SubContext<T>::data_parameter V)
+ICR::ICA::SubContext<T>::Assign(placeholder_parameter P, 
+				data_parameter V)
 {
   typedef std::map<placeholder_t,data_t> DataContainer;
   typedef std::pair<placeholder_t,data_t> Datum;

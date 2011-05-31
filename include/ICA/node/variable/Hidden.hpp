@@ -60,17 +60,6 @@ namespace ICR{
       mutable Mutex m_mutex;
     };
 
-    template <class T>
-    inline
-    std::ostream&
-    operator<<( std::ostream& out, const NaturalParameters<T>& m)
-    {
-      for(size_t i=0;i<m.size();++i)
-	{
-	  out<<m[i]<<" ";
-	}
-      return out;
-    }
   }
 }
 

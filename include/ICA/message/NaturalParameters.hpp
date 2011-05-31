@@ -11,6 +11,11 @@
 namespace ICR{
   namespace ICA{
 
+    /** A container for the Natural Paramemeters.
+     *  @tparam T The data type to be used.
+     *  This is intended to be either float or double.
+     *  @attention Natural Parameters is not thread safe - it is intended to be a temporary container for passing messages between nodes.
+     */
     template<class T>
     class NaturalParameters
     {
@@ -56,45 +61,101 @@ namespace ICR{
       typedef typename std::vector<T>::const_iterator
       const_iterator;
 
-      /** Constructor */
+      /** Constructor.
+       *  @param size The number of elements to be held in the container.
+       */
       NaturalParameters(size_parameter size =0 );
       
+      /** Constructor.
+       *  @param NP A vector containing the the Natural Parameters to be copied into the container.
+       */
       NaturalParameters(vector_parameter NP);
-      // NaturalParameters(const Moments<T>& m);
 
+      /** Constructor.
+       *  Construct a container holding two elements.
+       *  @param d1 The zeroth element of the container.
+       *  @param d2 The first element of the container.
+       */
       NaturalParameters(data_parameter d1, 
 			data_parameter d2);
 
+      /** Obtain a constant reference to an element of the  Natural Parameter container.
+       *  @param element The index of the container to return.
+       *  @return The element of the container requested by element.
+       *  @attention Natural Parameters is not thread safe - it is intended to be a temporary container for passing messages between nodes.
+       */
       data_const_reference 
-      operator[](size_parameter) const;
+      operator[](size_parameter element) const;
       
+      /** Obtain a reference to an element of the  Natural Parameter container.
+       *  @param element The index of the container to return.
+       *  @return The element of the container requested by element.
+       *  @attention Natural Parameters is not thread safe - it is intended to be a temporary container for passing messages between nodes.
+       */
       data_reference
-      operator[](size_parameter) ;
+      operator[](size_parameter element) ;
 
+      /** Obtain an iterator for the zeroth natural parameter.
+       *  @return An iterator pointing to the zeroth natural parameter.
+       *  The returned iterator is not thread safe 
+       */
       iterator
       begin();
-
+      
+      /** Obtain an const_iterator for the zeroth natural parameter.
+       *  @return A const_iterator pointing to the  zeroth natural parameter.
+       *  The returned iterator is not thread safe 
+       */
       const_iterator
       begin() const;
 
+      /** Obtain an iterator for the end of the container.
+       *  @return An iterator pointing to the end of the container
+       *  The returned iterator is not thread safe 
+       */
       iterator
       end();
 
+      /** Obtain an const_iterator for the end of the container.
+       *  @return A const_iterator pointing to the end of the container
+       *  The returned iterator is not thread safe 
+       */
       const_iterator
       end() const;
 
+      /** The number of Natural Parameters stored.
+       *  @return The number of Natural Parameters stored.
+       */
       size_type
       size() const {return m_data.size();}
       
+      /** Add another set of Natural Parameters to this container.
+       *  @param other The other Natural Parameters container.
+       *  @return A reference to the current (and now altered) Natural Paramters container.
+       */
       reference
       operator+=(parameter other);
       
+      /** Subtract another set of Natural Parameters to this container.
+       *  @param other The other Natural Parameters container.
+       *  @return A reference to the current (and now altered) Natural Paramters container.
+       */
       reference
       operator-=(parameter other);
 
+      /** Multiply this container by a scalar.
+       *  @param other The scalar
+       *  @return A reference to the current (and now altered) Natural Paramters container.
+       */
       reference
       operator*=(data_parameter other);
       
+      /** Multiply a Natural Paramers container by a Moments Container.
+       *  This is an inner-product like operation.
+       * @param a The Natural Parameters container.
+       * @param b The Moments container.
+       * @return The scalar product from the two containers.
+       */
       template<class U>
       friend
       U
@@ -149,7 +210,31 @@ namespace ICR{
 
     };
 
+    /** Output the contents of the Natural Parameters Container.
+     * @param out The output stream.
+     * @param m The Natural Parameters to output.
+     * @return A reference to the output stream.
+     */
+    template<class T>
+    inline
+    std::ostream&
+    operator<<(std::ostream& out, const NaturalParameters<T>& NP)
+    {
+      for(size_t i=0;i<NP.size();++i)
+	{
+	  out<<NP[i]<<" ";
+	}
 
+      return out;
+    }
+    
+
+    
+    /** Add two Natural Parameters containers together.
+     *  @param a The first Natural Parameters  container to add.
+     *  @param b The second Natural Parameters container to add
+     *  @return The sum of the two Natural Parameters.
+     */
     template<class T>
     inline
     NaturalParameters<T>
@@ -160,6 +245,11 @@ namespace ICR{
       return tmp+=b;
     }  
     
+    /** Subtract two Natural Parameters containers.
+     *  @param a The first Natural Parameters  container.
+     *  @param b The second Natural Parameters container.
+     *  @return The result of the subtraction.
+     */
     template<class T>
     inline
     NaturalParameters<T>
@@ -172,6 +262,13 @@ namespace ICR{
 
     
  
+      /** Multiply a Natural Paramers container by a Moments Container.
+       *  This is an inner-product like operation.
+       * @param a The Natural Parameters container.
+       * @param b The Moments container.
+       * @return The scalar product from the two containers.
+       */
+
     template<class T>
     inline
     T
@@ -187,7 +284,12 @@ namespace ICR{
     }  
       
 
-
+    /** Multiply a Natural Paramers container by a Moments Container.
+     *  This is an inner-product like operation.
+     * @param p The Natural Parameters container.
+     * @param m The Moments container.
+     * @return The scalar product from the two containers.
+     */
     template<class T>
     inline
     T
@@ -196,7 +298,11 @@ namespace ICR{
       return p*m;
     }  
 
-
+    /** Multiply a Natural Parameters container by a scalar.
+     * @param n The Natural Parameters container.
+     * @param d The scalar.
+     * @return The product of the natural parameters and the scalar.
+     */
     template<class T>
     inline
     const NaturalParameters<T>
@@ -207,22 +313,13 @@ namespace ICR{
     }  
 
 
-    // template<class T>
-    // inline
-    // typename NaturalParameters<T>::data_type
-    // operator*(typename NaturalParameters<T>::data_parameter a,
-    // 	      typename NaturalParameters<T>::data_parameter b)
-    // {
-    //   NaturalParameters<T> tmp = a;
-    //   return tmp*=b;
-    // }  
 
   }
 }
 
 template<class T>
 inline
-ICR::ICA::NaturalParameters<T>::NaturalParameters(typename NaturalParameters<T>::size_parameter size)
+ICR::ICA::NaturalParameters<T>::NaturalParameters(size_parameter size)
   : //m_mutex_ptr(new boost::mutex), 
   m_data(size)
 {
@@ -230,27 +327,16 @@ ICR::ICA::NaturalParameters<T>::NaturalParameters(typename NaturalParameters<T>:
 
 template<class T>
 inline
-ICR::ICA::NaturalParameters<T>::NaturalParameters(typename NaturalParameters<T>::vector_parameter NP)
+ICR::ICA::NaturalParameters<T>::NaturalParameters(vector_parameter NP)
   : //m_mutex_ptr(new boost::mutex), 
     m_data(NP)
 {
 }
 
-// template<class T>
-// inline
-// ICR::ICA::NaturalParameters<T>::NaturalParameters(const ICR::ICA::Moments<T>& m)
-// // : m_mutex_ptr(new boost::mutex)
-//   : m_data()
-// {
-//   m_data.resize(m.size());
-//   //boost::lock_guard<boost::mutex> lock(*m_mutex_ptr);  
-//   PARALLEL_COPY(m.begin(),m.end(),m_data.begin());
-// }
- 
 template<class T>
 inline
-ICR::ICA::NaturalParameters<T>::NaturalParameters(typename NaturalParameters<T>::data_parameter d1,
-						  typename NaturalParameters<T>::data_parameter d2 )
+ICR::ICA::NaturalParameters<T>::NaturalParameters(data_parameter d1,
+						  data_parameter d2 )
 //  : 
   //  m_mutex_ptr(new boost::mutex)
   : m_data(2)
@@ -301,7 +387,7 @@ ICR::ICA::NaturalParameters<T>::end() const
 template<class T>
 inline
 typename ICR::ICA::NaturalParameters<T>::data_const_reference 
-ICR::ICA::NaturalParameters<T>::operator[](typename NaturalParameters<T>::size_parameter i) const
+ICR::ICA::NaturalParameters<T>::operator[](size_parameter i) const
 {
   //boost::lock_guard<boost::mutex> lock(*m_mutex_ptr);  
   return m_data[i];
@@ -310,7 +396,7 @@ ICR::ICA::NaturalParameters<T>::operator[](typename NaturalParameters<T>::size_p
 template<class T>
 inline
 typename ICR::ICA::NaturalParameters<T>::data_reference
-ICR::ICA::NaturalParameters<T>::operator[](typename NaturalParameters<T>::size_parameter i) 
+ICR::ICA::NaturalParameters<T>::operator[](size_parameter i) 
 {
   //boost::lock_guard<boost::mutex> lock(*m_mutex_ptr);  
   return m_data[i];
@@ -321,7 +407,7 @@ ICR::ICA::NaturalParameters<T>::operator[](typename NaturalParameters<T>::size_p
 template<class T>
 inline
 typename ICR::ICA::NaturalParameters<T>::reference
-ICR::ICA::NaturalParameters<T>::operator+=(typename ICR::ICA::NaturalParameters<T>::parameter other)
+ICR::ICA::NaturalParameters<T>::operator+=(parameter other)
 {
   //This could be called by different threads, so lock
   //  boost::lock_guard<boost::mutex> lock(*m_mutex_ptr);  //DO KEEP THIS ONE!
@@ -339,7 +425,7 @@ ICR::ICA::NaturalParameters<T>::operator+=(typename ICR::ICA::NaturalParameters<
 template<class T>  
 inline 
 typename ICR::ICA::NaturalParameters<T>::reference
-ICR::ICA::NaturalParameters<T>::operator-=(typename ICR::ICA::NaturalParameters<T>::parameter other)
+ICR::ICA::NaturalParameters<T>::operator-=(parameter other)
 {
   //This could be called by different threads, so lock
   //  boost::lock_guard<boost::mutex> lock(*m_mutex_ptr);  //DO KEEP THIS ONE!
@@ -350,7 +436,7 @@ ICR::ICA::NaturalParameters<T>::operator-=(typename ICR::ICA::NaturalParameters<
 template<class T>
 inline
 typename ICR::ICA::NaturalParameters<T>::reference
-ICR::ICA::NaturalParameters<T>::operator*=(typename ICR::ICA::NaturalParameters<T>::data_parameter other)
+ICR::ICA::NaturalParameters<T>::operator*=(data_parameter other)
 {
   
   PARALLEL_TRANSFORM(m_data.begin(), m_data.end(), m_data.begin(), times_by(other));
@@ -358,28 +444,4 @@ ICR::ICA::NaturalParameters<T>::operator*=(typename ICR::ICA::NaturalParameters<
 }    
 
 
-// template<class T>
-// inline
-// ICR::ICA::NaturalParameters<T>
-// operator+(const ICR::ICA::NaturalParameters<T>& a, const ICR::ICA::NaturalParameters<T>& b)
-// {
-//   ICR::ICA::NaturalParameters<T> tmp = a;
-//   return tmp+=b;
-// }  
 
-
-
-
-template<class T>
-inline
-std::ostream&
-operator<<(std::ostream& out, typename ICR::ICA::NaturalParameters<T>::parameter NP)
-{
-  for(size_t i=0;i<NP.size();++i)
-    {
-      out<<NP[i]<<" ";
-    }
-
-  return out;
-}
-    

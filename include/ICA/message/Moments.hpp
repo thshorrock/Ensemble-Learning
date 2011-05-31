@@ -11,8 +11,12 @@
 namespace ICR{
   namespace ICA{
     
+    //Forward declaration.
     template<class> class Moments;
     
+    /** A threadsafe container for the Moments.
+     *  @tparam T The datatype to be used for storing the moments (typically double or float).
+     */
     template<class T=double>
     class 
     Moments
@@ -65,35 +69,85 @@ namespace ICR{
       typedef  MomentsIterator<const type, const data_type>  
       const_iterator;
       
+      /** Constructor 
+       * @param size The size of the set of moments to store 
+       */
       Moments(size_parameter size = 0);
+
+      /** Constructor.
+       *  Construct a set of moments based upon the passed vector.
+       *  @param data The set of moments to be copied.
+       */
       Moments(vector_parameter data);
+      
+      /** Constructor.
+       *  Construct a pair of moments.
+       * @param d1 The zeroth moment in the set.
+       * @param d2 The first moment in the set.
+       */
       Moments(data_parameter  d1, data_parameter d2);
+
+      /** Copy constructor.
+       * @param other The other set of moments to be copied.
+       */
       Moments(parameter other);
       
-      void operator=(parameter other);
+      /** Assingment operator.
+       *  @param other The  Moments container to be copied.
+       *  @return A reference to the current container.
+       */
+      reference operator=(parameter other);
       
+      /** Obtain an iterator for the first moment.
+       *  @return An iterator pointing to the first moment.
+       *  The returned iterator is thread safe 
+       */
       iterator
       begin();
 
+      /** Obtain an const_iterator for the first moment.
+       *  @return A const_iterator pointing to the first moment.
+       *  The returned iterator is thread safe 
+       */
       const_iterator
       begin() const;
 
+      /** Obtain an iterator for the last+1 moment.
+       *  @return An iterator pointing to the last+1 moment.
+       *  The returned iterator is thread safe 
+       */
       iterator
       end();
 
+      /** Obtain a const_iterator for the last+1 moment.
+       *  @return An const_iterator pointing to the last+1 moment.
+       *  The returned iterator is thread safe 
+       */
       const_iterator
       end() const;
 
-      /** The number of Moments stored.*/
+      /** The number of Moments stored.
+       *  @return The number of moments stored.
+       */
       size_type
       size() const {return m_data.size();}
       
       
-      /** Access the moments data.*/
+      /** Access the moments data.
+       *  @param index The index of the moment to return.
+       *    For example, the average will be zeroth element,
+       *    and the average of the squares will be the first element.
+       *  @return The requested moment.
+       */
       data_const_reference 
       operator[](size_parameter index) const;
       
-      /** Access the moments data.*/
+      /** Access the moments data.
+       *  @param index The index of the moment to return.
+       *    For example, the average will be zeroth element,
+       *    and the average of the squares will be the first element.
+       *  @return The requested moment.
+       */
       data_reference 
       operator[](size_parameter index);
 
@@ -105,12 +159,18 @@ namespace ICR{
       reference
       operator+=(parameter other);
       
-      // Moments<T>& 
-      // operator-=(const Moments<T>& other);
 
+      /** Multiply the moments by a scalar.
+       * @param other The scalar by which to multiply the moments.
+       * @return A reference to the current Moments.
+       */
       reference
       operator*=(const data_parameter other);
       
+      /** Multiply the moments by another set of moments.
+       * @param other The other moments by which to multiply the stored moments.
+       * @return A reference to the current, stored, Moments.
+       */
       reference
       operator*=(const parameter other);
 
@@ -158,7 +218,11 @@ namespace ICR{
     };
 
 
-
+    /** Output the contents of the Moments Container.
+     * @param out The output stream.
+     * @param m The moments to output.
+     * @return A reference to the output stream.
+     */
     template <class T>
     inline
     std::ostream&
@@ -171,6 +235,11 @@ namespace ICR{
       return out;
     }
 
+    /** Add two moments together.
+     *  @param a The first moments container to add.
+     *  @param b The second moments container to add
+     *  @return The sum of the two moments.
+     */
     template<class T>
     inline
     const Moments<T>
@@ -180,6 +249,11 @@ namespace ICR{
       return tmp+=b;
     }  
     
+    /** Multiply a Moments contatiner by a scaler.
+     *  @param m The  moments container.
+     *  @param d The scalar.
+     *  @return The product of the moments and the scaler.
+     */
     template<class T>  
     inline 
     const Moments<T>
@@ -191,6 +265,11 @@ namespace ICR{
     }
       
 
+    /** Multiply a Moments contatiner by a scaler.
+     *  @param m The  moments container.
+     *  @param d The scalar.
+     *  @return The product of the moments and the scaler.
+     */
     template<class T>  
     inline 
     const Moments<T>
@@ -206,22 +285,22 @@ namespace ICR{
 
 template<class T>
 inline
-ICR::ICA::Moments<T>::Moments( typename ICR::ICA::Moments<T>::vector_parameter data)
+ICR::ICA::Moments<T>::Moments( vector_parameter data)
   : m_data(data),
     m_mutex()
 {}
 
 template<class T> 
 inline   
-ICR::ICA::Moments<T>::Moments( typename ICR::ICA::Moments<T>::size_parameter size)
+ICR::ICA::Moments<T>::Moments( size_parameter size)
   : m_data(std::vector<T>(size)),
     m_mutex() //non-copiable
 {}
 
 template<class T> 
 inline   
-ICR::ICA::Moments<T>::Moments(typename ICR::ICA::Moments<T>::data_parameter d1,
-			      typename ICR::ICA::Moments<T>::data_parameter d2)
+ICR::ICA::Moments<T>::Moments(data_parameter d1,
+			      data_parameter d2)
   : m_data(),
     m_mutex() //non-copiable
 {
@@ -231,20 +310,21 @@ ICR::ICA::Moments<T>::Moments(typename ICR::ICA::Moments<T>::data_parameter d1,
       
 template<class T> 
 inline   
-ICR::ICA::Moments<T>::Moments(typename ICR::ICA::Moments<T>::parameter other)
+ICR::ICA::Moments<T>::Moments(parameter other)
   : m_data(other.m_data),
     m_mutex() //non-copiable
 {}
       
 template<class T> 
 inline   
-void 
-ICR::ICA::Moments<T>::operator=(typename ICR::ICA::Moments<T>::parameter other)
+typename ICR::ICA::Moments<T>::reference
+ICR::ICA::Moments<T>::operator=(parameter other)
 {    
   if (this!= &other) {
     m_data = (other.m_data);
     // m_mutex non-copiable  
   }
+  return *this;
 }
 
 template<class T>  
@@ -284,7 +364,7 @@ ICR::ICA::Moments<T>::end() const
 template<class T>
 inline
 typename ICR::ICA::Moments<T>::data_const_reference
-ICR::ICA::Moments<T>::operator[](typename ICR::ICA::Moments<T>::size_parameter index) const
+ICR::ICA::Moments<T>::operator[](size_parameter index) const
 {
   Lock lock(m_mutex); 
   return m_data[index];
@@ -293,7 +373,7 @@ ICR::ICA::Moments<T>::operator[](typename ICR::ICA::Moments<T>::size_parameter i
 template<class T>
 inline
 typename ICR::ICA::Moments<T>::data_reference
-ICR::ICA::Moments<T>::operator[](typename ICR::ICA::Moments<T>::size_parameter index)
+ICR::ICA::Moments<T>::operator[](size_parameter index)
 {
   Lock lock(m_mutex); 
   return m_data[index];
@@ -302,7 +382,7 @@ ICR::ICA::Moments<T>::operator[](typename ICR::ICA::Moments<T>::size_parameter i
 
 template<class T>
 typename ICR::ICA::Moments<T>::reference  
-ICR::ICA::Moments<T>::operator+=(typename Moments<T>::parameter other)
+ICR::ICA::Moments<T>::operator+=(parameter other)
 {
   //This could be called by different threads, so lock
   Lock lock(m_mutex);  
@@ -313,7 +393,7 @@ ICR::ICA::Moments<T>::operator+=(typename Moments<T>::parameter other)
 template<class T>  
 inline 
 typename ICR::ICA::Moments<T>::reference
-ICR::ICA::Moments<T>::operator*=(typename Moments<T>::parameter other)
+ICR::ICA::Moments<T>::operator*=(parameter other)
 {
   //This could be called by different threads, so lock
   Lock lock(m_mutex); 
@@ -324,7 +404,7 @@ ICR::ICA::Moments<T>::operator*=(typename Moments<T>::parameter other)
 template<class T>  
 inline 
 typename ICR::ICA::Moments<T>::reference
-ICR::ICA::Moments<T>::operator*=(typename Moments<T>::data_parameter d)
+ICR::ICA::Moments<T>::operator*=(data_parameter d)
 {
   //This could be called by different threads, so lock
   Lock lock(m_mutex); 
