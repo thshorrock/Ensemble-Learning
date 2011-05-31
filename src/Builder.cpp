@@ -440,22 +440,22 @@ ICR::ICA::Builder<T>::join(Variable Mean, GammaNode Precision, const T data )
 }
 
 
-template<class T>
-void 
-ICR::ICA::Builder<T>::join(Variable Mean, GammaNode& Precision, GammaNode& Child  )
-{
-  boost::shared_ptr<GammaFactor> GammaF(new GammaFactor(Mean,Precision,Child));
-  m_Factors.push_back(GammaF);
-}
+// template<class T>
+// void 
+// ICR::ICA::Builder<T>::join(Variable Mean, GammaNode& Precision, GammaNode& Child  )
+// {
+//   boost::shared_ptr<GammaFactor> GammaF(new GammaFactor(Mean,Precision,Child));
+//   m_Factors.push_back(GammaF);
+// }
 
    
-template<class T>   
-void 
-ICR::ICA::Builder<T>::join(Variable Mean, GammaNode& Precision, GaussianNode& Child  )
-{
-  boost::shared_ptr<GaussianFactor> GaussianF(new GaussianFactor(Mean,Precision,Child));
-  m_Factors.push_back(GaussianF);
-}
+// template<class T>   
+// void 
+// ICR::ICA::Builder<T>::join(Variable Mean, GammaNode& Precision, GaussianNode& Child  )
+// {
+//   boost::shared_ptr<GaussianFactor> GaussianF(new GaussianFactor(Mean,Precision,Child));
+//   m_Factors.push_back(GaussianF);
+// }
 
       
    
