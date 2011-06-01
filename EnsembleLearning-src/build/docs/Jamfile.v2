@@ -1,0 +1,43 @@
+project EnsembleLearning/doc ;
+import boostbook : boostbook ; 
+import doxygen : doxygen ;
+
+import toolset : using ;
+using doxygen ;
+
+doxygen EnsembleLearning.html : [ glob ../../include/*.hpp ] 
+	[ glob ../../include/ICA/*.hpp ]
+	[ glob ../../include/ICA/calculation_tree/*.hpp ]
+	[ glob ../../include/ICA/detail/*.hpp ]
+	[ glob ../../include/ICA/exception/*.hpp ]
+	[ glob ../../include/ICA/exponential_model/*.hpp ]
+	[ glob ../../include/ICA/message/*.hpp ]
+	[ glob ../../include/ICA/node/*.hpp ]
+	[ glob ../../include/ICA/node/factor/*.hpp ]
+	[ glob ../../include/ICA/node/variable/*.hpp ]
+:
+    <doxygen:param>PROJECT_NAME="Ensemble Learning"
+    <doxygen:param>PROJECT_NUMBER=0.1.0	
+    <doxygen:param>OUTPUT_DIRECTORY=$(TOP)/doc/
+    <doxygen:param>HIDE_UNDOC_MEMBERS=YES
+    <doxygen:param>EXTRACT_PRIVATE=NO
+    <doxygen:param>ENABLE_PREPROCESSING=YES
+    <doxygen:param>MACRO_EXPANSION=YES
+    <doxygen:param>EXPAND_ONLY_PREDEF=YES
+    <doxygen:param>QUIET=YES
+    <doxygen:param>WARNINGS=YES
+    <doxygen:param>WARN_IF_UNDOCUMENTED=YES
+    <doxygen:param>WARN_IF_DOC_ERROR=YES
+    <doxygen:param>WARN_NO_PARAMDOC=YES
+    <doxygen:param>SHORT_NAMES=YES
+    <doxygen:param>JAVADOC_AUTOBRIEF=YES
+    <doxygen:param>INTERNAL_DOCS=NO
+    <doxygen:param>INLINE_INHERITED_MEMB=YES
+    <doxygen:param>INHERIT_DOCS=YES
+#    <doxygen:param>HTML_OUTPUT=html
+#    <doxygen:param>GENERATE_LATEX=YES
+#    <doxygen:param>LATEX_OUTPUT=latex
+    #<doxygen:param>GENERATE_XML=YES
+    #<doxygen:param>XML_OUTPUT=xml
+	  <install-source-root>../../include 
+;

@@ -83,7 +83,7 @@ lib maths-differentiate-lib
 
 alias maths-library
     : $(TOP)//maths-vec-lib
-       $(TOP)//maths-mat-lib
+      $(TOP)//maths-mat-lib
       $(TOP)//maths-complex-lib
       $(TOP)//maths-mat-lib
       $(TOP)//maths-rng-lib
@@ -98,16 +98,16 @@ alias maths-library
 
 
 #Name the directory structure
-use-project /lib/ICA : ./build ;
+use-project /lib/ICA : ./EnsembleLearning-src/build ;
 
 #build libraries
-build-project ./build ;
+build-project ./EnsembleLearning-src/build ;
 
 #test libraries
-build-project ./build/test ;
+build-project ./EnsembleLearning-src/build/test ;
 
 #build app
 build-project ./example/ICA/build ;
 
 #docs
-build-project ./build/docs ;
+build-project ./EnsembleLearning-src/build/docs ;

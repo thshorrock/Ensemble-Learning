@@ -1,0 +1,28 @@
+
+import testing ;
+
+project ICA_test
+	: source-location ../../test 
+	: # default-build <variant>releaseAMD64mp <threading>multi 
+	: build-dir $(TOP)/build
+  	: usage-requirements 
+	  <include>../../include
+	  <include>$(BOOST_BASE)
+	: requirements 
+	<include>../../include/
+	<include>$(BOOST_BASE)
+;
+
+
+unit-test ICA_test 
+	  : test_ICA.cpp
+	    /lib/ICA
+	    $(TOP)//testing-library
+	    $(TOP)//maths-library
+	  :
+	    <include>../../include/
+	    <include>$(BOOST_BASE)	
+      	    <define>BOOST_TEST_DYN_LINK 
+	  ;
+
+
