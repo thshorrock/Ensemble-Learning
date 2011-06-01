@@ -1,7 +1,7 @@
 
 import testing ;
 
-project ICA_test
+project EnsembleLearning_test
 	: source-location ../../test 
 	: # default-build <variant>releaseAMD64mp <threading>multi 
 	: build-dir $(TOP)/build
@@ -14,9 +14,9 @@ project ICA_test
 ;
 
 
-unit-test ICA_test 
-	  : test_ICA.cpp
-	    /lib/ICA
+unit-test EnsembleLearning_test 
+	  : test_EnsembleLearning.cpp
+	    /lib/EnsembleLearning
 	    $(TOP)//testing-library
 	    $(TOP)//maths-library
 	  :

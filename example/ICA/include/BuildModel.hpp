@@ -1,18 +1,18 @@
 #pragma once
-#include "ICA.hpp"
+#include "EnsembleLearning.hpp"
 
 struct Model{};
 
 template<class data_t>
 class BuildModel : public Model
 {
-    typedef typename ICR::ICA::Builder<data_t>::GaussianNode GaussianNode;
-    typedef typename ICR::ICA::Builder<data_t>::RectifiedGaussianNode RectifiedGaussianNode;
-    typedef typename ICR::ICA::Builder<data_t>::WeightsNode WeightsNode;
-    typedef typename ICR::ICA::Builder<data_t>::GammaNode    GammaNode;
-    typedef typename ICR::ICA::Builder<data_t>::GaussianDataNode    Datum;
-    typedef typename ICR::ICA::Builder<data_t>::Variable    Variable;
-    typedef typename ICR::ICA::Builder<data_t>::GaussianResultNode    ResultNode;
+    typedef typename ICR::EnsembleLearning::Builder<data_t>::GaussianNode GaussianNode;
+    typedef typename ICR::EnsembleLearning::Builder<data_t>::RectifiedGaussianNode RectifiedGaussianNode;
+    typedef typename ICR::EnsembleLearning::Builder<data_t>::WeightsNode WeightsNode;
+    typedef typename ICR::EnsembleLearning::Builder<data_t>::GammaNode    GammaNode;
+    typedef typename ICR::EnsembleLearning::Builder<data_t>::GaussianDataNode    Datum;
+    typedef typename ICR::EnsembleLearning::Builder<data_t>::Variable    Variable;
+    typedef typename ICR::EnsembleLearning::Builder<data_t>::GaussianResultNode    ResultNode;
    
 public:
   BuildModel(matrix<double>& data,
@@ -115,19 +115,19 @@ public:
      *  M for Anm, M for Smt and 1 for Noise
      */
     //Make a set of placeholders for all the elements in the expression.
-    vector<ICR::ICA::Placeholder<data_t>*> SP(M);
-    vector<ICR::ICA::Placeholder<data_t>*> AP(M);
-    ICR::ICA::Placeholder<data_t>* NP = m_Factory.placeholder();
+    vector<ICR::EnsembleLearning::Placeholder<data_t>*> SP(M);
+    vector<ICR::EnsembleLearning::Placeholder<data_t>*> AP(M);
+    ICR::EnsembleLearning::Placeholder<data_t>* NP = m_Factory.placeholder();
     for(size_t m=0;m<M;++m){
       SP[m] = m_Factory.placeholder();  
       AP[m] = m_Factory.placeholder(); 
     }
     //The expression in terms of these placeholders
-    ICR::ICA::Expression<data_t>* Expr;
+    ICR::EnsembleLearning::Expression<data_t>* Expr;
     {
       BOOST_ASSERT(M!=0);
       //First do the multiplication
-      std::deque<ICR::ICA::Expression<data_t>*> prod(M);
+      std::deque<ICR::EnsembleLearning::Expression<data_t>*> prod(M);
       for(size_t m=0;m<M;++m){
     	prod[m] = m_Factory.Multiply(AP[m], SP[m]);
       }
@@ -152,7 +152,7 @@ public:
     	/**  Now need to replace the placeholders with given nodes 
     	 *   I.e. set up a context to the expression
     	 */
-	ICR::ICA::Context<data_t> context;
+	ICR::EnsembleLearning::Context<data_t> context;
     	for(size_t m=0;m<M;++m){
     	  context.Assign(AP[m], m_A(n,m));
     	  context.Assign(SP[m], m_S(m,t));
@@ -175,7 +175,7 @@ public:
     std::cout<<"built data - nodes = "<< m_Build.number_of_nodes() <<std::endl;
      
   }
-  ICR::ICA::Builder<data_t>& get_builder() {return m_Build;}
+  ICR::EnsembleLearning::Builder<data_t>& get_builder() {return m_Build;}
   matrix<Variable>& get_sources() {return m_S;}
   matrix<Variable>& get_mixing_matrix(){return m_A;}
   vector<Variable>& get_noiseMean(){return m_noiseMean;}
@@ -210,8 +210,8 @@ public:
   }
 
 private: 
-  ICR::ICA::Builder<data_t> m_Build;
-  ICR::ICA::ExpressionFactory<data_t> m_Factory;
+  ICR::EnsembleLearning::Builder<data_t> m_Build;
+  ICR::EnsembleLearning::ExpressionFactory<data_t> m_Factory;
   matrix<Variable> m_A;
   matrix<Variable> m_S;
   vector<GaussianNode> m_noiseMean;

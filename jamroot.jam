@@ -98,7 +98,7 @@ alias maths-library
 
 
 #Name the directory structure
-use-project /lib/ICA : ./EnsembleLearning-src/build ;
+use-project /lib/EnsembleLearning : ./EnsembleLearning-src/build ;
 
 #build libraries
 build-project ./EnsembleLearning-src/build ;

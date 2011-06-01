@@ -1,5 +1,3 @@
-//#include "ICA.hpp"
-
 #include "ExampleData.hpp"
 #include "BuildModel.hpp"
 
@@ -193,7 +191,7 @@ main  (int ac, char **av)
       BuildModel<float> Model(Data, assumed_sources, mixing_components,
 			      positive_source, positive_mixing, 
 			      model_noise_offset);
-      ICR::ICA::Builder<float> Build = Model.get_builder();
+      ICR::EnsembleLearning::Builder<float> Build = Model.get_builder();
       Build.set_cost_file(cost_file.string());
       std::cout<<"Running!"<<std::endl;
       Build.run(convergence_criterium,max_iterations);
@@ -211,7 +209,7 @@ main  (int ac, char **av)
       BuildModel<double>Model(Data, assumed_sources, mixing_components,
 			      positive_source, positive_mixing, 
 			      model_noise_offset);
-      ICR::ICA::Builder<double> Build = Model.get_builder();
+      ICR::EnsembleLearning::Builder<double> Build = Model.get_builder();
       Build.set_cost_file(cost_file.string());
       std::cout<<"Running!"<<std::endl;
       Build.run(convergence_criterium,max_iterations);

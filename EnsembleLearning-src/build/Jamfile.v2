@@ -1,5 +1,5 @@
 
-project ICA
+project EnsembleLearning
 	: source-location ../src
 	: ##default-build <variant>releaseAMD64mp
 	: build-dir $(TOP)/build
@@ -10,7 +10,7 @@ project ICA
 	#<warnings-as-errors>on
 ;
 
-lib ICA : 
+lib EnsembleLearning : 
     Builder.cpp
    $(TOP)//threaded-library 
    $(TOP)//asio-library
@@ -19,18 +19,18 @@ lib ICA :
     ;
 
 install headers 
-	: ../include/ICA.hpp  
-	  [ glob ../include/ICA/*.hpp ]  
-	  [ glob ../include/ICA/node/*.hpp ]  
-	  [ glob ../include/ICA/node/factor/*.hpp ]  
-	  [ glob ../include/ICA/node/variable/*.hpp ]  
-	  [ glob ../include/ICA/messagex/*.hpp ]  
-	  [ glob ../include/ICA/exponential_model/*.hpp ]  
-	  [ glob ../include/ICA/calculation_tree/*.hpp ]  
-	  [ glob ../include/ICA/detail/*.hpp ]  
-	  [ glob ../include/ICA/exception/*.hpp ]  
+	: ../include/EnsembleLearning.hpp  
+	  [ glob ../include/EnsembleLearning/*.hpp ]  
+	  [ glob ../include/EnsembleLearning/node/*.hpp ]  
+	  [ glob ../include/EnsembleLearning/node/factor/*.hpp ]  
+	  [ glob ../include/EnsembleLearning/node/variable/*.hpp ]  
+	  [ glob ../include/EnsembleLearning/messagex/*.hpp ]  
+	  [ glob ../include/EnsembleLearning/exponential_model/*.hpp ]  
+	  [ glob ../include/EnsembleLearning/calculation_tree/*.hpp ]  
+	  [ glob ../include/EnsembleLearning/detail/*.hpp ]  
+	  [ glob ../include/EnsembleLearning/exception/*.hpp ]  
 	: <location>$(TOP)/include  
 	  <install-source-root>../include 
 ;
 
- install ICA-lib : ICA : <location>$(TOP)/lib  ;
+ install EnsembleLearning-lib : EnsembleLearning : <location>$(TOP)/lib  ;

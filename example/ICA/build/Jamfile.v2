@@ -10,7 +10,7 @@ project  ICA-exe
 ;
 
 exe ICA-exe  : ICA.cpp  
-    /lib/ICA  
+    /lib/EnsembleLearning  
     $(TOP)//program_options-library
     $(TOP)//filesystem-library
 ;

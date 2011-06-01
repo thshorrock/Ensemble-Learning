@@ -1,5 +1,5 @@
 #pragma once
-#include "ICA/exponential_model/Random.hpp"
+#include "EnsembleLearning/exponential_model/Random.hpp"
 
 
 #include <numeric>
@@ -32,7 +32,7 @@ make_noise(double precision, size_t samples)
 {
   vector<double> Data(samples);
       
-  ICR::ICA::rng* random = ICR::ICA::Random::Instance() ;// get the random
+  ICR::EnsembleLearning::rng* random = ICR::EnsembleLearning::Random::Instance() ;// get the random
   for(size_t i=0;i<samples;++i){
     Data[i] = random->gaussian(1.0/std::sqrt(precision));
   }
@@ -46,7 +46,7 @@ public:
   Sources(size_t number_of_sources, size_t samples_per_source, bool positive = false)
     : m_sources(number_of_sources,samples_per_source)
   {
-    ICR::ICA::rng* random = ICR::ICA::Random::Instance() ;// get the random
+    ICR::EnsembleLearning::rng* random = ICR::EnsembleLearning::Random::Instance() ;// get the random
     for(size_t i=0;i<number_of_sources;++i){
       matrix_row<matrix<double> > row(m_sources,i);
       double mean = random->uniform(0,10);
@@ -82,7 +82,7 @@ public:
     : m_mixing(number_of_records, number_of_sources)
   {
 	
-    ICR::ICA::rng* random = ICR::ICA::Random::Instance() ;// get the random
+    ICR::EnsembleLearning::rng* random = ICR::EnsembleLearning::Random::Instance() ;// get the random
 
     for(size_t i=0;i<m_mixing.size1();++i){
       for(size_t j=0;j<m_mixing.size2();++j){

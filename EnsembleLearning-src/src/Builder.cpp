@@ -1,54 +1,54 @@
-#include "ICA.hpp"
+#include "EnsembleLearning.hpp"
 
-// #include "ICA/node/variable/Constant.hpp"
-// #include "ICA/node/variable/Data.hpp"
-#include "ICA/node/variable/Hidden.hpp"
-// #include "ICA/node/variable/Dirichlet.hpp"
-#include "ICA/node/variable/Calculation.hpp"
-// #include "ICA/variable/Forwarding.hpp"
+// #include "EnsembleLearning/node/variable/Constant.hpp"
+// #include "EnsembleLearning/node/variable/Data.hpp"
+#include "EnsembleLearning/node/variable/Hidden.hpp"
+// #include "EnsembleLearning/node/variable/Dirichlet.hpp"
+#include "EnsembleLearning/node/variable/Calculation.hpp"
+// #include "EnsembleLearning/variable/Forwarding.hpp"
 
-#include "ICA/node/factor/Calculation.hpp"
-#include "ICA/node/factor/Factor.hpp"
-#include "ICA/node/factor/Mixture.hpp"
-// #include "ICA/factor/DeterministicFactor.hpp"
+#include "EnsembleLearning/node/factor/Calculation.hpp"
+#include "EnsembleLearning/node/factor/Factor.hpp"
+#include "EnsembleLearning/node/factor/Mixture.hpp"
+// #include "EnsembleLearning/factor/DeterministicFactor.hpp"
 
-#include "ICA/exponential_model/RectifiedGaussian.hpp"
+#include "EnsembleLearning/exponential_model/RectifiedGaussian.hpp"
 
-#include "ICA/detail/parallel_algorithms.hpp"
+#include "EnsembleLearning/detail/parallel_algorithms.hpp"
 
-// typedef ICR::ICA::Factor<ICR::ICA::RectifiedGaussianModel<T> >      RectifiedGaussianFactor;
-// typedef ICR::ICA::Factor<ICR::ICA::GaussianModel<T> >      GaussianFactor;
-// typedef ICR::ICA::Factor<ICR::ICA::GammaModel<T> >         GammaFactor;
-// typedef ICR::ICA::Factor<ICR::ICA::DirichletModel<T> >     DirichletFactor;
-// typedef ICR::ICA::Factor<ICR::ICA::DiscreteModel<T> >      DiscreteFactor;
-// typedef ICR::ICA::Mixture<ICR::ICA::RectifiedGaussianModel<T> >     RectifiedGaussianMixtureFactor;
-// typedef ICR::ICA::Mixture<ICR::ICA::GaussianModel<T> >     GaussianMixtureFactor;
+// typedef ICR::EnsembleLearning::Factor<ICR::EnsembleLearning::RectifiedGaussianModel<T> >      RectifiedGaussianFactor;
+// typedef ICR::EnsembleLearning::Factor<ICR::EnsembleLearning::GaussianModel<T> >      GaussianFactor;
+// typedef ICR::EnsembleLearning::Factor<ICR::EnsembleLearning::GammaModel<T> >         GammaFactor;
+// typedef ICR::EnsembleLearning::Factor<ICR::EnsembleLearning::DirichletModel<T> >     DirichletFactor;
+// typedef ICR::EnsembleLearning::Factor<ICR::EnsembleLearning::DiscreteModel<T> >      DiscreteFactor;
+// typedef ICR::EnsembleLearning::Mixture<ICR::EnsembleLearning::RectifiedGaussianModel<T> >     RectifiedGaussianMixtureFactor;
+// typedef ICR::EnsembleLearning::Mixture<ICR::EnsembleLearning::GaussianModel<T> >     GaussianMixtureFactor;
 
-// typedef ICR::ICA::Details::CalcGaussianFactor<ICR::ICA::GaussianModel, T >  CalcGaussianFactor;
+// typedef ICR::EnsembleLearning::Details::CalcGaussianFactor<ICR::EnsembleLearning::GaussianModel, T >  CalcGaussianFactor;
 
 // // typedef DeterministicFactor<GaussianModel,Det::Add, T >     AddFactor;
 // // typedef DeterministicFactor<GaussianModel,Det::Multiply, T >     MultiplyFactor;
 
-// typedef ICR::ICA::HiddenNode<ICR::ICA::GaussianModel<T> >      GaussianType;
-// typedef ICR::ICA::HiddenNode<ICR::ICA::RectifiedGaussianModel<T> >      RectifiedGaussianType;
-// typedef ICR::ICA::HiddenNode<ICR::ICA::GammaModel<T> >         GammaType;
-// typedef ICR::ICA::HiddenNode<ICR::ICA::DirichletModel<T> >     DirichletType;
-// typedef ICR::ICA::DataNode<ICR::ICA::GaussianConstant<T> >     GaussianDataType;
-// typedef ICR::ICA::DataNode<ICR::ICA::GammaConstant<T> >        GammaDataType;
-// typedef ICR::ICA::ConstantNode<ICR::ICA::GaussianConstant<T> > GaussianConstType;
-// typedef ICR::ICA::ConstantNode<ICR::ICA::GammaConstant<T> >    GammaConstType;
-// typedef ICR::ICA::ConstantNode<ICR::ICA::NormalConstant<T> >   NormalConstType;
-// typedef ICR::ICA::ConstantNode<ICR::ICA::DirichletConstant<T> >  DirichletConstType;
-// typedef ICR::ICA::DeterministicNode<ICR::ICA::GaussianModel<T>, T>    GaussianResultType;
+// typedef ICR::EnsembleLearning::HiddenNode<ICR::EnsembleLearning::GaussianModel<T> >      GaussianType;
+// typedef ICR::EnsembleLearning::HiddenNode<ICR::EnsembleLearning::RectifiedGaussianModel<T> >      RectifiedGaussianType;
+// typedef ICR::EnsembleLearning::HiddenNode<ICR::EnsembleLearning::GammaModel<T> >         GammaType;
+// typedef ICR::EnsembleLearning::HiddenNode<ICR::EnsembleLearning::DirichletModel<T> >     DirichletType;
+// typedef ICR::EnsembleLearning::DataNode<ICR::EnsembleLearning::GaussianConstant<T> >     GaussianDataType;
+// typedef ICR::EnsembleLearning::DataNode<ICR::EnsembleLearning::GammaConstant<T> >        GammaDataType;
+// typedef ICR::EnsembleLearning::ConstantNode<ICR::EnsembleLearning::GaussianConstant<T> > GaussianConstType;
+// typedef ICR::EnsembleLearning::ConstantNode<ICR::EnsembleLearning::GammaConstant<T> >    GammaConstType;
+// typedef ICR::EnsembleLearning::ConstantNode<ICR::EnsembleLearning::NormalConstant<T> >   NormalConstType;
+// typedef ICR::EnsembleLearning::ConstantNode<ICR::EnsembleLearning::DirichletConstant<T> >  DirichletConstType;
+// typedef ICR::EnsembleLearning::DeterministicNode<ICR::EnsembleLearning::GaussianModel<T>, T>    GaussianResultType;
 
       
-// typedef ICR::ICA::HiddenNode<DirichletModel<T> >     WeightsType;
-// typedef ICR::ICA::HiddenNode<DiscreteModel<T> >      CatagoryType;
+// typedef ICR::EnsembleLearning::HiddenNode<DirichletModel<T> >     WeightsType;
+// typedef ICR::EnsembleLearning::HiddenNode<DiscreteModel<T> >      CatagoryType;
 //      typedef ForwardingNode<GaussianModel<T> >   GaussianMixtureType;
 
       
 template<class T>
-ICR::ICA::Builder<T>::Builder(const std::string& cost_file)
+ICR::EnsembleLearning::Builder<T>::Builder(const std::string& cost_file)
   : m_PrevCost(-1.0/0.0), // minus infty
     m_Factors(),
     m_Nodes(),
@@ -67,7 +67,7 @@ ICR::ICA::Builder<T>::Builder(const std::string& cost_file)
 
 template<class T>
 void 
-ICR::ICA::Builder<T>::set_cost_file(const std::string& cost_file)
+ICR::EnsembleLearning::Builder<T>::set_cost_file(const std::string& cost_file)
 {
   m_cost_file = cost_file;
   if (m_cost_file != "") { 
@@ -78,13 +78,13 @@ ICR::ICA::Builder<T>::set_cost_file(const std::string& cost_file)
 }
 
 template<class T>
-ICR::ICA::Builder<T>::~Builder()
+ICR::EnsembleLearning::Builder<T>::~Builder()
 {
 }
 
 template<class T>
-typename ICR::ICA::Builder<T>::WeightsNode
-ICR::ICA::Builder<T>::weights(const size_t size)
+typename ICR::EnsembleLearning::Builder<T>::WeightsNode
+ICR::EnsembleLearning::Builder<T>::weights(const size_t size)
 {
   boost::shared_ptr<DirichletConstType > DirichletPrior(new DirichletConstType(size,1.0));
   boost::shared_ptr<DirichletType >      Dirichlet(new DirichletType(size));
@@ -100,8 +100,8 @@ ICR::ICA::Builder<T>::weights(const size_t size)
 }
 
 template<class T>
-typename ICR::ICA::Builder<T>::GaussianNode
-ICR::ICA::Builder<T>::gaussian(Variable Mean, Variable Precision)
+typename ICR::EnsembleLearning::Builder<T>::GaussianNode
+ICR::EnsembleLearning::Builder<T>::gaussian(Variable Mean, Variable Precision)
 {
 	
   boost::shared_ptr<GaussianType > Gaussian(new GaussianType());
@@ -114,8 +114,8 @@ ICR::ICA::Builder<T>::gaussian(Variable Mean, Variable Precision)
 }
 
 template<class T>
-typename ICR::ICA::Builder<T>::GaussianNode
-ICR::ICA::Builder<T>::gaussian(GaussianNode Mean, const T& precision)
+typename ICR::EnsembleLearning::Builder<T>::GaussianNode
+ICR::EnsembleLearning::Builder<T>::gaussian(GaussianNode Mean, const T& precision)
 {
 	
   boost::shared_ptr<GammaConstType > Precision(new GammaConstType(precision));
@@ -124,8 +124,8 @@ ICR::ICA::Builder<T>::gaussian(GaussianNode Mean, const T& precision)
 }
     
 template<class T>  
-typename ICR::ICA::Builder<T>::GaussianNode
-ICR::ICA::Builder<T>::gaussian(const T& mean, GammaNode Precision)
+typename ICR::EnsembleLearning::Builder<T>::GaussianNode
+ICR::EnsembleLearning::Builder<T>::gaussian(const T& mean, GammaNode Precision)
 {
 	
   boost::shared_ptr<GaussianConstType > Mean(new GaussianConstType(mean));
@@ -134,8 +134,8 @@ ICR::ICA::Builder<T>::gaussian(const T& mean, GammaNode Precision)
 }
   
 template<class T>
-typename ICR::ICA::Builder<T>::GaussianNode
-ICR::ICA::Builder<T>::gaussian(const T& mean, const T& precision)
+typename ICR::EnsembleLearning::Builder<T>::GaussianNode
+ICR::EnsembleLearning::Builder<T>::gaussian(const T& mean, const T& precision)
 {
 	
   boost::shared_ptr<GaussianConstType > Mean(new GaussianConstType(mean));
@@ -149,8 +149,8 @@ ICR::ICA::Builder<T>::gaussian(const T& mean, const T& precision)
       
 
 template<class T>
-typename ICR::ICA::Builder<T>::RectifiedGaussianNode
-ICR::ICA::Builder<T>::rectified_gaussian(Variable Mean,Variable  Precision)
+typename ICR::EnsembleLearning::Builder<T>::RectifiedGaussianNode
+ICR::EnsembleLearning::Builder<T>::rectified_gaussian(Variable Mean,Variable  Precision)
 {
 	
   boost::shared_ptr<RectifiedGaussianType > RectifiedGaussian(new RectifiedGaussianType());
@@ -163,8 +163,8 @@ ICR::ICA::Builder<T>::rectified_gaussian(Variable Mean,Variable  Precision)
 }
 
 template<class T>
-typename ICR::ICA::Builder<T>::RectifiedGaussianNode
-ICR::ICA::Builder<T>::rectified_gaussian(GaussianNode Mean, const T& precision)
+typename ICR::EnsembleLearning::Builder<T>::RectifiedGaussianNode
+ICR::EnsembleLearning::Builder<T>::rectified_gaussian(GaussianNode Mean, const T& precision)
 {
 	
   boost::shared_ptr<GammaConstType > Precision(new GammaConstType(precision));
@@ -173,8 +173,8 @@ ICR::ICA::Builder<T>::rectified_gaussian(GaussianNode Mean, const T& precision)
 }
     
 template<class T>  
-typename ICR::ICA::Builder<T>::RectifiedGaussianNode
-ICR::ICA::Builder<T>::rectified_gaussian(const T& mean, GammaNode Precision)
+typename ICR::EnsembleLearning::Builder<T>::RectifiedGaussianNode
+ICR::EnsembleLearning::Builder<T>::rectified_gaussian(const T& mean, GammaNode Precision)
 {
 	
   boost::shared_ptr<GaussianConstType > Mean(new GaussianConstType(mean));
@@ -183,8 +183,8 @@ ICR::ICA::Builder<T>::rectified_gaussian(const T& mean, GammaNode Precision)
 }
   
 template<class T>
-typename ICR::ICA::Builder<T>::RectifiedGaussianNode
-ICR::ICA::Builder<T>::rectified_gaussian(const T& mean, const T& precision)
+typename ICR::EnsembleLearning::Builder<T>::RectifiedGaussianNode
+ICR::EnsembleLearning::Builder<T>::rectified_gaussian(const T& mean, const T& precision)
 {
 	
   boost::shared_ptr<GaussianConstType > Mean(new GaussianConstType(mean));
@@ -199,8 +199,8 @@ ICR::ICA::Builder<T>::rectified_gaussian(const T& mean, const T& precision)
 	
 
 template<class T>
-typename ICR::ICA::Builder<T>::GaussianNode
-ICR::ICA::Builder<T>::gaussian_mixture(std::vector<Variable>& vMean, std::vector<Variable>& vPrecision, WeightsNode Weights)
+typename ICR::EnsembleLearning::Builder<T>::GaussianNode
+ICR::EnsembleLearning::Builder<T>::gaussian_mixture(std::vector<Variable>& vMean, std::vector<Variable>& vPrecision, WeightsNode Weights)
 {
   const size_t number = Weights->size();
 	
@@ -221,8 +221,8 @@ ICR::ICA::Builder<T>::gaussian_mixture(std::vector<Variable>& vMean, std::vector
 }
 
 template<class T>	
-typename ICR::ICA::Builder<T>::RectifiedGaussianNode
-ICR::ICA::Builder<T>::rectified_gaussian_mixture(std::vector<Variable>& vMean, std::vector<Variable>& vPrecision, WeightsNode Weights)
+typename ICR::EnsembleLearning::Builder<T>::RectifiedGaussianNode
+ICR::EnsembleLearning::Builder<T>::rectified_gaussian_mixture(std::vector<Variable>& vMean, std::vector<Variable>& vPrecision, WeightsNode Weights)
 {
   const size_t number = Weights->size();
 	
@@ -243,8 +243,8 @@ ICR::ICA::Builder<T>::rectified_gaussian_mixture(std::vector<Variable>& vMean, s
 }
 
 template<class T>
-typename ICR::ICA::Builder<T>::GammaNode
-ICR::ICA::Builder<T>::gamma(const T& shape, const T& iscale)
+typename ICR::EnsembleLearning::Builder<T>::GammaNode
+ICR::EnsembleLearning::Builder<T>::gamma(const T& shape, const T& iscale)
 {
   if ((shape<=0) || (iscale <=0)) {
     std::cout<<"Shape and iscale must be greater than zero"<<std::endl;
@@ -270,8 +270,8 @@ ICR::ICA::Builder<T>::gamma(const T& shape, const T& iscale)
 
 
 template<class T>
-typename ICR::ICA::Builder<T>::GaussianConstNode
-ICR::ICA::Builder<T>::gaussian_const(const T value)
+typename ICR::EnsembleLearning::Builder<T>::GaussianConstNode
+ICR::EnsembleLearning::Builder<T>::gaussian_const(const T value)
 {
   boost::shared_ptr<GaussianConstType > Const(new GaussianConstType(value));
   m_Nodes.push_back(Const);
@@ -280,8 +280,8 @@ ICR::ICA::Builder<T>::gaussian_const(const T value)
 }
       
 template<class T>
-typename ICR::ICA::Builder<T>::GammaConstNode
-ICR::ICA::Builder<T>::gamma_const(const T value)
+typename ICR::EnsembleLearning::Builder<T>::GammaConstNode
+ICR::EnsembleLearning::Builder<T>::gamma_const(const T value)
 {
   if (value<=0) {
     std::cout<<"Shape and iscale must be greater than zero"<<std::endl;
@@ -297,8 +297,8 @@ ICR::ICA::Builder<T>::gamma_const(const T value)
 }
       
 template<class T>
-typename ICR::ICA::Builder<T>::GaussianDataNode
-ICR::ICA::Builder<T>::gaussian_data(const T data)
+typename ICR::EnsembleLearning::Builder<T>::GaussianDataNode
+ICR::EnsembleLearning::Builder<T>::gaussian_data(const T data)
 {
 	
   boost::shared_ptr<GaussianDataType > Data(new GaussianDataType(data));
@@ -310,8 +310,8 @@ ICR::ICA::Builder<T>::gaussian_data(const T data)
       
 
 template<class T>
-typename ICR::ICA::Builder<T>::GammaDataNode
-ICR::ICA::Builder<T>::gamma_data(const T data)
+typename ICR::EnsembleLearning::Builder<T>::GammaDataNode
+ICR::EnsembleLearning::Builder<T>::gamma_data(const T data)
 {
 	
   boost::shared_ptr<GammaDataType > Data(new GammaDataType(data));
@@ -322,8 +322,8 @@ ICR::ICA::Builder<T>::gamma_data(const T data)
 }
 
 template<class T>
-typename ICR::ICA::Builder<T>::GaussianResultNode
-ICR::ICA::Builder<T>::calc_gaussian(Expression<T>* Expr,  Context<T>& context)
+typename ICR::EnsembleLearning::Builder<T>::GaussianResultNode
+ICR::EnsembleLearning::Builder<T>::calc_gaussian(Expression<T>* Expr,  Context<T>& context)
 {
   boost::shared_ptr<GaussianResultType > Child(new GaussianResultType());
   boost::shared_ptr<CalcGaussianFactor > ChildF
@@ -337,7 +337,7 @@ ICR::ICA::Builder<T>::calc_gaussian(Expression<T>* Expr,  Context<T>& context)
 
 template<class T>
 void 
-ICR::ICA::Builder<T>::join(T& shape, GammaNode IScale ,  const T& data)
+ICR::EnsembleLearning::Builder<T>::join(T& shape, GammaNode IScale ,  const T& data)
 {
 
   boost::shared_ptr<GammaDataType > Data(new GammaDataType(data));
@@ -354,7 +354,7 @@ ICR::ICA::Builder<T>::join(T& shape, GammaNode IScale ,  const T& data)
 }
 template<class T>
 void
-ICR::ICA::Builder<T>::join(T& shape, T& iscale, GammaDataNode Data  )
+ICR::EnsembleLearning::Builder<T>::join(T& shape, T& iscale, GammaDataNode Data  )
 {
 
   boost::shared_ptr<NormalConstType > Shape(new NormalConstType(shape));
@@ -370,7 +370,7 @@ ICR::ICA::Builder<T>::join(T& shape, T& iscale, GammaDataNode Data  )
 
 template<class T>
 void 
-ICR::ICA::Builder<T>::join(T& shape, GammaNode IScale, GammaDataNode Data  )
+ICR::EnsembleLearning::Builder<T>::join(T& shape, GammaNode IScale, GammaDataNode Data  )
 {
   boost::shared_ptr<NormalConstType > Shape (new NormalConstType(shape));
   boost::shared_ptr<GammaFactor > GammaF (new GammaFactor(Shape.get(), IScale, Data));
@@ -381,7 +381,7 @@ ICR::ICA::Builder<T>::join(T& shape, GammaNode IScale, GammaDataNode Data  )
 
 template<class T>
 void 
-ICR::ICA::Builder<T>::join(T& mean, T& precision, GaussianDataNode Data  )
+ICR::EnsembleLearning::Builder<T>::join(T& mean, T& precision, GaussianDataNode Data  )
 {
 
   boost::shared_ptr<GaussianConstType > Mean(new GaussianConstType(mean));
@@ -396,7 +396,7 @@ ICR::ICA::Builder<T>::join(T& mean, T& precision, GaussianDataNode Data  )
    
 template<class T>   
 void 
-ICR::ICA::Builder<T>::join(Variable Mean, T& precision, GaussianDataNode Data  )
+ICR::EnsembleLearning::Builder<T>::join(Variable Mean, T& precision, GaussianDataNode Data  )
 {
 
   boost::shared_ptr<GaussianConstType > Precision(new GaussianConstType(precision));
@@ -408,7 +408,7 @@ ICR::ICA::Builder<T>::join(Variable Mean, T& precision, GaussianDataNode Data  )
   
 template<class T>    
 void 
-ICR::ICA::Builder<T>::join(T& mean, GammaNode Precision, GaussianDataNode Data  )
+ICR::EnsembleLearning::Builder<T>::join(T& mean, GammaNode Precision, GaussianDataNode Data  )
 {
 
   boost::shared_ptr<GaussianConstType > Mean(new GaussianConstType(mean));
@@ -421,7 +421,7 @@ ICR::ICA::Builder<T>::join(T& mean, GammaNode Precision, GaussianDataNode Data  
   
 template<class T>    
 void 
-ICR::ICA::Builder<T>::join(Variable Mean, GammaNode& Precision, GaussianDataNode& Data  )
+ICR::EnsembleLearning::Builder<T>::join(Variable Mean, GammaNode& Precision, GaussianDataNode& Data  )
 {
   boost::shared_ptr<GaussianFactor> GaussianF(new GaussianFactor(Mean,Precision,Data));
   m_Factors.push_back(GaussianF);
@@ -429,7 +429,7 @@ ICR::ICA::Builder<T>::join(Variable Mean, GammaNode& Precision, GaussianDataNode
 
 template<class T>
 void 
-ICR::ICA::Builder<T>::join(Variable Mean, GammaNode Precision, const T data )
+ICR::EnsembleLearning::Builder<T>::join(Variable Mean, GammaNode Precision, const T data )
 {
 	
   boost::shared_ptr<GaussianDataType > Data(new GaussianDataType(data));
@@ -442,7 +442,7 @@ ICR::ICA::Builder<T>::join(Variable Mean, GammaNode Precision, const T data )
 
 // template<class T>
 // void 
-// ICR::ICA::Builder<T>::join(Variable Mean, GammaNode& Precision, GammaNode& Child  )
+// ICR::EnsembleLearning::Builder<T>::join(Variable Mean, GammaNode& Precision, GammaNode& Child  )
 // {
 //   boost::shared_ptr<GammaFactor> GammaF(new GammaFactor(Mean,Precision,Child));
 //   m_Factors.push_back(GammaF);
@@ -451,7 +451,7 @@ ICR::ICA::Builder<T>::join(Variable Mean, GammaNode Precision, const T data )
    
 // template<class T>   
 // void 
-// ICR::ICA::Builder<T>::join(Variable Mean, GammaNode& Precision, GaussianNode& Child  )
+// ICR::EnsembleLearning::Builder<T>::join(Variable Mean, GammaNode& Precision, GaussianNode& Child  )
 // {
 //   boost::shared_ptr<GaussianFactor> GaussianF(new GaussianFactor(Mean,Precision,Child));
 //   m_Factors.push_back(GaussianF);
@@ -461,7 +461,7 @@ ICR::ICA::Builder<T>::join(Variable Mean, GammaNode Precision, const T data )
    
 template<class T>   
 void
-ICR::ICA::Builder<T>::join( std::vector<Variable>& vMean, GammaNode& Precision, WeightsNode Weights,const T data )
+ICR::EnsembleLearning::Builder<T>::join( std::vector<Variable>& vMean, GammaNode& Precision, WeightsNode Weights,const T data )
 {
 
   boost::shared_ptr<GaussianDataType > Data(new GaussianDataType(data));
@@ -489,7 +489,7 @@ ICR::ICA::Builder<T>::join( std::vector<Variable>& vMean, GammaNode& Precision, 
 
 template<class T>	
 void
-ICR::ICA::Builder<T>::join( std::vector<Variable>& vMean, std::vector<Variable>& vPrecision, WeightsNode Weights,const T data )
+ICR::EnsembleLearning::Builder<T>::join( std::vector<Variable>& vMean, std::vector<Variable>& vPrecision, WeightsNode Weights,const T data )
 {
 
   boost::shared_ptr<GaussianDataType > Data(new GaussianDataType(data));
@@ -513,14 +513,14 @@ ICR::ICA::Builder<T>::join( std::vector<Variable>& vMean, std::vector<Variable>&
 
 template<class T>
 size_t
-ICR::ICA::Builder<T>::number_of_nodes() const
+ICR::EnsembleLearning::Builder<T>::number_of_nodes() const
 {
   return m_Nodes.size();
 }
 
 template<class T>
 size_t
-ICR::ICA::Builder<T>::number_of_factors() const
+ICR::EnsembleLearning::Builder<T>::number_of_factors() const
 {
   return m_Factors.size();
 }
@@ -528,7 +528,7 @@ ICR::ICA::Builder<T>::number_of_factors() const
 
 template<class T>
 double
-ICR::ICA::Builder<T>::iterate()
+ICR::EnsembleLearning::Builder<T>::iterate()
 {
   // Initialise();
   if (m_Factors.size() == 0)
@@ -560,7 +560,7 @@ ICR::ICA::Builder<T>::iterate()
 
 template<class T>
 bool
-ICR::ICA::Builder<T>::run(const double& epsilon, const size_t& max_iterations )
+ICR::EnsembleLearning::Builder<T>::run(const double& epsilon, const size_t& max_iterations )
 {
   std::cout<<"initialising"<<std::endl;
 
@@ -583,7 +583,7 @@ ICR::ICA::Builder<T>::run(const double& epsilon, const size_t& max_iterations )
       
 template<class T>
 bool
-ICR::ICA::Builder<T>::HasConverged(const T Cost, const T epsilon)
+ICR::EnsembleLearning::Builder<T>::HasConverged(const T Cost, const T epsilon)
 {
 #pragma omp critical
   {
@@ -606,7 +606,7 @@ ICR::ICA::Builder<T>::HasConverged(const T Cost, const T epsilon)
     
 template<class T>  
 void
-ICR::ICA::Builder<T>::Initialise()
+ICR::EnsembleLearning::Builder<T>::Initialise()
 {
   if (!m_initialised) {
     PARALLEL_FOREACH(m_Nodes.begin(), m_Nodes.end(),
@@ -618,6 +618,6 @@ ICR::ICA::Builder<T>::Initialise()
 }
 
 
-template class ICR::ICA::Builder<double>;
-template class ICR::ICA::Builder<float>;
+template class ICR::EnsembleLearning::Builder<double>;
+template class ICR::EnsembleLearning::Builder<float>;
 
