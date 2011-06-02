@@ -1,0 +1,19 @@
+
+
+##############################
+#  Make the test binary
+#############################
+
+
+project(test_EnsembleLearning)
+
+#require the omp library
+FIND_PACKAGE(OpenMP REQUIRED) 
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_C_FLAGS}")
+
+add_executable(test_EnsembleLearning test_EnsembleLearning.cpp)
+target_link_libraries (test_EnsembleLearning EnsembleLearning)
+target_link_libraries (test_EnsembleLearning ${Boost_LIBRARIES})
+target_link_libraries (test_EnsembleLearning ${boost_numeric_LIBRARY} ${boost_filesystem_LIBRARY} ${boost_program_options_LIBRARY} ${boost_system_LIBRARY} ${boost_test_LIBRARY}  EnsembleLearning  ${boost_test_exec_monitor_LIBRARY} )
+add_test(test-EnsembleLearning-lib ${CMAKE_BINARY_DIR}/bin/test_EnsembleLearning Hello )
