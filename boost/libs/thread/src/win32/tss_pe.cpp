@@ -1,4 +1,4 @@
-// $Id: tss_pe.cpp 66259 2010-10-29 23:27:00Z anthonyw $
+// $Id$
 // (C) Copyright Aaron W. LaFramboise, Roland Schwarz, Michael Glassford 2004.
 // (C) Copyright 2007 Roland Schwarz
 // (C) Copyright 2007 Anthony Williams
