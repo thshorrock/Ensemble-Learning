@@ -24,11 +24,11 @@ install headers
 	  [ glob ../include/EnsembleLearning/node/*.hpp ]  
 	  [ glob ../include/EnsembleLearning/node/factor/*.hpp ]  
 	  [ glob ../include/EnsembleLearning/node/variable/*.hpp ]  
-	  [ glob ../include/EnsembleLearning/messagex/*.hpp ]  
+	  [ glob ../include/EnsembleLearning/message/*.hpp ]  
 	  [ glob ../include/EnsembleLearning/exponential_model/*.hpp ]  
 	  [ glob ../include/EnsembleLearning/calculation_tree/*.hpp ]  
 	  [ glob ../include/EnsembleLearning/detail/*.hpp ]  
-	  [ glob ../include/EnsembleLearning/exception/*.hpp ]  
+	  [ glob ../include/EnsembleLearnxing/exception/*.hpp ]  
 	: <location>$(TOP)/include  
 	  <install-source-root>../include 
 ;

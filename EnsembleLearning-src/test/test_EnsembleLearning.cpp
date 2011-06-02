@@ -8,13 +8,13 @@
 #include "EnsembleLearning/message/Moments.hpp"
 #include "EnsembleLearning/message/NaturalParameters.hpp"
 #include "EnsembleLearning.hpp"
-#include "rng.hpp"
+//#include "rng.hpp"
 #include <boost/test/unit_test.hpp>
 #include <iostream>
 #include <boost/shared_ptr.hpp>
 
-#include "vec.hpp"
-#include "mat.hpp"
+//#include "vec.hpp"
+//#include "mat.hpp"
 
 #include <vector>
 #include <iostream>
@@ -26,8 +26,8 @@ using namespace ICR::EnsembleLearning;
 // using namespace boost::assign;
 //____________________________________________________________________________//
 
-typedef ICR::maths::vector<boost::units::si::dimensionless> vec;
-typedef ICR::maths::mat mat;
+//typedef ICR::maths::vector<boost::units::si::dimensionless> vec;
+//typedef ICR::maths::mat mat;
 
 
 class ScopedRedirect
@@ -1375,596 +1375,596 @@ BOOST_AUTO_TEST_SUITE_END()
 
 
 
-vec
-make_Gaussian(double mean, double precision, size_t samples , double from = 0, double to = 10)
-{
-  vec Data(samples);
+// vec
+// make_Gaussian(double mean, double precision, size_t samples , double from = 0, double to = 10)
+// {
+//   vec Data(samples);
 
-  double inorm = std::sqrt(2*precision/(2.0*M_PI));
+//   double inorm = std::sqrt(2*precision/(2.0*M_PI));
   
-  double dx = (to-from)/double(samples);
-  for(size_t i=0;i<Data.size();++i){
-    double x = dx*i;
-    double expen = std::exp(precision*mean*x-0.5*precision*x*x+ -.5*precision*mean*mean);
-    Data[i]=inorm*expen;      
-  }
+//   double dx = (to-from)/double(samples);
+//   for(size_t i=0;i<Data.size();++i){
+//     double x = dx*i;
+//     double expen = std::exp(precision*mean*x-0.5*precision*x*x+ -.5*precision*mean*mean);
+//     Data[i]=inorm*expen;      
+//   }
 
-  return Data;
+//   return Data;
 
-}
+// }
 
 
-class GaussianComponent
-{
-public:
-  GaussianComponent(double mean, double precision,  size_t samples ,double from = 0, double to = 10)
-    : m_component(make_Gaussian(mean,precision,samples,from,to))
-  {  }
+// class GaussianComponent
+// {
+// public:
+//   GaussianComponent(double mean, double precision,  size_t samples ,double from = 0, double to = 10)
+//     : m_component(make_Gaussian(mean,precision,samples,from,to))
+//   {  }
   
-  GaussianComponent(const vec& C)
-    : m_component(C)
-  {  }
+//   GaussianComponent(const vec& C)
+//     : m_component(C)
+//   {  }
 
-  const double
-  operator[] (const size_t i) const {return m_component[i];}
+//   const double
+//   operator[] (const size_t i) const {return m_component[i];}
 
-  operator vec() const {
-    return m_component;
-  }
+//   operator vec() const {
+//     return m_component;
+//   }
 
-  GaussianComponent& operator+=(const GaussianComponent& C)
-  {
-    // std::cout<<"C size = "<<size()<<std::endl;
-    // std::cout<<"O size = "<<C.size()<<std::endl;
-    // for(size_t i=0;i<m_component.size();++i){
-    //   m_component[i]+=C[i];
-    // } 
-    m_component+=vec(C);
+//   GaussianComponent& operator+=(const GaussianComponent& C)
+//   {
+//     // std::cout<<"C size = "<<size()<<std::endl;
+//     // std::cout<<"O size = "<<C.size()<<std::endl;
+//     // for(size_t i=0;i<m_component.size();++i){
+//     //   m_component[i]+=C[i];
+//     // } 
+//     m_component+=vec(C);
 
-    return *this;
-  }
+//     return *this;
+//   }
 
-  size_t size() const
-  {
-    return m_component.size();
-  }
+//   size_t size() const
+//   {
+//     return m_component.size();
+//   }
 
-  friend 
-  GaussianComponent operator+(const GaussianComponent& C1,const GaussianComponent& C2)
-  {
-    GaussianComponent tmp = C1;
-    // std::cout<<"C1 size = "<<C1.size()<<std::endl;
-    // std::cout<<"C2 size = "<<C2.size()<<std::endl;
+//   friend 
+//   GaussianComponent operator+(const GaussianComponent& C1,const GaussianComponent& C2)
+//   {
+//     GaussianComponent tmp = C1;
+//     // std::cout<<"C1 size = "<<C1.size()<<std::endl;
+//     // std::cout<<"C2 size = "<<C2.size()<<std::endl;
 
-    return tmp+=C2;
-  }
+//     return tmp+=C2;
+//   }
   
-private:
-  vec m_component;
+// private:
+//   vec m_component;
 
-};
+// };
 
-class NoiseComponent
-{
-public:
-  NoiseComponent(size_t seed, double precision, size_t samples)
-    : m_component(samples)
-  {
-    ICR::maths::rng random(seed);
-    for(size_t i=0;i<samples;++i){
-      m_component[i] = random.gaussian(1.0/std::sqrt(precision));
-    }
-  }
-  operator vec() const
-  {
-    return (m_component);
-  }
+// class NoiseComponent
+// {
+// public:
+//   NoiseComponent(size_t seed, double precision, size_t samples)
+//     : m_component(samples)
+//   {
+//     ICR::maths::rng random(seed);
+//     for(size_t i=0;i<samples;++i){
+//       m_component[i] = random.gaussian(1.0/std::sqrt(precision));
+//     }
+//   }
+//   operator vec() const
+//   {
+//     return (m_component);
+//   }
   
-  operator GaussianComponent() const
-  {
-    return GaussianComponent(m_component);
-  }
-private:
-  vec m_component;
+//   operator GaussianComponent() const
+//   {
+//     return GaussianComponent(m_component);
+//   }
+// private:
+//   vec m_component;
   
-};
+// };
 
 
 
 
-struct exponentiate
-{
-  double operator()(const double d) {return std::exp(d);}
-};
+// struct exponentiate
+// {
+//   double operator()(const double d) {return std::exp(d);}
+// };
       
 
-BOOST_AUTO_TEST_CASE( ICA_test  )
-{
-  std::ofstream filestream("MixtureTree.txt");
-  {
-    //ScopedRedirect redirect(std::cout, filestream);
+// BOOST_AUTO_TEST_CASE( ICA_test  )
+// {
+//   std::ofstream filestream("MixtureTree.txt");
+//   {
+//     //ScopedRedirect redirect(std::cout, filestream);
 
-    //Make 3 data sources from 5 Gaussians
-    size_t samples = 100;
-    GaussianComponent G0(0,2,samples);
-    GaussianComponent G1(3,5,samples);
-    GaussianComponent G2(7,1,samples);
-    GaussianComponent G3(3,0.1,samples);
-    GaussianComponent G4(7,0.1,samples);
+//     //Make 3 data sources from 5 Gaussians
+//     size_t samples = 100;
+//     GaussianComponent G0(0,2,samples);
+//     GaussianComponent G1(3,5,samples);
+//     GaussianComponent G2(7,1,samples);
+//     GaussianComponent G3(3,0.1,samples);
+//     GaussianComponent G4(7,0.1,samples);
 
-    GaussianComponent s1 = G0+G1+G2;
-    GaussianComponent s2 = G3;
-    GaussianComponent s3 = G4;
-    std::cout<<"size="<<s1.size()<<std::endl;
+//     GaussianComponent s1 = G0+G1+G2;
+//     GaussianComponent s2 = G3;
+//     GaussianComponent s3 = G4;
+//     std::cout<<"size="<<s1.size()<<std::endl;
 
-    // NoiseComponent N1(1,5000);
-    // NoiseComponent N2(2,5000);
-    // NoiseComponent N3(3,5000);
-    // s1+=N1;
-    // s2+=N2;
-    // s3+=N3;
-    {
-      std::ofstream source1("ICAsource1.txt");
-      std::ofstream source2("ICAsource2.txt");
-      std::ofstream source3("ICAsource3.txt");
-      std::cout<<s1.size()<<std::endl;
+//     // NoiseComponent N1(1,5000);
+//     // NoiseComponent N2(2,5000);
+//     // NoiseComponent N3(3,5000);
+//     // s1+=N1;
+//     // s2+=N2;
+//     // s3+=N3;
+//     {
+//       std::ofstream source1("ICAsource1.txt");
+//       std::ofstream source2("ICAsource2.txt");
+//       std::ofstream source3("ICAsource3.txt");
+//       std::cout<<s1.size()<<std::endl;
 
-      for(size_t i=0;i<s1.size();++i){
-	source1<<s1[i]<<"\n";
-	source2<<s2[i]<<"\n";
-	source3<<s3[i]<<"\n";
-      }
-    }
+//       for(size_t i=0;i<s1.size();++i){
+// 	source1<<s1[i]<<"\n";
+// 	source2<<s2[i]<<"\n";
+// 	source3<<s3[i]<<"\n";
+//       }
+//     }
 
-    //Make Mixure Matrix A 5 rows 3 cols
-    mat ATrue(5,3);
-    ICR::maths::rng random(10);
+//     //Make Mixure Matrix A 5 rows 3 cols
+//     mat ATrue(5,3);
+//     ICR::maths::rng random(10);
     
-    for(size_t i=0;i<ATrue.rows();++i){
-      for(size_t j=0;j<ATrue.cols();++j){
-	ATrue(i,j) = random.gamma();
-      }
-    }
+//     for(size_t i=0;i<ATrue.rows();++i){
+//       for(size_t j=0;j<ATrue.cols();++j){
+// 	ATrue(i,j) = random.gamma();
+//       }
+//     }
 
-    for(size_t j=0;j<ATrue.cols();++j){
-      vec col = ATrue.get_col(j);
-      std::cout<<"col = "<<col<<std::endl;
+//     for(size_t j=0;j<ATrue.cols();++j){
+//       vec col = ATrue.get_col(j);
+//       std::cout<<"col = "<<col<<std::endl;
 
-      vec col2 = col*col;
-      double norm = 1.0/sqrt(mean(col2));
-      std::cout<<"norm "<<norm<<std::endl;
+//       vec col2 = col*col;
+//       double norm = 1.0/sqrt(mean(col2));
+//       std::cout<<"norm "<<norm<<std::endl;
 
-      col*=norm;
-      ATrue.set_col(j, col);
-    }
+//       col*=norm;
+//       ATrue.set_col(j, col);
+//     }
     
-    //std::cout<<A<<std::endl;
+//     //std::cout<<A<<std::endl;
     
-    mat sources(3,samples);
-    sources.set_row(0,s1);
-    sources.set_row(1,s2);
-    sources.set_row(2,s3);
+//     mat sources(3,samples);
+//     sources.set_row(0,s1);
+//     sources.set_row(1,s2);
+//     sources.set_row(2,s3);
     
-    mat Data = multiply(ATrue,sources);
-    vec d0 = Data.get_row(0) +  vec(NoiseComponent(0,50,samples));
-    vec d1 = Data.get_row(1) +  vec(NoiseComponent(1,50,samples));
-    vec d2 = Data.get_row(2) +  vec(NoiseComponent(2,50,samples));
-    vec d3 = Data.get_row(3) +  vec(NoiseComponent(3,50,samples));
-    vec d4 = Data.get_row(4) +  vec(NoiseComponent(4,50,samples));
+//     mat Data = multiply(ATrue,sources);
+//     vec d0 = Data.get_row(0) +  vec(NoiseComponent(0,50,samples));
+//     vec d1 = Data.get_row(1) +  vec(NoiseComponent(1,50,samples));
+//     vec d2 = Data.get_row(2) +  vec(NoiseComponent(2,50,samples));
+//     vec d3 = Data.get_row(3) +  vec(NoiseComponent(3,50,samples));
+//     vec d4 = Data.get_row(4) +  vec(NoiseComponent(4,50,samples));
     
-    // std::
+//     // std::
     
-    {
-      std::ofstream Atrue_stream("ICAATrue.txt");
-      for(size_t i=0;i<ATrue.rows();++i){
-	for(size_t j=0;j<ATrue.cols();++j){
-	  Atrue_stream<< ATrue(i,j)<<" ";
-	}
-	Atrue_stream<<"\n";
-      }
-    }
-    {
-      std::ofstream data0("ICAData0.txt");
-      std::ofstream data1("ICAData1.txt");
-      std::ofstream data2("ICAData2.txt");
-      std::ofstream data3("ICAData3.txt");
-      std::ofstream data4("ICAData4.txt");
-      for(size_t i=0;i<d1.size();++i){
-	data0<<d0[i]<<"\n";
-	data1<<d1[i]<<"\n";
-	data2<<d2[i]<<"\n";
-	data3<<d3[i]<<"\n";
-	data4<<d4[i]<<"\n";
-      }
-    }
-    //Make 5 Data output
+//     {
+//       std::ofstream Atrue_stream("ICAATrue.txt");
+//       for(size_t i=0;i<ATrue.rows();++i){
+// 	for(size_t j=0;j<ATrue.cols();++j){
+// 	  Atrue_stream<< ATrue(i,j)<<" ";
+// 	}
+// 	Atrue_stream<<"\n";
+//       }
+//     }
+//     {
+//       std::ofstream data0("ICAData0.txt");
+//       std::ofstream data1("ICAData1.txt");
+//       std::ofstream data2("ICAData2.txt");
+//       std::ofstream data3("ICAData3.txt");
+//       std::ofstream data4("ICAData4.txt");
+//       for(size_t i=0;i<d1.size();++i){
+// 	data0<<d0[i]<<"\n";
+// 	data1<<d1[i]<<"\n";
+// 	data2<<d2[i]<<"\n";
+// 	data3<<d3[i]<<"\n";
+// 	data4<<d4[i]<<"\n";
+//       }
+//     }
+//     //Make 5 Data output
     
     
     
 
     
     
-    // ICR::maths::rng random(10);
-    // ICR::maths::rng init(11);
-    // size_t data_points = 150;//5447
-    typedef Builder<double>::GaussianNode GaussianNode;
-    typedef Builder<double>::RectifiedGaussianNode RectifiedGaussianNode;
-    typedef Builder<double>::WeightsNode WeightsNode;
-    typedef Builder<double>::GammaNode    GammaNode;
-    typedef Builder<double>::GaussianDataNode    Datum;
-    typedef Builder<double>::Variable    Variable;
-    typedef Builder<double>::GaussianResultNode    ResultNode;
+//     // ICR::maths::rng random(10);
+//     // ICR::maths::rng init(11);
+//     // size_t data_points = 150;//5447
+//     typedef Builder<double>::GaussianNode GaussianNode;
+//     typedef Builder<double>::RectifiedGaussianNode RectifiedGaussianNode;
+//     typedef Builder<double>::WeightsNode WeightsNode;
+//     typedef Builder<double>::GammaNode    GammaNode;
+//     typedef Builder<double>::GaussianDataNode    Datum;
+//     typedef Builder<double>::Variable    Variable;
+//     typedef Builder<double>::GaussianResultNode    ResultNode;
    
-    Builder<double> Build("Cost.txt");
+//     Builder<double> Build("Cost.txt");
 
 
-    const size_t Components = 3;
-    const size_t M = 4; //assumed sources
-    const size_t N = Data.rows(); //DataSources
-    const size_t T  = Data.cols(); //DataLength
+//     const size_t Components = 3;
+//     const size_t M = 4; //assumed sources
+//     const size_t N = Data.rows(); //DataSources
+//     const size_t T  = Data.cols(); //DataLength
 
-    std::vector<WeightsNode> Weights(M);
-    for(size_t m=0;m<M;++m){
-      Weights[m] = Build.weights(Components);
-    }
+//     std::vector<WeightsNode> Weights(M);
+//     for(size_t m=0;m<M;++m){
+//       Weights[m] = Build.weights(Components);
+//     }
     
-    std::vector< std::vector<Variable> > ShypMean(M);
-    std::vector< std::vector<Variable> >    ShypPrec(M);
-    for(size_t m=0;m<M;++m){ 
-      ShypMean[m].resize(Components);
-      ShypPrec[m].resize(Components);
-      for(size_t c=0;c<Components;++c){
-	ShypMean[m][c]=	Build.gaussian(0.0,0.1);
-	ShypPrec[m][c]= Build.gamma(0.1,0.1);
-      }
+//     std::vector< std::vector<Variable> > ShypMean(M);
+//     std::vector< std::vector<Variable> >    ShypPrec(M);
+//     for(size_t m=0;m<M;++m){ 
+//       ShypMean[m].resize(Components);
+//       ShypPrec[m].resize(Components);
+//       for(size_t c=0;c<Components;++c){
+// 	ShypMean[m][c]=	Build.gaussian(0.0,0.1);
+// 	ShypPrec[m][c]= Build.gamma(0.1,0.1);
+//       }
 
 
-    }
+//     }
 
-    std::vector< std::vector<RectifiedGaussianNode> > S(M);
-    for(size_t m=0;m<M;++m){ 
-      S[m].resize(T);
-      for(size_t t=0;t<T;++t){ 
-	S[m][t] = Build.rectified_gaussian_mixture(ShypMean[m],
-						 ShypPrec[m],
-						 Weights[m]);
-      }
-    }
+//     std::vector< std::vector<RectifiedGaussianNode> > S(M);
+//     for(size_t m=0;m<M;++m){ 
+//       S[m].resize(T);
+//       for(size_t t=0;t<T;++t){ 
+// 	S[m][t] = Build.rectified_gaussian_mixture(ShypMean[m],
+// 						 ShypPrec[m],
+// 						 Weights[m]);
+//       }
+//     }
 
-    std::vector<GaussianNode> AMean(M);
-    for(size_t m=0;m<M;++m){
-      AMean[m] = Build.gaussian(0.0,0.1);
-    }
-    std::vector<GammaNode> APrecision(M);
-    for(size_t m=0;m<M;++m){
-      APrecision[m] = Build.gamma(0.1,0.1);
-    }
+//     std::vector<GaussianNode> AMean(M);
+//     for(size_t m=0;m<M;++m){
+//       AMean[m] = Build.gaussian(0.0,0.1);
+//     }
+//     std::vector<GammaNode> APrecision(M);
+//     for(size_t m=0;m<M;++m){
+//       APrecision[m] = Build.gamma(0.1,0.1);
+//     }
     
-    std::vector< std::vector<RectifiedGaussianNode> > A(N);
-    for(size_t n=0;n<N;++n){ 
-      A[n].resize(M);
-      for(size_t m=0;m<M;++m){ 
-	A[n][m] = Build.rectified_gaussian(AMean[m], APrecision[m]);
-      }
-    }
+//     std::vector< std::vector<RectifiedGaussianNode> > A(N);
+//     for(size_t n=0;n<N;++n){ 
+//       A[n].resize(M);
+//       for(size_t m=0;m<M;++m){ 
+// 	A[n][m] = Build.rectified_gaussian(AMean[m], APrecision[m]);
+//       }
+//     }
 
     
-    std::vector<RectifiedGaussianNode> noiseMean(N);
-    for(size_t n=0;n<N;++n){
-      noiseMean[n] = Build.rectified_gaussian(0.00,0.01);
-    }
+//     std::vector<RectifiedGaussianNode> noiseMean(N);
+//     for(size_t n=0;n<N;++n){
+//       noiseMean[n] = Build.rectified_gaussian(0.00,0.01);
+//     }
     
     
     
-    std::vector<GammaNode> DPrecision(N);
-    for(size_t n=0;n<N;++n){
-      DPrecision[n] = Build.gamma(0.1,0.1);
-    }
+//     std::vector<GammaNode> DPrecision(N);
+//     for(size_t n=0;n<N;++n){
+//       DPrecision[n] = Build.gamma(0.1,0.1);
+//     }
     
-    //Deterministic Node.  Need to make the expression.
-    //The inner product plus noise
-    /** The inner product is summed over M.
-     *  Therefore there are 2M + 1 placeholders required
-     *  M for Anm, M for Smt and 1 for Noise
-     */
-    ExpressionFactory<double> Factory;
-    //Make a set of placeholders for all the elements in the expression.
-    std::vector<Placeholder<double>*> SP(M);
-    std::vector<Placeholder<double>*> AP(M);
-    for(size_t m=0;m<M;++m){
-      SP[m] = Factory.placeholder();  
-      AP[m] = Factory.placeholder(); 
-    }
-    //Placeholder<double>* NP = Factory.placeholder();
+//     //Deterministic Node.  Need to make the expression.
+//     //The inner product plus noise
+//     /** The inner product is summed over M.
+//      *  Therefore there are 2M + 1 placeholders required
+//      *  M for Anm, M for Smt and 1 for Noise
+//      */
+//     ExpressionFactory<double> Factory;
+//     //Make a set of placeholders for all the elements in the expression.
+//     std::vector<Placeholder<double>*> SP(M);
+//     std::vector<Placeholder<double>*> AP(M);
+//     for(size_t m=0;m<M;++m){
+//       SP[m] = Factory.placeholder();  
+//       AP[m] = Factory.placeholder(); 
+//     }
+//     //Placeholder<double>* NP = Factory.placeholder();
 
-    //The expression in terms of these placeholders
-    Expression<double>* Expr;
-    {
-      BOOST_ASSERT(M!=0);
-      //First do the multiplication
-      std::deque<Expression<double>*> prod(M);
-      for(size_t m=0;m<M;++m){
-	prod[m] = Factory.Multiply(AP[m], SP[m]);
-      }
-      //then add them up
-      Expr = prod[0];
-      prod.pop_front();
-      while(prod.size()!=0)
-	{
-	  Expr = Factory.Add(Expr,prod[0]);
-	  prod.pop_front();
-	}
-      //Finnaly add the Noise placeholder
-      //Expr = Factory.Add(Expr, NP);
+//     //The expression in terms of these placeholders
+//     Expression<double>* Expr;
+//     {
+//       BOOST_ASSERT(M!=0);
+//       //First do the multiplication
+//       std::deque<Expression<double>*> prod(M);
+//       for(size_t m=0;m<M;++m){
+// 	prod[m] = Factory.Multiply(AP[m], SP[m]);
+//       }
+//       //then add them up
+//       Expr = prod[0];
+//       prod.pop_front();
+//       while(prod.size()!=0)
+// 	{
+// 	  Expr = Factory.Add(Expr,prod[0]);
+// 	  prod.pop_front();
+// 	}
+//       //Finnaly add the Noise placeholder
+//       //Expr = Factory.Add(Expr, NP);
       
-    }
+//     }
     
     
 
-    std::vector< std::vector<ResultNode> > AtimesSplusN(N);
-    for(size_t n=0;n<N;++n){ 
-      AtimesSplusN[n].resize(T);
-      for(size_t t=0;t<T;++t){ 
+//     std::vector< std::vector<ResultNode> > AtimesSplusN(N);
+//     for(size_t n=0;n<N;++n){ 
+//       AtimesSplusN[n].resize(T);
+//       for(size_t t=0;t<T;++t){ 
 
-	/**  Now need to replace the placeholders with given nodes 
-	 *   I.e. set up a context to the expression
-	 */
-	Context<double> context;
-	for(size_t m=0;m<M;++m){
-	  context.Assign(AP[m], A[n][m]);
-	  context.Assign(SP[m], S[m][t]);
-	}
-	//context.Assign(NP, noiseMean[n]);
+// 	/**  Now need to replace the placeholders with given nodes 
+// 	 *   I.e. set up a context to the expression
+// 	 */
+// 	Context<double> context;
+// 	for(size_t m=0;m<M;++m){
+// 	  context.Assign(AP[m], A[n][m]);
+// 	  context.Assign(SP[m], S[m][t]);
+// 	}
+// 	//context.Assign(NP, noiseMean[n]);
 	
-	AtimesSplusN[n][t] = Build.calc_gaussian(Expr,context);  
-      }
-    }
+// 	AtimesSplusN[n][t] = Build.calc_gaussian(Expr,context);  
+//       }
+//     }
 
-    for(size_t n=0;n<N;++n){
-      for(size_t t=0;t<T;++t){
-	Build.join(AtimesSplusN[n][t],DPrecision[n], Data(n,t));
-      }
-    }
+//     for(size_t n=0;n<N;++n){
+//       for(size_t t=0;t<T;++t){
+// 	Build.join(AtimesSplusN[n][t],DPrecision[n], Data(n,t));
+//       }
+//     }
 
-    std::cout<<"NODES   = "<<Build.number_of_nodes()<<std::endl;
-    std::cout<<"FACTORS = "<<Build.number_of_factors()<<std::endl;
+//     std::cout<<"NODES   = "<<Build.number_of_nodes()<<std::endl;
+//     std::cout<<"FACTORS = "<<Build.number_of_factors()<<std::endl;
 
-    // // BOOST_CHECK(Build.NumberOfNodes()   ==  (size_t) 6 + data_points );
-    // // BOOST_CHECK(Build.NumberOfFactors() ==  (size_t) 2 + data_points);
+//     // // BOOST_CHECK(Build.NumberOfNodes()   ==  (size_t) 6 + data_points );
+//     // // BOOST_CHECK(Build.NumberOfFactors() ==  (size_t) 2 + data_points);
    
     
 
-    bool not_converged = true;
-    size_t max_attempts = 1;
+//     bool not_converged = true;
+//     size_t max_attempts = 1;
 
-    size_t attempt = 0;
+//     size_t attempt = 0;
     
-    while(not_converged && attempt< max_attempts)
-      {
+//     while(not_converged && attempt< max_attempts)
+//       {
 
-	//check weights to see if they have coallect
-	not_converged = false;
-	for(size_t m=0;m<M;++m){
-	  const Moments<double> W = Weights[m]->GetMoments();
-	  std::vector<double> weights(W.size());
-	  PARALLEL_TRANSFORM(W.begin(), W.end(), weights.begin(),exponentiate());
-	  if (*min_element(weights.begin(), weights.end()) < 0.01) {
-	    Weights[m]->InitialiseMoments();
-	    std::cout<<"reinitializing weights "<<m<<std::endl;
-	    // for(size_t c=0;c<Components;++c){
-	    //   // std::cout<<std::exp(Weights[m]->GetMoments()[c])<<"\t";
-	    //   ShypMean[m][c]->InitialiseMoments();
-	    //   ShypPrec[m][c]->InitialiseMoments();
-	    // }
-	    // std::cout<<std::endl;
+// 	//check weights to see if they have coallect
+// 	not_converged = false;
+// 	for(size_t m=0;m<M;++m){
+// 	  const Moments<double> W = Weights[m]->GetMoments();
+// 	  std::vector<double> weights(W.size());
+// 	  PARALLEL_TRANSFORM(W.begin(), W.end(), weights.begin(),exponentiate());
+// 	  if (*min_element(weights.begin(), weights.end()) < 0.01) {
+// 	    Weights[m]->InitialiseMoments();
+// 	    std::cout<<"reinitializing weights "<<m<<std::endl;
+// 	    // for(size_t c=0;c<Components;++c){
+// 	    //   // std::cout<<std::exp(Weights[m]->GetMoments()[c])<<"\t";
+// 	    //   ShypMean[m][c]->InitialiseMoments();
+// 	    //   ShypPrec[m][c]->InitialiseMoments();
+// 	    // }
+// 	    // std::cout<<std::endl;
 
 
 
       
-	    // std::vector<double> hprec1(M);
-	    // PARALLEL_TRANSFORM(ShypMean[m].begin(), ShypMean[m].end(), 
-	    // 		       hprec1.begin(),
-	    // 		       boost::bind(&Variable::GetMoments(), _1)
-	    // 		       );
-	    // std::vector<double> hprec2 = hprec1;
-	    // PARALLEL_NEXT_PERMUTATION(hprec2.begin(), hprec2.end());
+// 	    // std::vector<double> hprec1(M);
+// 	    // PARALLEL_TRANSFORM(ShypMean[m].begin(), ShypMean[m].end(), 
+// 	    // 		       hprec1.begin(),
+// 	    // 		       boost::bind(&Variable::GetMoments(), _1)
+// 	    // 		       );
+// 	    // std::vector<double> hprec2 = hprec1;
+// 	    // PARALLEL_NEXT_PERMUTATION(hprec2.begin(), hprec2.end());
 	    
-	    // std::vector<double> hprec_sub;
+// 	    // std::vector<double> hprec_sub;
       
-	    // PARALLEL_TRANSFROM(hprec1.begin(), hprec1.end(),
-	    // 		       hprec2.begin(), hprec_sub.begin(),
-	    // 		       subtract()
-	    // 		       );
+// 	    // PARALLEL_TRANSFROM(hprec1.begin(), hprec1.end(),
+// 	    // 		       hprec2.begin(), hprec_sub.begin(),
+// 	    // 		       subtract()
+// 	    // 		       );
 	    
-	    // for(size_t c=0;c<Components;++c){
-	    //   if (hprec_sub<0.01)
-	    // 	{
+// 	    // for(size_t c=0;c<Components;++c){
+// 	    //   if (hprec_sub<0.01)
+// 	    // 	{
 
-	    // 	  ShypMean[m][c]->InitialiseMoments();
-	    // 	  ShypPrec[m][c]->InitialiseMoments();
-	    // 	}
-	    // }
+// 	    // 	  ShypMean[m][c]->InitialiseMoments();
+// 	    // 	  ShypPrec[m][c]->InitialiseMoments();
+// 	    // 	}
+// 	    // }
 
-	    // PARALLEL_SORT(weights1.begin(), weights1.end());
-	    // weights2 = weights1;
-	    // PARALLEL_NEXT_PERMUTATION(weights2.begin(), weights2.end());
-	    // PARALLEL_TRANSFROM(weights1.begin(), weights1.end(),
-	    // 		       weights2.begin(), weights_sub.begin(),
-	    // 		       subtract()
-	    // 		       );
-	    // if (*min_element(weights_sub.begin(), weights_sub.end() < 0.01) 
+// 	    // PARALLEL_SORT(weights1.begin(), weights1.end());
+// 	    // weights2 = weights1;
+// 	    // PARALLEL_NEXT_PERMUTATION(weights2.begin(), weights2.end());
+// 	    // PARALLEL_TRANSFROM(weights1.begin(), weights1.end(),
+// 	    // 		       weights2.begin(), weights_sub.begin(),
+// 	    // 		       subtract()
+// 	    // 		       );
+// 	    // if (*min_element(weights_sub.begin(), weights_sub.end() < 0.01) 
 			 
-	    // 	for(size_t c=0;c<Components;++c){
-	    // 	  InferredWeights<<std::exp(Weights[m]->GetMoments()[c])<<"\t";
-	    // 	}
-	    // 	InfHypMeans <<"\n";
-	    // 	InfHypPrec  <<"\n";
-	    // 	InferredWeights<<"\n";
-	    // 	}
+// 	    // 	for(size_t c=0;c<Components;++c){
+// 	    // 	  InferredWeights<<std::exp(Weights[m]->GetMoments()[c])<<"\t";
+// 	    // 	}
+// 	    // 	InfHypMeans <<"\n";
+// 	    // 	InfHypPrec  <<"\n";
+// 	    // 	InferredWeights<<"\n";
+// 	    // 	}
 	    
 
 
-	    // not_converged = true;
-	  }
-	}
+// 	    // not_converged = true;
+// 	  }
+// 	}
 	
-	not_converged = !Build.run(0.1,50);
+// 	not_converged = !Build.run(0.1,50);
 
-	// std::cout<<"WEIGHTS ["<<attempt<<"] = "<<std::endl;
+// 	// std::cout<<"WEIGHTS ["<<attempt<<"] = "<<std::endl;
 
-	// for(size_t m=0;m<M;++m){
-	//   for(size_t c=0;c<Components;++c){
-	//     std::cout<<std::exp(Weights[m]->GetMoments()[c])<<"\t";
-	//   }
-	//   std::cout<<std::endl;
-	//}
+// 	// for(size_t m=0;m<M;++m){
+// 	//   for(size_t c=0;c<Components;++c){
+// 	//     std::cout<<std::exp(Weights[m]->GetMoments()[c])<<"\t";
+// 	//   }
+// 	//   std::cout<<std::endl;
+// 	//}
 
-	std::ofstream InferredResult("ICAInferedResult.txt");
-	for(size_t t=0;t<T;++t){
-	  for(size_t n=0;n<N;++n){
-	    InferredResult<<Mean(AtimesSplusN[n][t])<<"\t";
-	  }
-	  InferredResult<<"\n";
+// 	std::ofstream InferredResult("ICAInferedResult.txt");
+// 	for(size_t t=0;t<T;++t){
+// 	  for(size_t n=0;n<N;++n){
+// 	    InferredResult<<Mean(AtimesSplusN[n][t])<<"\t";
+// 	  }
+// 	  InferredResult<<"\n";
 
-	}
-	// mat tAInf(N,M);
-	// mat tA2Inf(N,M);
-	// vec tAVarianceScale(M);
+// 	}
+// 	// mat tAInf(N,M);
+// 	// mat tA2Inf(N,M);
+// 	// vec tAVarianceScale(M);
 
-	// for(size_t n=0;n<N;++n){
-	//   for(size_t m=0;m<M;++m){
-	//     tAInf(n,m)  = A[n][m]->GetMoments()[0];
-	//     tA2Inf(n,m) = A[n][m]->GetMoments()[1];
-	//     // AVarianceScale(m,t) = GSL_POW_2(SInf(m,t))/SInf2(m,t);
-	//   }
-	// }
-	// //std::cout<<"A = "<<std::endl;
-	// //std::cout<<tAInf<<std::endl;
+// 	// for(size_t n=0;n<N;++n){
+// 	//   for(size_t m=0;m<M;++m){
+// 	//     tAInf(n,m)  = A[n][m]->GetMoments()[0];
+// 	//     tA2Inf(n,m) = A[n][m]->GetMoments()[1];
+// 	//     // AVarianceScale(m,t) = GSL_POW_2(SInf(m,t))/SInf2(m,t);
+// 	//   }
+// 	// }
+// 	// //std::cout<<"A = "<<std::endl;
+// 	// //std::cout<<tAInf<<std::endl;
 
 
-	// for(size_t m=0;m<M;++m){
-	//   const vec a =tAInf.get_col(m);
-	//   tAVarianceScale(m) = mean(a*a)/mean(tA2Inf.get_col(m));
+// 	// for(size_t m=0;m<M;++m){
+// 	//   const vec a =tAInf.get_col(m);
+// 	//   tAVarianceScale(m) = mean(a*a)/mean(tA2Inf.get_col(m));
       
-	//   if (tAVarianceScale(m)<0.9) 
-	//     {
-	//       std::cout<<"restarting "<<m<<std::endl;
-	//       attempt =0;
+// 	//   if (tAVarianceScale(m)<0.9) 
+// 	//     {
+// 	//       std::cout<<"restarting "<<m<<std::endl;
+// 	//       attempt =0;
 
-	//       //restart
-	//       for(size_t n=0;n<N;++n){
-	// 	A[n][m]->InitialiseMoments();
-	//       }
-	//       for(size_t t=0;t<T;++t){
-	//       	S[m][t]->InitialiseMoments();
-	//       }
-	//     }
-	// }
-	// std::cout<<"A variance scale = "<<tAVarianceScale<<"\n";
-	++attempt;
+// 	//       //restart
+// 	//       for(size_t n=0;n<N;++n){
+// 	// 	A[n][m]->InitialiseMoments();
+// 	//       }
+// 	//       for(size_t t=0;t<T;++t){
+// 	//       	S[m][t]->InitialiseMoments();
+// 	//       }
+// 	//     }
+// 	// }
+// 	// std::cout<<"A variance scale = "<<tAVarianceScale<<"\n";
+// 	++attempt;
 
 
-	/* Fix weightings on mixing matrix */
-	mat AInf(N,M);
-	// mat A2Inf(N,M);
-	// vec AVarianceScale(M);
+// 	/* Fix weightings on mixing matrix */
+// 	mat AInf(N,M);
+// 	// mat A2Inf(N,M);
+// 	// vec AVarianceScale(M);
     
-	mat SInf(M,T);
-	// mat SInf2(M,T);
-	// mat SVarianceScale(M,T);
+// 	mat SInf(M,T);
+// 	// mat SInf2(M,T);
+// 	// mat SVarianceScale(M,T);
     
-	for(size_t n=0;n<N;++n){
-	  for(size_t m=0;m<M;++m){
-	    AInf(n,m)  = Mean(A[n][m]);
-	    // A2Inf(n,m) = A[n][m]->GetMoments()[1];
-	    // AVarianceScale(m,t) = GSL_POW_2(SInf(m,t))/SInf2(m,t);
-	  }
-	}
+// 	for(size_t n=0;n<N;++n){
+// 	  for(size_t m=0;m<M;++m){
+// 	    AInf(n,m)  = Mean(A[n][m]);
+// 	    // A2Inf(n,m) = A[n][m]->GetMoments()[1];
+// 	    // AVarianceScale(m,t) = GSL_POW_2(SInf(m,t))/SInf2(m,t);
+// 	  }
+// 	}
     
     
 
-	for(size_t m=0;m<M;++m){
-	  for(size_t t=0;t<T;++t){
-	    SInf(m,t) = Mean(S[m][t]);
-	    // SInf2(m,t) = S[m][t]->GetMoments()[1];
-	    // SVarianceScale(m,t) = GSL_POW_2(SInf(m,t))/SInf2(m,t);
-	  }
-	}
+// 	for(size_t m=0;m<M;++m){
+// 	  for(size_t t=0;t<T;++t){
+// 	    SInf(m,t) = Mean(S[m][t]);
+// 	    // SInf2(m,t) = S[m][t]->GetMoments()[1];
+// 	    // SVarianceScale(m,t) = GSL_POW_2(SInf(m,t))/SInf2(m,t);
+// 	  }
+// 	}
     
     
-	for(size_t m=0;m<M;++m){
-	  vec col = AInf.get_col(m);
-	  const vec col2 = col*col;
-	  double norm = 1.0/std::sqrt(mean(col2));
-	  col*=norm;
-	  AInf.set_col(m, col);
+// 	for(size_t m=0;m<M;++m){
+// 	  vec col = AInf.get_col(m);
+// 	  const vec col2 = col*col;
+// 	  double norm = 1.0/std::sqrt(mean(col2));
+// 	  col*=norm;
+// 	  AInf.set_col(m, col);
       
-	  vec row = SInf.get_row(m);
-	  row /= norm;
-	  SInf.set_row(m,row);
-	}
+// 	  vec row = SInf.get_row(m);
+// 	  row /= norm;
+// 	  SInf.set_row(m,row);
+// 	}
     
 
-	std::ofstream InferredA("ICAMixingMatrix.txt");
-	for(size_t n=0;n<N;++n){
-	  vec row = AInf.get_row(n);
-	  InferredA<<row<<"\n";
-	}
+// 	std::ofstream InferredA("ICAMixingMatrix.txt");
+// 	for(size_t n=0;n<N;++n){
+// 	  vec row = AInf.get_row(n);
+// 	  InferredA<<row<<"\n";
+// 	}
 
 
-	std::ofstream InferredSources("ICAInferedSources.txt");
-	for(size_t t=0;t<T;++t){
-	  InferredSources<< SInf.get_col(t)<<"\n";
-	  // InferredSources <<col<<"\n";
-	  // InferredSources<<S[m][t]->GetMoments()[0]<<"\t";
-	}
-	// InferredSources<<"\n";
+// 	std::ofstream InferredSources("ICAInferedSources.txt");
+// 	for(size_t t=0;t<T;++t){
+// 	  InferredSources<< SInf.get_col(t)<<"\n";
+// 	  // InferredSources <<col<<"\n";
+// 	  // InferredSources<<S[m][t]->GetMoments()[0]<<"\t";
+// 	}
+// 	// InferredSources<<"\n";
 
 
-	std::ofstream InferredNoise("ICAInferedNoise.txt");
-	for(size_t n=0;n<N;++n){
-	  InferredNoise<<Mean(noiseMean[n])<<"\t";
-	}
+// 	std::ofstream InferredNoise("ICInferedNoise.txt");
+// 	for(size_t n=0;n<N;++n){
+// 	  InferredNoise<<Mean(noiseMean[n])<<"\t";
+// 	}
 
-	std::ofstream  InferredWeights("ICAWeights.txt");
-	std::ofstream  InferredWeightsSD("ICAWeightsSD.txt");
-	std::ofstream  InfHypMeans("ICAHypMean.txt");
-	std::ofstream  InfHypPrec("ICAHypPrec.txt");
-	for(size_t m=0;m<M;++m){
-	  for(size_t c=0;c<Components;++c){
-	    InfHypMeans<<Mean(ShypMean[m][c])<<"\t";
-	    InfHypPrec <<Mean(ShypPrec[m][c])<<"\t";
-	    InferredWeights<<Mean(Weights[m],c)<<"\t";
-	    InferredWeightsSD<<StandardDeviation(Weights[m],c)<<"\t";
-	  }
-	  InfHypMeans <<"\n";
-	  InfHypPrec  <<"\n";
-	  InferredWeights<<"\n";
-	  InferredWeightsSD<<"\n";
-	}
+// 	std::ofstream  InferredWeights("ICAWeights.txt");
+// 	std::ofstream  InferredWeightsSD("ICAWeightsSD.txt");
+// 	std::ofstream  InfHypMeans("ICAHypMean.txt");
+// 	std::ofstream  InfHypPrec("ICAHypPrec.txt");
+// 	for(size_t m=0;m<M;++m){
+// 	  for(size_t c=0;c<Components;++c){
+// 	    InfHypMeans<<Mean(ShypMean[m][c])<<"\t";
+// 	    InfHypPrec <<Mean(ShypPrec[m][c])<<"\t";
+// 	    InferredWeights<<Mean(Weights[m],c)<<"\t";
+// 	    InferredWeightsSD<<StandardDeviation(Weights[m],c)<<"\t";
+// 	  }
+// 	  InfHypMeans <<"\n";
+// 	  InfHypPrec  <<"\n";
+// 	  InferredWeights<<"\n";
+// 	  InferredWeightsSD<<"\n";
+// 	}
     
 
 
 	
-      }
+//       }
   
 
-    //or if 
+//     //or if 
 
-    // std::ofstream InferredA("ICAMixingMatrix.txt");
-    // for(size_t n=0;n<N;++n){
-    //   for(size_t m=0;m<M;++m){
+//     // std::ofstream InferredA("ICAMixingMatrix.txt");
+//     // for(size_t n=0;n<N;++n){
+//     //   for(size_t m=0;m<M;++m){
 
-    // 	InferredA<<A[n][m]->GetMoments()[0]<<"\t";
-    //   }
-    //   InferredA<<"\n";
-    // }
-    //    std::cout<<<<std::endl;
+//     // 	InferredA<<A[n][m]->GetMoments()[0]<<"\t";
+//     //   }
+//     //   InferredA<<"\n";
+//     // }
+//     //    std::cout<<<<std::endl;
 
  
 
-  }
-}
+//   }
+// }
 
 
 

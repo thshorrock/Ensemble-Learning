@@ -12,7 +12,7 @@
 #EMACS BACKUPS
 *~ 
 Makefile
-cmake_install.cmake
+*.cmake
 
 #files
 git_forever_remove

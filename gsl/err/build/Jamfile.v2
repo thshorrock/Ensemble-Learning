@@ -1,0 +1,24 @@
+
+project gslerr
+	: source-location ../
+	: #default-build
+	: build-dir $(TOP)/build
+  	: usage-requirements <include>../include 
+	: requirements 
+	<include>../include/
+;
+
+lib gslerr : 
+    error.c stream.c message.c strerror.c
+#   $(TOP)//gsl-sys-library 
+#   $(TOP)//gsl-test-library
+#   $(TOP)//gsl-utils-library
+    ;
+
+install headers 
+	: [ glob *.h ]  
+	: <location>$(TOP)/include/gsl/
+	  <install-source-root>../
+;
+
+install gslerr-lib : gslerr : <location>$(TOP)/lib  ;
