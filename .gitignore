@@ -13,6 +13,7 @@
 *~ 
 Makefile
 *.cmake
+*.dot
 
 #files
 git_forever_remove
