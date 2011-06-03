@@ -26,31 +26,25 @@
  ***********************************************************************************
  ***********************************************************************************/
 
-
-
-
-#include "EnsembleLearning/node/Node.hpp"
-#include "EnsembleLearning/message/NaturalParameters.hpp"
 #include "EnsembleLearning/message/Moments.hpp"
-// #include "EnsembleLearning/Message.hpp"
-
-//#include "EnsembleLearning/piping/Piping.hpp"
-#include "EnsembleLearning/node/variable/Hidden.hpp"
-#include "EnsembleLearning/exponential_model/Gaussian.hpp"
-#include "EnsembleLearning/exponential_model/RectifiedGaussian.hpp"
-#include "EnsembleLearning/exponential_model/Gamma.hpp"
+#include "EnsembleLearning/node/Node.hpp"
 #include "EnsembleLearning/exponential_model/Discrete.hpp"
 #include "EnsembleLearning/exponential_model/Dirichlet.hpp"
+
 #include <boost/shared_ptr.hpp>
 #include <boost/none.hpp>
-#include <vector>
 #include <boost/assert.hpp> 
-//#include "rng.hpp"
+
+#include <vector>
 
 
 namespace ICR{
   namespace EnsembleLearning{
+   
+    //forward declaration
     
+    template<class T>
+    class NaturalParameters;
    
     /******************************************************************************
      * Default Specialisation - Gaussian, RectifiedGaussian, Gamma
