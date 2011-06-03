@@ -28,7 +28,6 @@
 
 
 
-#include "EnsembleLearning/message/Coster.hpp"
 #include <boost/call_traits.hpp>
 #include <vector>
 #include <iostream>
@@ -37,6 +36,7 @@ namespace ICR{
   namespace EnsembleLearning{
     
     //forward declaration
+    class Coster;
     template<class T> class Moments;
     template<class T> class NaturalParameters;
     

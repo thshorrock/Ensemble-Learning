@@ -34,9 +34,10 @@
 #include "EnsembleLearning/node/variable/Hidden.hpp"
 #include "EnsembleLearning/node/variable/Observed.hpp"
 #include "EnsembleLearning/node/variable/Calculation.hpp"
-#include <iostream>
 //algorithms
 #include "EnsembleLearning/detail/parallel_algorithms.hpp"
+//messages
+#include "EnsembleLearning/message/Coster.hpp"
 
 //stream
 #include <fstream>
