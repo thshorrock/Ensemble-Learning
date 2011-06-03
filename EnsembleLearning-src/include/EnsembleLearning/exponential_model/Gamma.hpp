@@ -1,10 +1,22 @@
 #pragma once
+
+
+#include "Random.hpp"
+#include "EnsembleLearning/detail/parallel_algorithms.hpp"
+#include "EnsembleLearning/message/Moments.hpp"
+#include "EnsembleLearning/message/NaturalParameters.hpp"
+#include "EnsembleLearning/node/Node.hpp"
 #include "EnsembleLearning/exception/NotConjugate.hpp"
 
 #include <gsl/gsl_sf_psi.h> //for Digamma function gsl_sf_psi
 #include <gsl/gsl_sf_gamma.h> //for gamma function
 
+#include <boost/call_traits.hpp> 
 #include <boost/assert.hpp> 
+
+#include <vector>
+#include <cmath>
+
 namespace ICR{
   namespace EnsembleLearning{
 
