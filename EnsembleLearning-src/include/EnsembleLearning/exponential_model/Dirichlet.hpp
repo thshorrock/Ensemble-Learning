@@ -1,15 +1,49 @@
 #pragma once
+#ifndef DIRICHLET_HPP
+#define DIRICHLET_HPP
+
+
+/***********************************************************************************
+ ***********************************************************************************
+ **                                                                               **
+ **  Copyright (C) 2011 Tom Shorrock <t.h.shorrock@gmail.com> 
+ **                                                                               **
+ **                                                                               **
+ **  This program is free software; you can redistribute it and/or                **
+ **  modify it under the terms of the GNU General Public License                  **
+ **  as published by the Free Software Foundation; either version 2               **
+ **  of the License, or (at your option) any later version.                       **
+ **                                                                               **
+ **  This program is distributed in the hope that it will be useful,              **
+ **  but WITHOUT ANY WARRANTY; without even the implied warranty of               **
+ **  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                **
+ **  GNU General Public License for more details.                                 **
+ **                                                                               **
+ **  You should have received a copy of the GNU General Public License            **
+ **  along with this program; if not, write to the Free Software                  **
+ **  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.  **
+ **                                                                               **
+ ***********************************************************************************
+ ***********************************************************************************/
+
+
+
 
 #include "Random.hpp"
-// #include "ExponentialModel.hpp"
+#include "EnsembleLearning/detail/parallel_algorithms.hpp"
+#include "EnsembleLearning/message/Moments.hpp"
+#include "EnsembleLearning/message/NaturalParameters.hpp"
+#include "EnsembleLearning/node/Node.hpp"
 
 #include <gsl/gsl_sf_psi.h> //for Digamma function gsl_sf_psi
 #include <gsl/gsl_sf_gamma.h> //for gamma function
 
-#include <vector>
-#include "EnsembleLearning/detail/parallel_algorithms.hpp"
-
 #include <boost/assert.hpp> 
+#include <boost/call_traits.hpp> 
+
+#include <vector>
+#include <cmath>
+
 
 namespace ICR{
   namespace EnsembleLearning{
@@ -45,6 +79,10 @@ namespace ICR{
       vector_data_parameter;
       typedef typename boost::call_traits<std::vector<T> >::value_type
       vector_data_t;
+
+      typedef typename boost::call_traits<const VariableNode<T>*>::param_type
+      Variable_parameter;
+
       
       ///@}
 
@@ -74,7 +112,7 @@ namespace ICR{
        */
       static
       moments_t
-      CalcSample(const VariableNode<T>* V);
+      CalcSample(Variable_parameter V);
 
       /** Calculate the Mean from the Natural Paramters.
        *  @param NP The NaturalParameters from which to calcualate the moments.
@@ -221,7 +259,7 @@ ICR::EnsembleLearning::Dirichlet<T>::CalcLogNorm(NP_parameter NP)
 template<class T>
 inline
 typename ICR::EnsembleLearning::Dirichlet<T>::moments_t
-ICR::EnsembleLearning::Dirichlet<T>::CalcSample(const VariableNode<T>* V) 
+ICR::EnsembleLearning::Dirichlet<T>::CalcSample(Variable_parameter V) 
 {
   rng* random = Random::Instance();
   const moments_t  Mus = V->GetMoments();
@@ -296,3 +334,5 @@ ICR::EnsembleLearning::Dirichlet<T>::CalcNP2Data(moments_parameter Us)
   PARALLEL_TRANSFORM( Us.begin(), Us.end(), NP.begin(), minus_one());
   return NP;
 }
+
+#endif  // guard for DIRICHLET_HPP
