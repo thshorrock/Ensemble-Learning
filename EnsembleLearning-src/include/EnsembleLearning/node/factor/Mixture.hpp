@@ -47,6 +47,8 @@ namespace ICR{
     template <class Model, class T>
     class HiddenNode; //only used as pointer here.
     
+    namespace detail{
+
     /******************************************************************************
      * Default Specialisation
      ******************************************************************************/
@@ -220,7 +222,7 @@ namespace ICR{
       throw ("Unknown Node in GetNaturalNot");
     }
 
-  
+    }
   }
 }
 

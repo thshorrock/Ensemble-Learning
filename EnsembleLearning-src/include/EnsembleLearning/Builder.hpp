@@ -114,16 +114,11 @@ namespace ICR{
     
 
     //Forward declarations of Factors
-    template<class Model, class T> class Factor;
-    template<class Model, class T> class Mixture;
-    namespace Details{
-    template<template<class> class Model, class T> class Deterministic;
+    namespace detail{
+      template<class Model, class T> class Factor;
+      template<class Model, class T> class Mixture;
+      template<template<class> class Model, class T> class Deterministic;
     }
-
-    //Forward declarations of VariableNodes
-    // template<class Model, class T> class HiddenNode;
-    // template<class Model, class T> class ObservedNode;
-    // template<class Model, class T> class DeterministicNode;
 
 
     //forward declaration of Expressions
@@ -135,15 +130,15 @@ namespace ICR{
     class Builder
     {
 
-      typedef Factor<RectifiedGaussian<T>, T >      RectifiedGaussianFactor;
-      typedef Factor<Gaussian<T>, T >      GaussianFactor;
-      typedef Factor<Gamma<T>, T >         GammaFactor;
-      typedef Factor<Dirichlet<T>, T >     DirichletFactor;
-      typedef Factor<Discrete<T>, T >      DiscreteFactor;
-      typedef Mixture<RectifiedGaussian<T>, T >     RectifiedGaussianMixtureFactor;
-      typedef Mixture<Gaussian<T>, T >     GaussianMixtureFactor;
+      typedef detail::Factor<RectifiedGaussian<T>, T >      RectifiedGaussianFactor;
+      typedef detail::Factor<Gaussian<T>, T >      GaussianFactor;
+      typedef detail::Factor<Gamma<T>, T >         GammaFactor;
+      typedef detail::Factor<Dirichlet<T>, T >     DirichletFactor;
+      typedef detail::Factor<Discrete<T>, T >      DiscreteFactor;
+      typedef detail::Mixture<RectifiedGaussian<T>, T >     RectifiedGaussianMixtureFactor;
+      typedef detail::Mixture<Gaussian<T>, T >     GaussianMixtureFactor;
 
-      typedef Details::Deterministic<Gaussian, T >  DeterministicFactor;
+      typedef detail::Deterministic<Gaussian, T >  DeterministicFactor;
 
       typedef HiddenNode<Gaussian<T>, T >      GaussianType;
       typedef HiddenNode<RectifiedGaussian<T>, T >      RectifiedGaussianType;

@@ -46,6 +46,9 @@ namespace ICR{
     template<class T>
     class NaturalParameters;
    
+
+    
+    namespace detail{
     /******************************************************************************
      * Default Specialisation - Gaussian, RectifiedGaussian, Gamma
      ******************************************************************************/
@@ -369,7 +372,7 @@ namespace ICR{
       mutable T  m_LogNorm; //no need for mutex to protect this variable.
     };
     
-  
+    }
   }
 }
 

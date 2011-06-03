@@ -41,7 +41,7 @@ namespace ICR{
     template<class T> class Expression; //only used as a pointer here
     template <class Model, class T> class DeterministicNode; //only used as a pointer here
     
-    namespace Details{
+    namespace detail{
       
       
       /** A Deterministic Factor.
