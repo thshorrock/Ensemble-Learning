@@ -1,15 +1,53 @@
+
+/***********************************************************************************
+ ***********************************************************************************
+ **                                                                               **
+ **  Copyright (C) 2011 Tom Shorrock <t.h.shorrock@gmail.com> 
+ **                                                                               **
+ **                                                                               **
+ **  This program is free software; you can redistribute it and/or                **
+ **  modify it under the terms of the GNU General Public License                  **
+ **  as published by the Free Software Foundation; either version 2               **
+ **  of the License, or (at your option) any later version.                       **
+ **                                                                               **
+ **  This program is distributed in the hope that it will be useful,              **
+ **  but WITHOUT ANY WARRANTY; without even the implied warranty of               **
+ **  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                **
+ **  GNU General Public License for more details.                                 **
+ **                                                                               **
+ **  You should have received a copy of the GNU General Public License            **
+ **  along with this program; if not, write to the Free Software                  **
+ **  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.  **
+ **                                                                               **
+ ***********************************************************************************
+ ***********************************************************************************/
+
+
+
 #pragma once
+#ifndef OBSERVED_HPP
+#define OBSERVED_HPP
+
+
 #include "EnsembleLearning/message/Moments.hpp"
 #include "EnsembleLearning/node/Node.hpp"
-#include "EnsembleLearning/exponential_model/Gaussian.hpp"
-#include "EnsembleLearning/exponential_model/RectifiedGaussian.hpp"
-#include "EnsembleLearning/exponential_model/Gamma.hpp"
-#include "EnsembleLearning/exponential_model/Discrete.hpp"
-#include "EnsembleLearning/exponential_model/Dirichlet.hpp"
 
 namespace ICR{
   namespace EnsembleLearning{
     
+    //forward declarations
+    
+    template<class T>
+    class Gaussian;
+    template<class T>
+    class RectifiedGaussian;
+    template<class T>
+    class Gamma;
+    template<class T>
+    class Discrete;
+    template<class T>
+    class Dirichlet;
+
     /** An observed node.
      *  A node that contains data that is a known constant.
      *  Examples include data nodes (where the data is experimentally determined)
@@ -159,3 +197,4 @@ ICR::EnsembleLearning::ObservedNode<Model,T>::Iterate(Coster& Total)
       Total += Cost;
     }
 }
+#endif  // guard for OBSERVED_HPP
