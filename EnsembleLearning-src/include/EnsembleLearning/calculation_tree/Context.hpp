@@ -45,7 +45,7 @@ namespace ICR{
     //Forward declaration.
     namespace Details{
       template<template<class> class ,  class>
-      class CalcGaussianFactor ;
+      class Deterministic ;
     }
 
 
@@ -304,11 +304,11 @@ namespace ICR{
     private:
 
       template<template<class> class Model,  class U>
-      friend class Details::CalcGaussianFactor;
+      friend class Details::Deterministic;
 
       template<template<class> class Model,  class U>
       void
-      AddChildFactor(Details::CalcGaussianFactor<Model,U>* factor ) const
+      AddChildFactor(Details::Deterministic<Model,U>* factor ) const
       {
 	//Defer thread safety to the variable
 	// (m_map not being altered here)

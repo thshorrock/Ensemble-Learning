@@ -50,7 +50,7 @@ namespace ICR{
        *  @tparam T The data type (float or double)
        */
       template<template<class> class Model,  class T>
-      class CalcGaussianFactor : public FactorNode<T>
+      class Deterministic : public FactorNode<T>
       {
       public:
       
@@ -70,7 +70,7 @@ namespace ICR{
 	 *  @param context The Context (The actual parent nodes) for the expression in this node.
 	 *  @param Child The DeterministicNode That is the child to this factor.
 	 */
-	CalcGaussianFactor( Expression<T>* Expr,  Context<T>& context,
+	Deterministic( Expression<T>* Expr,  Context<T>& context,
 			    DeterministicNode<Model<T>,T>* Child)
 	  : m_expr(Expr),
 	    m_context(context),

@@ -321,8 +321,8 @@ typename ICR::EnsembleLearning::Builder<T>::GaussianResultNode
 ICR::EnsembleLearning::Builder<T>::calc_gaussian(Expression<T>* Expr,  Context<T>& context)
 {
   boost::shared_ptr<GaussianResultType > Child(new GaussianResultType());
-  boost::shared_ptr<CalcGaussianFactor > ChildF
-    (new CalcGaussianFactor(Expr, context,Child.get()));
+  boost::shared_ptr<DeterministicFactor> ChildF
+    (new DeterministicFactor(Expr, context,Child.get()));
 	
   m_Nodes.push_back(Child);
   m_Factors.push_back(ChildF);

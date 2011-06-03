@@ -117,7 +117,7 @@ namespace ICR{
     template<class Model, class T> class Factor;
     template<class Model, class T> class Mixture;
     namespace Details{
-    template<template<class> class Model, class T> class CalcGaussianFactor;
+    template<template<class> class Model, class T> class Deterministic;
     }
 
     //Forward declarations of VariableNodes
@@ -143,7 +143,7 @@ namespace ICR{
       typedef Mixture<RectifiedGaussian<T>, T >     RectifiedGaussianMixtureFactor;
       typedef Mixture<Gaussian<T>, T >     GaussianMixtureFactor;
 
-      typedef Details::CalcGaussianFactor<Gaussian, T >  CalcGaussianFactor;
+      typedef Details::Deterministic<Gaussian, T >  DeterministicFactor;
 
       typedef HiddenNode<Gaussian<T>, T >      GaussianType;
       typedef HiddenNode<RectifiedGaussian<T>, T >      RectifiedGaussianType;
