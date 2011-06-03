@@ -4,7 +4,6 @@ project (EnsembleLearning)
 ##########################################################################
 #  The Ensemble Learning library depends on the following boost packages:
 #    - utility
-#    - assign
 #   A
 ##########################################################################
 
