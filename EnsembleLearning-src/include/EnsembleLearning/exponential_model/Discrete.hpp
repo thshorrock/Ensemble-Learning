@@ -1,13 +1,47 @@
 #pragma once
+#ifndef DISCRETE_HPP
+#define DISCRETE_HPP
 
-//#include "ExponentialModel.hpp"
+
+/***********************************************************************************
+ ***********************************************************************************
+ **                                                                               **
+ **  Copyright (C) 2011 Tom Shorrock <t.h.shorrock@gmail.com> 
+ **                                                                               **
+ **                                                                               **
+ **  This program is free software; you can redistribute it and/or                **
+ **  modify it under the terms of the GNU General Public License                  **
+ **  as published by the Free Software Foundation; either version 2               **
+ **  of the License, or (at your option) any later version.                       **
+ **                                                                               **
+ **  This program is distributed in the hope that it will be useful,              **
+ **  but WITHOUT ANY WARRANTY; without even the implied warranty of               **
+ **  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                **
+ **  GNU General Public License for more details.                                 **
+ **                                                                               **
+ **  You should have received a copy of the GNU General Public License            **
+ **  along with this program; if not, write to the Free Software                  **
+ **  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.  **
+ **                                                                               **
+ ***********************************************************************************
+ ***********************************************************************************/
+
+
+
+#include "Random.hpp"
+#include "EnsembleLearning/detail/parallel_algorithms.hpp"
+#include "EnsembleLearning/message/Moments.hpp"
+#include "EnsembleLearning/message/NaturalParameters.hpp"
+#include "EnsembleLearning/node/Node.hpp"
 
 #include <gsl/gsl_sf_psi.h> //for Digamma function gsl_sf_psi
 #include <gsl/gsl_sf_gamma.h> //for gamma function
 
-#include "EnsembleLearning/detail/parallel_algorithms.hpp"
 #include <vector>
 #include <boost/assert.hpp> 
+#include <boost/call_traits.hpp> 
+
+
 namespace ICR{
   namespace EnsembleLearning{
 
@@ -309,3 +343,4 @@ ICR::EnsembleLearning::Discrete<T>::CalcNP2Data(moments_parameter Dirichlet)
   return  NP;
 }
    
+#endif  // guard for DISCRETE_HPP
