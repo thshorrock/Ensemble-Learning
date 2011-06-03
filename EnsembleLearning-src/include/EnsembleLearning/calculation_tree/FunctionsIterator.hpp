@@ -39,8 +39,6 @@
 namespace ICR{
   namespace EnsembleLearning{
 
-    //forward declaration
-    template<class> class Function;
     
     /**Iterator to iterate down the function tree (towards the root).*/ 
     template <class function>
