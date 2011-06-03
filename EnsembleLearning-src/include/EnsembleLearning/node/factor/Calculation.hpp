@@ -1,29 +1,46 @@
 #pragma once
+#ifndef FACTOR_CALCULATION_HPP
+#define FACTOR_CALCULATION_HPP
+
+
+/***********************************************************************************
+ ***********************************************************************************
+ **                                                                               **
+ **  Copyright (C) 2011 Tom Shorrock <t.h.shorrock@gmail.com> 
+ **                                                                               **
+ **                                                                               **
+ **  This program is free software; you can redistribute it and/or                **
+ **  modify it under the terms of the GNU General Public License                  **
+ **  as published by the Free Software Foundation; either version 2               **
+ **  of the License, or (at your option) any later version.                       **
+ **                                                                               **
+ **  This program is distributed in the hope that it will be useful,              **
+ **  but WITHOUT ANY WARRANTY; without even the implied warranty of               **
+ **  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                **
+ **  GNU General Public License for more details.                                 **
+ **                                                                               **
+ **  You should have received a copy of the GNU General Public License            **
+ **  along with this program; if not, write to the Free Software                  **
+ **  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.  **
+ **                                                                               **
+ ***********************************************************************************
+ ***********************************************************************************/
+
 
 #include "EnsembleLearning/node/Node.hpp"
-#include "EnsembleLearning/message/NaturalParameters.hpp"
-#include "EnsembleLearning/message/Moments.hpp"
-#include "EnsembleLearning/calculation_tree/Expression.hpp"
 #include "EnsembleLearning/calculation_tree/Context.hpp"
 
-// #include "EnsembleLearning/Message.hpp"
-
-//#include "EnsembleLearning/piping/Piping.hpp"
-#include "EnsembleLearning/node/variable/Hidden.hpp"
-#include "EnsembleLearning/node/variable/Calculation.hpp"
-#include "EnsembleLearning/exponential_model/Gaussian.hpp"
-#include "EnsembleLearning/exponential_model/Gamma.hpp"
-#include "EnsembleLearning/exponential_model/Discrete.hpp"
-#include "EnsembleLearning/exponential_model/Dirichlet.hpp"
-#include <boost/shared_ptr.hpp>
-#include <boost/none.hpp>
-#include <vector>
-#include <boost/assert.hpp> 
-//#include "rng.hpp"
+#include <boost/call_traits.hpp> 
 
 
 namespace ICR{
   namespace EnsembleLearning{
+    //forward declare
+    template<class T> class Moments;
+    template<class T> class NaturalParameters;
+    template<class T> class Expression; //only used as a pointer here
+    template <class Model, class T> class DeterministicNode; //only used as a pointer here
+    
     namespace Details{
       
       
@@ -99,3 +116,4 @@ namespace ICR{
     
   }
 }
+#endif  // guard for FACTOR_CALCULATION_HPP
