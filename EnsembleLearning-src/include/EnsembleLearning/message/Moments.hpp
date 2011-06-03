@@ -29,19 +29,14 @@
 
 
 #include "MomentsIterator.hpp"
-#include "EnsembleLearning/node/Node.hpp"
 #include "EnsembleLearning/detail/Mutex.hpp"
 #include "EnsembleLearning/detail/parallel_algorithms.hpp"
 
-#include <boost/assign/list_of.hpp>
-#include <boost/assign/std/vector.hpp>
 #include <iostream>
 
 namespace ICR{
   namespace EnsembleLearning{
     
-    //Forward declaration.
-    template<class> class Moments;
     
     /** A threadsafe container for the Moments.
      *  @tparam T The datatype to be used for storing the moments (typically double or float).
@@ -335,11 +330,11 @@ template<class T>
 inline   
 ICR::EnsembleLearning::Moments<T>::Moments(data_parameter d1,
 			      data_parameter d2)
-  : m_data(),
+  : m_data(2),
     m_mutex() //non-copiable
 {
-  using namespace boost::assign;
-  m_data += d1,d2; // insert values at the end of the container
+  m_data[0] = d1;
+  m_data[1] = d2;
 }
       
 template<class T> 

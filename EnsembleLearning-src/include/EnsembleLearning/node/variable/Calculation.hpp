@@ -5,6 +5,7 @@
 #include "EnsembleLearning/detail/Mutex.hpp"
 #include "EnsembleLearning/detail/parallel_algorithms.hpp"
 
+#include <boost/assert.hpp> 
 #include <boost/bind.hpp>
 #include <vector>
 
