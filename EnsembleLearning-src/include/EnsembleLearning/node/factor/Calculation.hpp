@@ -70,8 +70,9 @@ namespace ICR{
 	 *  @param context The Context (The actual parent nodes) for the expression in this node.
 	 *  @param Child The DeterministicNode That is the child to this factor.
 	 */
-	Deterministic( Expression<T>* Expr,  Context<T>& context,
-			    DeterministicNode<Model<T>,T>* Child)
+	Deterministic( Expression<T>* Expr,  
+		       Context<T>& context,
+		       DeterministicNode<Model<T>,T>* Child)
 	  : m_expr(Expr),
 	    m_context(context),
 	    m_child_node(Child)
@@ -89,6 +90,11 @@ namespace ICR{
 	  return Model<T>::CalcMoments(Model<T>::CalcNP2Deterministic(m_expr,m_context));
 	}
       
+      /** Obtain the natural parameter destined for the variable_parameter v.
+       * @param v A pointer to the  VariableNode for which the message is destined.
+       *  The message is calculated from the moments of every node adjacent to the factor withe exception of v.
+       * @return The natural parameter calculated for v.
+       */
 	NaturalParameters<T>
 	GetNaturalNot( variable_parameter v) const
 	{

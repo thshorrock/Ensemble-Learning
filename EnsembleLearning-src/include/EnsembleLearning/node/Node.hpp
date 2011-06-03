@@ -28,6 +28,7 @@
 
 
 
+#include "EnsembleLearning/message/Coster.hpp"
 #include <boost/call_traits.hpp>
 #include <vector>
 #include <iostream>

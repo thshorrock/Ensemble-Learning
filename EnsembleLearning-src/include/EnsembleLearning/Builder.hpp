@@ -41,6 +41,31 @@
 namespace ICR{
   namespace EnsembleLearning{
 
+    //Forward declarations of models
+    template<class T> class Discrete;
+    template<class T> class Dirichlet;
+    template<class T> class Gamma;
+    template<class T> class Gaussian;
+    template<class T> class RectifiedGaussian;
+    
+    //forward declaration of Interfaces
+    template<class T> class VariableNode;
+    template<class T> class FactorNode;
+    
+
+    //Forward declarations of Factors
+    namespace detail{
+      template<class Model, class T> class Factor;
+      template<class Model, class T> class Mixture;
+      template<template<class> class Model, class T> class Deterministic;
+    }
+
+
+    //forward declaration of Expressions
+    template<class T> class Expression;
+    template<class T> class Context;
+    
+
     /** Build the components for ensemble learning.
      *  @tparam T The datatype used by the model.
      *   This will either be float or double.
@@ -101,30 +126,6 @@ namespace ICR{
      *
      */
 
-    //Forward declarations of models
-    template<class T> class Discrete;
-    template<class T> class Dirichlet;
-    template<class T> class Gamma;
-    template<class T> class Gaussian;
-    template<class T> class RectifiedGaussian;
-    
-    //forward declaration of Interfaces
-    template<class T> class VariableNode;
-    template<class T> class FactorNode;
-    
-
-    //Forward declarations of Factors
-    namespace detail{
-      template<class Model, class T> class Factor;
-      template<class Model, class T> class Mixture;
-      template<template<class> class Model, class T> class Deterministic;
-    }
-
-
-    //forward declaration of Expressions
-    template<class T> class Expression;
-    template<class T> class Context;
-    
 
     template<class T>
     class Builder

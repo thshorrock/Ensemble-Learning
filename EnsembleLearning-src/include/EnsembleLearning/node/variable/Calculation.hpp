@@ -73,6 +73,9 @@ namespace ICR{
       GetMoments() const;
 
       //should make a const version of this 
+      /** Forward moments to the deterministic function.
+       *  @return The moments from the child node.
+       */
       const Moments<T>
       GetForwardedMoments() ;
 

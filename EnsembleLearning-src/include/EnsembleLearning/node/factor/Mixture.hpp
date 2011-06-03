@@ -139,6 +139,11 @@ namespace ICR{
       }
 
 
+      /** Obtain the natural parameter destined for the variable_parameter v.
+       * @param v A pointer to the  VariableNode for which the message is destined.
+       *  The message is calculated from the moments of every node adjacent to the factor withe exception of v.
+       * @return The natural parameter calculated for v.
+       */
       NaturalParameters<T>
       GetNaturalNot( variable_parameter v) const;
       
