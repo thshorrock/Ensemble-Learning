@@ -29,7 +29,6 @@
 
 
 #include "EnsembleLearning/node/Node.hpp"
-#include "EnsembleLearning/node/variable/Hidden.hpp"
 #include "EnsembleLearning/message/NaturalParameters.hpp"
 #include "EnsembleLearning/message/Moments.hpp"
 
@@ -45,6 +44,8 @@ namespace ICR{
     template<class T>
     class Discrete;
     
+    template <class Model, class T>
+    class HiddenNode; //only used as pointer here.
     
     /******************************************************************************
      * Default Specialisation
