@@ -27,6 +27,7 @@
  ***********************************************************************************/
 
 
+#include <numeric> 
 
 namespace std{
   /** Check that not inputting integer type into accumulate
