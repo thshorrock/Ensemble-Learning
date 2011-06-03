@@ -33,6 +33,7 @@
 #include "EnsembleLearning/detail/parallel_algorithms.hpp"
 
 #include <iostream>
+#include <boost/call_traits.hpp>
 
 namespace ICR{
   namespace EnsembleLearning{

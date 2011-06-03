@@ -1,15 +1,45 @@
 #pragma once
+#ifndef NATURALPARAMETERS_HPP
+#define NATURALPARAMETERS_HPP
+
+
+
+/***********************************************************************************
+ ***********************************************************************************
+ **                                                                               **
+ **  Copyright (C) 2011 Tom Shorrock <t.h.shorrock@gmail.com> 
+ **                                                                               **
+ **                                                                               **
+ **  This program is free software; you can redistribute it and/or                **
+ **  modify it under the terms of the GNU General Public License                  **
+ **  as published by the Free Software Foundation; either version 2               **
+ **  of the License, or (at your option) any later version.                       **
+ **                                                                               **
+ **  This program is distributed in the hope that it will be useful,              **
+ **  but WITHOUT ANY WARRANTY; without even the implied warranty of               **
+ **  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                **
+ **  GNU General Public License for more details.                                 **
+ **                                                                               **
+ **  You should have received a copy of the GNU General Public License            **
+ **  along with this program; if not, write to the Free Software                  **
+ **  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.  **
+ **                                                                               **
+ ***********************************************************************************
+ ***********************************************************************************/
+
+#include "EnsembleLearning/detail/parallel_algorithms.hpp"
+#include "EnsembleLearning/message/Moments.hpp"
+
+#include <boost/call_traits.hpp>
+
+
 #include <iostream>
-
-#include "Moments.hpp"
-
 #include<vector>
 
 
-#include "EnsembleLearning/detail/parallel_algorithms.hpp"
-
 namespace ICR{
   namespace EnsembleLearning{
+    
 
     /** A container for the Natural Paramemeters.
      *  @tparam T The data type to be used.
@@ -280,7 +310,6 @@ namespace ICR{
     operator*(const NaturalParameters<T>&  a, 
 	      const Moments<T>& b)
     { 
-      
       std::vector<T> prod(a.size());
       PARALLEL_TRANSFORM(a.begin(), a.end(), b.begin(), prod.begin(), 
 			 typename NaturalParameters<T>::times());
@@ -450,3 +479,4 @@ ICR::EnsembleLearning::NaturalParameters<T>::operator*=(data_parameter other)
 
 
 
+#endif  // guard for NATURALPARAMETERS_HPP
