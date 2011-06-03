@@ -31,22 +31,15 @@
 
 #include "EnsembleLearning/message/Moments.hpp"
 #include "EnsembleLearning/node/Node.hpp"
+#include "EnsembleLearning/exponential_model/Gaussian.hpp"
+#include "EnsembleLearning/exponential_model/RectifiedGaussian.hpp"
+#include "EnsembleLearning/exponential_model/Gamma.hpp"
+#include "EnsembleLearning/exponential_model/Discrete.hpp"
+#include "EnsembleLearning/exponential_model/Dirichlet.hpp"
 
 namespace ICR{
   namespace EnsembleLearning{
     
-    //forward declarations
-    
-    template<class T>
-    class Gaussian;
-    template<class T>
-    class RectifiedGaussian;
-    template<class T>
-    class Gamma;
-    template<class T>
-    class Discrete;
-    template<class T>
-    class Dirichlet;
 
     /** An observed node.
      *  A node that contains data that is a known constant.
