@@ -37,6 +37,7 @@
 #include "Expression.hpp"
 
 #include <boost/smart_ptr.hpp>
+#include <boost/call_traits.hpp>
 #include<list>
 
 namespace ICR{
