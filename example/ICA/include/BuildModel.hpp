@@ -1,10 +1,27 @@
 #pragma once
 #include "EnsembleLearning.hpp"
 
-struct Model{};
+#include <boost/bind.hpp>
+
+#include <deque>
+#include <fstream>
+
+// template<class data_t>
+// struct Model
+// {
+//   virtual
+//   ICR::EnsembleLearning::Builder<data_t>& 
+//   get_builder() = 0;
+  
+//   virtual
+//   void 
+//   get_normalised_means(matrix<data_t>& A, matrix<data_t>& S) = 0;
+  
+// };
+
 
 template<class data_t>
-class BuildModel : public Model
+class BuildModel //: public Model<data_t>
 {
     typedef typename ICR::EnsembleLearning::Builder<data_t>::GaussianNode GaussianNode;
     typedef typename ICR::EnsembleLearning::Builder<data_t>::RectifiedGaussianNode RectifiedGaussianNode;
@@ -13,12 +30,18 @@ class BuildModel : public Model
     typedef typename ICR::EnsembleLearning::Builder<data_t>::GaussianDataNode    Datum;
     typedef typename ICR::EnsembleLearning::Builder<data_t>::Variable    Variable;
     typedef typename ICR::EnsembleLearning::Builder<data_t>::GaussianResultNode    ResultNode;
-   
+  
+  template<int i>
+  struct Int2Type
+  {
+    enum {value = i};
+  };
+  
 public:
   BuildModel(matrix<double>& data,
 	     size_t assumed_sources,
 	     size_t mixing_components,
-	     bool positive_sources, 
+	     const bool positive_sources,
 	     bool positive_mixing,
 	     bool noise_offset
 	     )
@@ -28,7 +51,6 @@ public:
       m_S(assumed_sources, data.size2()),
       m_noiseMean(data.size1()),
       m_noisePrecision(data.size1())
-      // m_noisePrecision()
   {
  
 
@@ -43,60 +65,19 @@ public:
 	     <<"T = "<<T<<std::endl;
 
     
-    //build A weights component for each source
-    vector<WeightsNode> Weights(M);
-    for(size_t m=0;m<M;++m){
-      Weights[m] = m_Build.weights(Components);
-    }
-    std::cout<<"build weights - nodes = "<< m_Build.number_of_nodes() <<std::endl;
-
-    
-    //m_Build hyper mean and hyper precision for each source mixture component.
-    std::vector< std::vector<Variable> > ShypMean(M);
-    std::vector< std::vector<Variable> > ShypPrec(M);
-    for(size_t m=0;m<M;++m){ 
-      ShypMean[m].resize(Components);
-      ShypPrec[m].resize(Components);
-      for(size_t c=0;c<Components;++c){
-	ShypMean[m][c]=	m_Build.gaussian(0.0,0.1);
-	ShypPrec[m][c]= m_Build.gamma(1.0,1.0);
-      }
-    }
-    std::cout<<"built hyperparams - nodes = "<< m_Build.number_of_nodes() <<std::endl;
      
     //m_Build the source approximation
-    for(size_t m=0;m<M;++m){ 
-      for(size_t t=0;t<T;++t){ 
-	if (positive_sources) 
-	  m_S(m,t) = m_Build.rectified_gaussian_mixture(ShypMean[m],
-						     ShypPrec[m],
-						     Weights[m]);
-	else
-	  m_S(m,t) = m_Build.gaussian_mixture(ShypMean[m],
-					   ShypPrec[m],
-					   Weights[m]);
-      }
-    }
+    if (positive_sources) 
+      build_source_matrix(Int2Type<true>(),M,T, Components);
+    else
+      build_source_matrix(Int2Type<false>(),M,T, Components);
     
-    std::cout<<"built sources - nodes = "<< m_Build.number_of_nodes() <<std::endl;
-     
     //m_Build approximation to the mixing matrix
-    vector<GaussianNode> AMean(M);
-    vector<GammaNode> APrecision(M);
-    for(size_t m=0;m<M;++m){
-      AMean[m] = m_Build.gaussian(0.0,0.1);
-      APrecision[m] = m_Build.gamma(1.0,1.0);
-    }
-    for(size_t n=0;n<N;++n){
-      for(size_t m=0;m<M;++m){ 
-	if (positive_mixing) 
-	  m_A(n,m) = m_Build.rectified_gaussian(AMean[m], APrecision[m]);
-	else 
-	  m_A(n,m) = m_Build.gaussian(AMean[m], APrecision[m]);
-      }
-    }
-    std::cout<<"built mixing - nodes = "<< m_Build.number_of_nodes() <<std::endl;
-     
+    if (positive_mixing) 
+      build_mixing_matrix(Int2Type<true>(),M,T);
+    else
+      build_mixing_matrix(Int2Type<false>(),M,T);
+      
 
     //m_Build the noise mean approximation
     // m_noiseMean(N);
@@ -183,16 +164,17 @@ public:
   
   void get_normalised_means(matrix<data_t>& A, matrix<data_t>& S)
   {
+    
     for(size_t i=0;i<m_A.size1();++i){
       for(size_t j=0; j<m_A.size2();++j){
-	A(i,j)= m_A(i,j)->GetMoments()[0];
+	  A(i,j)= m_A(i,j)->GetMoments()[0];
       }
     }
     std::cout<<"got a"<<std::endl;
 
     for(size_t i=0;i<m_S.size1();++i){
       for(size_t j=0; j<m_S.size2();++j){
-	S(i,j)= m_S(i,j)->GetMoments()[0];
+	  S(i,j)= m_S(i,j)->GetMoments()[0];
       }
     }
     std::cout<<"got b"<<std::endl;
@@ -210,7 +192,129 @@ public:
   }
 
 private: 
-  ICR::EnsembleLearning::Builder<data_t> m_Build;
+  void 
+  build_vector(vector<GaussianNode>& V)
+  {
+    std::generate(V.begin(), V.end(), 
+		  boost::bind(static_cast<GaussianNode (ICR::EnsembleLearning::Builder<data_t>::*)
+			      (const data_t&, const data_t&)>
+			      (&ICR::EnsembleLearning::Builder<data_t>::gaussian),
+			      boost::ref(m_Build),
+			      0.0, 0.1));
+  }
+  void 
+  build_vector(vector<GammaNode>& V)
+  {
+    std::generate(V.begin(), V.end(), boost::bind(&ICR::EnsembleLearning::Builder<data_t>::gamma,
+					     m_Build,
+					     1.0, 1.0));
+  }
+  void 
+  build_vector(vector<WeightsNode>& V, size_t components)
+  {
+    std::generate(V.begin(), V.end(), boost::bind(&ICR::EnsembleLearning::Builder<data_t>::weights,
+					     m_Build,
+					     components));
+  }
+  
+  void
+  build_mixing_matrix(Int2Type<false>, size_t N, size_t M)
+  {
+    vector<GaussianNode> AMean(M);
+    vector<GammaNode> APrecision(M);
+    build_vector(AMean);
+    build_vector(APrecision);
+    
+    for(size_t n=0;n<N;++n){
+      for(size_t m=0;m<M;++m){ 
+	m_A(n,m) = m_Build.gaussian(AMean[m], APrecision[m]);
+      }
+    }
+    std::cout<<"built mixing - nodes = "<< m_Build.number_of_nodes() <<std::endl;
+  };
+
+  void
+  build_mixing_matrix(Int2Type<true>, size_t N, size_t M)
+  {
+    vector<GaussianNode> AMean(M);
+    vector<GammaNode> APrecision(M);
+    build_vector(AMean);
+    build_vector(APrecision);
+    
+    for(size_t n=0;n<N;++n){
+      for(size_t m=0;m<M;++m){ 
+	m_A(n,m) = m_Build.rectified_gaussian(AMean[m], APrecision[m]);
+      }
+    }
+    std::cout<<"built mixing - nodes = "<< m_Build.number_of_nodes() <<std::endl;
+  };
+
+
+  
+  void
+  build_source_matrix(Int2Type<false>, size_t M, size_t T, size_t Components)
+  {
+    
+	//build A weights component for each source
+	vector<WeightsNode> Weights(M);
+	build_vector(Weights, Components);
+    
+	//m_Build hyper mean and hyper precision for each source mixture component.
+	std::vector< vector<GaussianNode> > ShypMean(M);
+	std::vector< vector<GammaNode> > ShypPrec(M);
+	for(size_t m=0;m<M;++m){ 
+	  ShypMean[m].resize(Components);
+	  ShypPrec[m].resize(Components);
+	  build_vector(ShypMean[m]);
+	  build_vector(ShypPrec[m]);
+	}
+	std::cout<<"built hyperparams - nodes = "<< m_Build.number_of_nodes() <<std::endl;
+    
+	for(size_t m=0;m<M;++m){ 
+	  for(size_t t=0;t<T;++t){ 
+	    m_S(m,t) = m_Build.gaussian_mixture(ShypMean[m].begin(),
+						ShypPrec[m].begin(),
+						Weights[m]);
+	  }
+	}
+    
+	std::cout<<"built sources - nodes = "<< m_Build.number_of_nodes() <<std::endl;
+     
+  }
+  
+  void
+  build_source_matrix(Int2Type<true>, size_t M, size_t T, size_t Components)
+  {
+    
+    //build A weights component for each source
+    vector<WeightsNode> Weights(M);
+    build_vector(Weights, Components);
+    
+    //m_Build hyper mean and hyper precision for each source mixture component.
+    std::vector< vector<GaussianNode> > ShypMean(M);
+    std::vector< vector<GammaNode> > ShypPrec(M);
+    for(size_t m=0;m<M;++m){ 
+	  ShypMean[m].resize(Components);
+	  ShypPrec[m].resize(Components);
+	  build_vector(ShypMean[m]);
+	  build_vector(ShypPrec[m]);
+    }
+    std::cout<<"built hyperparams - nodes = "<< m_Build.number_of_nodes() <<std::endl;
+    
+    for(size_t m=0;m<M;++m){ 
+      for(size_t t=0;t<T;++t){ 
+	m_S(m,t) = m_Build.rectified_gaussian_mixture(ShypMean[m].begin(),
+						      ShypPrec[m].begin(),
+						      Weights[m]);
+      }
+    }
+    
+    std::cout<<"built sources - nodes = "<< m_Build.number_of_nodes() <<std::endl;
+     
+  }
+  
+
+ICR::EnsembleLearning::Builder<data_t> m_Build;
   ICR::EnsembleLearning::ExpressionFactory<data_t> m_Factory;
   matrix<Variable> m_A;
   matrix<Variable> m_S;
@@ -223,8 +327,8 @@ template<class data_t>
 std::ofstream&
 operator<<(std::ofstream& out, const matrix<data_t>& M)
 {
-    for(size_t j=0; j<M.size2();++j){
-   for(size_t i=0;i<M.size1();++i){
+  for(size_t j=0; j<M.size2();++j){
+    for(size_t i=0;i<M.size1();++i){
       out<< M(i,j) << "\t";
     }
     out<<"\n";

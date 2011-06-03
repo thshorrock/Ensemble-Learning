@@ -15,6 +15,10 @@ namespace ICR{
     {
     public:
       
+      /** @name Useful typdefs for types that are exposed to the user.
+       */
+      ///@{
+
       typedef typename boost::call_traits<Expression<T>*>::param_type
       expression_parameter;
       
@@ -33,6 +37,8 @@ namespace ICR{
       typedef typename boost::call_traits<SubContext<T> >::param_type
       subcontext_parameter;
       
+      ///@}
+
       /** Constructor.
        *  @param a The left hand side of the addition.
        *  @param b The right-hand-side of the addition.
@@ -87,6 +93,10 @@ namespace ICR{
     {
     public:
       
+      /** @name Useful typdefs for types that are exposed to the user.
+       */
+      ///@{
+
       typedef typename boost::call_traits<Expression<T>*>::param_type
       expression_parameter;
       
@@ -104,6 +114,8 @@ namespace ICR{
 
       typedef typename boost::call_traits<SubContext<T> >::param_type
       subcontext_parameter;
+
+      ///@}
 
       
       /** Constructor.

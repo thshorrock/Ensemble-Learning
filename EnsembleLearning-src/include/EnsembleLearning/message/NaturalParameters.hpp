@@ -20,6 +20,9 @@ namespace ICR{
     class NaturalParameters
     {
     public:
+      /** @name Useful typdefs for types that are exposed to the user.
+       */
+      ///@{
 
       typedef typename boost::call_traits<std::vector<T> >::param_type 
       vector_parameter;
@@ -60,6 +63,8 @@ namespace ICR{
       
       typedef typename std::vector<T>::const_iterator
       const_iterator;
+
+      ///@}
 
       /** Constructor.
        *  @param size The number of elements to be held in the container.

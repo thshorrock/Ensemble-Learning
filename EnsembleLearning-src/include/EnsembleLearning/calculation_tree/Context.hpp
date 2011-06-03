@@ -43,6 +43,9 @@ namespace ICR{
       
     public:
       
+      /** @name Useful typdefs for types that are exposed to the user.
+       */
+      ///@{
       
       typedef typename boost::call_traits<T>::param_type
       data_parameter;
@@ -71,6 +74,7 @@ namespace ICR{
       typedef typename boost::call_traits<SubContext<T> >::value_type
       type;
 
+      ///@}
 
       /** Obtain the value associated with for the placeholder.
        *   @param P The placeholder.
@@ -181,6 +185,9 @@ namespace ICR{
       typedef std::map<VariableNode<T>* const ,const Placeholder<T>* > DataContainer;
       typedef std::pair<  VariableNode<T>*const,const Placeholder<T>*> Datum;
     public:
+      /** @name Useful typdefs for types that are exposed to the user.
+       */
+      ///@{
       
       typedef typename boost::call_traits<SubContext<T> >::value_type
       subcontext_t;
@@ -199,6 +206,7 @@ namespace ICR{
       typedef typename boost::call_traits<size_t>::param_type
       size_parameter;
       
+      ///@}
       
       /** Obtain the placeholder associated  with a particular VariableNoder.
        *   @param V The VariableNode.

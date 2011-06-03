@@ -23,6 +23,9 @@ namespace ICR{
     {
     public:
       
+      /** @name Useful typdefs for types that are exposed to the user.
+       */
+      ///@{
       typedef typename boost::call_traits<std::vector<T> >::param_type 
       vector_parameter;
       
@@ -69,6 +72,8 @@ namespace ICR{
       typedef  MomentsIterator<const type, const data_type>  
       const_iterator;
       
+      ///@}
+
       /** Constructor 
        * @param size The size of the set of moments to store 
        */

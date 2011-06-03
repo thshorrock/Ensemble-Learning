@@ -47,6 +47,9 @@ namespace ICR{
     class ExpressionFactory{
     public:
       
+      /** @name Useful typdefs for types that are exposed to the user.
+       */
+      ///@{
       typedef typename boost::call_traits<Expression<T>*>::param_type
       expression_parameter;
       
@@ -56,6 +59,8 @@ namespace ICR{
       typedef typename boost::call_traits<Placeholder<T>*>::value_type
       placeholder_t;
       
+      ///@}
+
       /** Create a placeholder
        *  @return A pointer to a placeholder.
        */

@@ -37,6 +37,10 @@ namespace ICR{
       //Non-copiable
       Factor(const Factor<Model,T>& f) {};
     public:
+      /** @name Useful typdefs for types that are exposed to the user.
+       */
+      ///@{
+
       typedef typename boost::call_traits< VariableNode<T>* const>::param_type
       variable_parameter;
       typedef typename boost::call_traits< VariableNode<T>* const>::value_type
@@ -56,6 +60,7 @@ namespace ICR{
       typedef typename boost::call_traits< Moments<T> >::value_type
       moments_t;
 
+      ///@}
       /** Constructor.
        *  @param Parent1 The first VariableNode attached to the Factor:
        *     This is the mean for the Gaussian/RectifiedGaussian or the Shape for the Gamma distribution.
@@ -149,6 +154,9 @@ namespace ICR{
       Factor(const Factor<Dirichlet<T>, T>& f) {};
     public:
       
+      /** @name Useful typdefs for types that are exposed to the user.
+       */
+      ///@{
       typedef typename boost::call_traits< VariableNode<T>* const>::param_type
       variable_parameter;
       typedef typename boost::call_traits< VariableNode<T>* const>::value_type
@@ -166,6 +174,8 @@ namespace ICR{
       
       typedef typename boost::call_traits< Moments<T> >::value_type
       moments_t;
+
+      ///@}
 
       /** Constructor.
        *  @param Prior The Parent VariableNode.
@@ -243,6 +253,9 @@ namespace ICR{
     {
     public:
       
+      /** @name Useful typdefs for types that are exposed to the user.
+       */
+      ///@{
 
       typedef typename boost::call_traits< VariableNode<T>* const>::param_type
       variable_parameter;
@@ -266,6 +279,8 @@ namespace ICR{
       typedef typename boost::call_traits< Moments<T> >::value_type
       moments_t;
           
+      ///@}
+
       /** Constructor.
        *  @param Prior The first VariableNode attached to the Factor:
        *     This is a Hidden Node for the Dirichlet distribution.

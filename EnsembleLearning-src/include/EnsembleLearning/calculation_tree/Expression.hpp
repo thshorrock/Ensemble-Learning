@@ -39,6 +39,9 @@ namespace ICR{
     class Expression
     {
     public:
+      /** @name Useful typdefs for types that are exposed to the user.
+       */
+      ///@{
       typedef typename boost::call_traits<Function<T>*>::param_type
       function_parameter;
       
@@ -51,6 +54,8 @@ namespace ICR{
       typedef typename boost::call_traits<T>::value_type
       data_t;
       
+      ///@}
+
       /** A destructor */
       virtual ~Expression(){};
       
@@ -66,7 +71,14 @@ namespace ICR{
       friend class Placeholder<T>;
       template<class> friend  class FunctionIterator;
       
-      virtual void SetParent(function_parameter) = 0;
+      /** Set the parent to the expression.
+       * @param fp The function that is the parent
+       */
+      virtual void SetParent(function_parameter fp) = 0;
+      
+      /** Get the parent to the expression.
+       * @return The function that is the parent
+       */
       virtual function_t GetParent() const = 0;
     };
 

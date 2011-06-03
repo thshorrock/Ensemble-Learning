@@ -20,6 +20,9 @@ namespace ICR{
     {
     public:
 
+      /** @name Useful typdefs for types that are exposed to the user.
+       */
+      ///@{
       typedef typename boost::call_traits< VariableNode<T>* const>::param_type
       variable_parameter;
       
@@ -45,6 +48,8 @@ namespace ICR{
       typedef typename boost::call_traits<std::vector<T> >::value_type
       vector_data_t;
       
+      ///@}
+
       /** Calculate the natural log of the normalisation factor.
        *  The normalisation is the inverse of the partition factor.
        *  @param Dirichlet The moments from the Dirichlet

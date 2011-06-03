@@ -185,11 +185,15 @@ main  (int ac, char **av)
   fs::path mixing_file = fs::path(output_directory)/fs::path("InferedMixing.txt");
   fs::path cost_file   = fs::path(output_directory)/fs::path("Cost.txt");
   
+
+
+  
   if (use_float) 
     {
       std::cout<<"Building Model"<<std::endl;
-      BuildModel<float> Model(Data, assumed_sources, mixing_components,
-			      positive_source, positive_mixing, 
+      BuildModel<float> Model(Data, assumed_sources, mixing_components, 
+			      positive_source,
+			      positive_mixing,
 			      model_noise_offset);
       ICR::EnsembleLearning::Builder<float> Build = Model.get_builder();
       Build.set_cost_file(cost_file.string());
@@ -206,8 +210,9 @@ main  (int ac, char **av)
   else
     {
       std::cout<<"Building Model"<<std::endl;
-      BuildModel<double>Model(Data, assumed_sources, mixing_components,
-			      positive_source, positive_mixing, 
+      BuildModel<double> Model(Data, assumed_sources, mixing_components, 
+			      positive_source,
+			      positive_mixing,
 			      model_noise_offset);
       ICR::EnsembleLearning::Builder<double> Build = Model.get_builder();
       Build.set_cost_file(cost_file.string());
@@ -221,6 +226,5 @@ main  (int ac, char **av)
       sources<<S;
       mixing_matrix<< matrix<double>(trans(A));
     }
-
 
 }

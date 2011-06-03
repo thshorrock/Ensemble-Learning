@@ -1,17 +1,42 @@
+
+/***********************************************************************************
+ ***********************************************************************************
+ **                                                                               **
+ **  Copyright (C) 2011 Tom Shorrock <t.h.shorrock@gmail.com> 
+ **                                                                               **
+ **                                                                               **
+ **  This program is free software; you can redistribute it and/or                **
+ **  modify it under the terms of the GNU General Public License                  **
+ **  as published by the Free Software Foundation; either version 2               **
+ **  of the License, or (at your option) any later version.                       **
+ **                                                                               **
+ **  This program is distributed in the hope that it will be useful,              **
+ **  but WITHOUT ANY WARRANTY; without even the implied warranty of               **
+ **  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                **
+ **  GNU General Public License for more details.                                 **
+ **                                                                               **
+ **  You should have received a copy of the GNU General Public License            **
+ **  along with this program; if not, write to the Free Software                  **
+ **  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.  **
+ **                                                                               **
+ ***********************************************************************************
+ ***********************************************************************************/
+
+
+
 #ifndef BUILDER_HPP
 #define BUILDER_HPP
 
+//node definitions required so inheritence relationship available to user.
 #include "EnsembleLearning/node/variable/Hidden.hpp"
 #include "EnsembleLearning/node/variable/Observed.hpp"
 #include "EnsembleLearning/node/variable/Calculation.hpp"
-#include "EnsembleLearning/node/factor/Calculation.hpp"
-#include "EnsembleLearning/node/factor/Factor.hpp"
-#include "EnsembleLearning/node/factor/Mixture.hpp"
-#include "EnsembleLearning/exponential_model/RectifiedGaussian.hpp"
 
-#include <fstream>
 
-#include "EnsembleLearning/detail/parallel_algorithms.hpp"
+#include <boost/shared_ptr.hpp>
+#include <vector>
+#include <string>
+
 
 namespace ICR{
   namespace EnsembleLearning{
@@ -76,6 +101,36 @@ namespace ICR{
      *
      */
 
+    //Forward declarations of models
+    template<class T> class Discrete;
+    template<class T> class Dirichlet;
+    template<class T> class Gamma;
+    template<class T> class Gaussian;
+    template<class T> class RectifiedGaussian;
+    
+    //forward declaration of Interfaces
+    template<class T> class VariableNode;
+    template<class T> class FactorNode;
+    
+
+    //Forward declarations of Factors
+    template<class Model, class T> class Factor;
+    template<class Model, class T> class Mixture;
+    namespace Details{
+    template<template<class> class Model, class T> class CalcGaussianFactor;
+    }
+
+    //Forward declarations of VariableNodes
+    // template<class Model, class T> class HiddenNode;
+    // template<class Model, class T> class ObservedNode;
+    // template<class Model, class T> class DeterministicNode;
+
+
+    //forward declaration of Expressions
+    template<class T> class Expression;
+    template<class T> class Context;
+    
+
     template<class T>
     class Builder
     {
@@ -106,6 +161,10 @@ namespace ICR{
       typedef HiddenNode<Dirichlet<T>, T >     WeightsType;
       typedef HiddenNode<Discrete<T>, T >      CatagoryType;
     public:
+      
+      /** @name Useful typdefs for types that are exposed to the user.
+       */
+      ///@{
       typedef VariableNode<T>*                    Variable;
       typedef HiddenNode<RectifiedGaussian<T>, T >*      RectifiedGaussianNode;
       typedef HiddenNode<Gaussian<T>, T >*      GaussianNode;
@@ -118,7 +177,8 @@ namespace ICR{
       
       typedef HiddenNode<Dirichlet<T>, T >*      WeightsNode;
       typedef HiddenNode<Discrete<T>, T >*       CatagoryNode;
-      
+      ///@}
+
       /** A constructor.
        *  @param cost_file The output filename to plot the evidence.
        *   If the filename is blank (the default) 
@@ -247,30 +307,62 @@ namespace ICR{
       weights(const size_t size);
 
       /** Gaussian Mixture Model.
-       *  @param vMean A vector of variables representing the means.
-       *  @param vPrecision A vector of variables representing the precision.
+       *  @param vMean The vector container containing all the  variables representing the means.
+       *  @param vPrecision The vector container containing all the  variables representing the precisions.
        *  @param Weights A Weights variable that stores the weights to the means and precisions in vMean and vPrecision.
        *  @attention The size of vMean and vPrecision must be identical, 
        *   and must be the same as the size of the Weights Node.
        * @return The GaussianNode that holds the inferred  Gaussian Moments.
        */
       GaussianNode
-      gaussian_mixture(std::vector<Variable>& vMean, 
-		       std::vector<Variable>& vPrecision, 
+      gaussian_mixture( std::vector<Variable>& vMean, 
+		        std::vector<Variable>& vPrecision, 
 		       WeightsNode Weights);
 	
 
   
       /** Rectified Gaussian Mixture Model.
-       *  @param vMean A vector of variables representing the means.
-       *  @param vPrecision A vector of variables representing the precision.
+       *  @param vMean The vector containing all the  variables representing the means.
+       *  @param vPrecision The vector containing all the  variables representing the precisions.
        *  @param Weights A Weights variable that stores the weights to the means and precisions in vMean and vPrecision.
        *  @attention The size of vMean and vPrecision must be identical, 
        *   and must be the same as the size of the Weights Node.
        * @return The GaussianNode that holds the inferred Rectified Gaussian Moments.
        */
       RectifiedGaussianNode
-      rectified_gaussian_mixture(std::vector<Variable>& vMean, std::vector<Variable>& vPrecision, WeightsNode Weights);
+      rectified_gaussian_mixture( std::vector<Variable>& vMean, 
+				  std::vector<Variable>& vPrecision,
+				 WeightsNode Weights);
+      
+      /** Gaussian Mixture Model.
+       *  @param MeanBegin The iterator at the beginning of the the container containing all the  variables representing the means.
+       *  @param PrecisionBegin The iterator at the beginning of the the container containing all the  variables representing the precisions.
+       *  @param Weights A Weights variable that stores the weights to the means and precisions in vMean and vPrecision.
+       *  @attention The size of vMean and vPrecision must be identical, 
+       *   and must be the same as the size of the Weights Node.
+       * @return The GaussianNode that holds the inferred  Gaussian Moments.
+       */
+      template<class MeanIterator, class PrecIterator>
+      GaussianNode
+      gaussian_mixture(const MeanIterator& MeanBegin, 
+		       const PrecIterator& PrecisionBegin, 
+		       WeightsNode Weights);
+	
+
+  
+      /** Rectified Gaussian Mixture Model.
+       *  @param MeanBegin The iterator at the beginning of the the container containing all the  variables representing the means.
+       *  @param PrecisionBegin The iterator at the beginning of the the container containing all the  variables representing the precisions.
+       *  @param Weights A Weights variable that stores the weights to the means and precisions in vMean and vPrecision.
+       *  @attention The size of vMean and vPrecision must be identical, 
+       *   and must be the same as the size of the Weights Node.
+       * @return The GaussianNode that holds the inferred Rectified Gaussian Moments.
+       */
+      template<class MeanIterator, class PrecIterator>
+      RectifiedGaussianNode
+      rectified_gaussian_mixture(const MeanIterator& MeanBegin, 
+				 const PrecIterator& PrecisionBegin,
+				 WeightsNode Weights);
       
       ///@}
       
@@ -491,5 +583,54 @@ namespace ICR{
 
   }
 }
+
+
+/********************************************************
+ ********************************************************
+ ** Implementation
+ ********************************************************
+ ********************************************************/
+
+
+
+
+template<class T>
+template<class MeanIterator, class PrecIterator>
+typename ICR::EnsembleLearning::Builder<T>::GaussianNode
+ICR::EnsembleLearning::Builder<T>::gaussian_mixture(const MeanIterator& MeanBegin,
+						    const PrecIterator& PrecBegin,
+						    WeightsNode Weights)
+{
+  const size_t number = Weights->size();
+  //put in vector form
+  std::vector<Variable> vMean;
+  std::vector<Variable> vPrec;
+	
+  std::copy(MeanBegin,MeanBegin+number, vMean.begin());
+  std::copy(PrecBegin,PrecBegin+number, vPrec.begin());
+  
+  return gaussian_mixture(vMean, vPrec, Weights);
+}
+
+template<class T>
+template<class MeanIterator, class PrecIterator>	
+typename ICR::EnsembleLearning::Builder<T>::RectifiedGaussianNode
+ICR::EnsembleLearning::Builder<T>::rectified_gaussian_mixture(const MeanIterator& MeanBegin,
+							      const PrecIterator& PrecBegin,
+							      WeightsNode Weights)
+{
+  
+  const size_t number = Weights->size();
+  //put in vector form
+  std::vector<Variable> vMean;
+  std::vector<Variable> vPrec;
+	
+  std::copy(MeanBegin,MeanBegin+number, vMean.begin());
+  std::copy(PrecBegin,PrecBegin+number, vPrec.begin());
+  
+  return rectified_gaussian_mixture(vMean, vPrec, Weights);
+}
+
+
 
 #endif //BUILDER_HPP guard

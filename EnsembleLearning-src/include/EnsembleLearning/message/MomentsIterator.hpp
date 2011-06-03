@@ -19,6 +19,10 @@ namespace ICR{
     class  MomentsIterator
       : public boost::iterator_facade<MomentsIterator<moments,T>, T, boost::random_access_traversal_tag >
     {
+      /** @name Useful typdefs for types that are exposed to the user.
+       */
+      ///@{
+
     typedef  typename boost::iterator_facade<MomentsIterator<moments,T>, T, boost::random_access_traversal_tag > F;
       struct enabler {};
     public:
@@ -34,6 +38,8 @@ namespace ICR{
       
       typedef typename boost::call_traits<T>::value_type
       data_type;
+
+      ///@}
 
       /** A constructor */
       MomentsIterator()

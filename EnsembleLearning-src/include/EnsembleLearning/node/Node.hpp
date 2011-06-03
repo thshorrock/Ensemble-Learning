@@ -115,10 +115,15 @@ namespace ICR{
     {
     public:
       
+      /** @name Useful typdefs for types that are exposed to the user.
+       */
+      ///@{
       typedef typename boost::call_traits< VariableNode<T>* const>::param_type
       variable_parameter;
       typedef typename boost::call_traits< VariableNode<T>* const>::value_type
       variable_t;
+
+      ///@}
 
       /** Obtain the natural parameter destined for the variable_parameter v.
        * @param v A pointer to the  VariableNode for which the message is destined.

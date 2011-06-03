@@ -2,6 +2,8 @@
 #include "EnsembleLearning/node/variable/Calculation.hpp"
 #include "EnsembleLearning/calculation_tree/Context.hpp"
 #include "EnsembleLearning/calculation_tree/Expression.hpp"
+#include "EnsembleLearning/calculation_tree/Placeholder.hpp"
+
 
 #include "Random.hpp"
 #include <gsl/gsl_sf_erf.h>
@@ -19,6 +21,10 @@ namespace ICR{
     class RectifiedGaussian
     {
     public:
+      
+      /** @name Useful typdefs for types that are exposed to the user.
+       */
+      ///@{
 
       typedef typename boost::call_traits< VariableNode<T>* const>::param_type
       variable_parameter;
@@ -54,6 +60,8 @@ namespace ICR{
       vector_data_t;
       
       
+      ///@}
+
       /** Calculate the natural log of the normalisation factor.
        *  The normalisation is the inverse of the partition factor.
        *  @param Mean The moments from the VariableNode that represents Mean

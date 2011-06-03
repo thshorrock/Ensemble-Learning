@@ -28,6 +28,10 @@ namespace ICR{
       Mixture(const Mixture<Model, T>& f) {};
     public:
       
+      /** @name Useful typdefs for types that are exposed to the user.
+       */
+      ///@{
+
       typedef typename boost::call_traits< VariableNode<T>* const>::param_type
       variable_parameter;
       typedef typename boost::call_traits< VariableNode<T>* const>::value_type
@@ -42,7 +46,15 @@ namespace ICR{
       typedef typename boost::call_traits<HiddenNode<Discrete<T>,T >*>::value_type
       discrete_parameter;
 
+      ///@}
       
+      /** Construct a mixture node.
+       * @param Parent1 A vector of parent Nodes (for example Means)
+       * @param Parent2 A vector of parent Nodes (for example Precisions)
+       * @param Weights The Weights on each of the vectors 
+       *   (The size of the weights need to be the same as sthe size of the vectors)
+       * @param child The child node.
+       */
       Mixture(variable_vector_parameter Parent1, 
 	      variable_vector_parameter Parent2,  
 	      discrete_parameter Weights,

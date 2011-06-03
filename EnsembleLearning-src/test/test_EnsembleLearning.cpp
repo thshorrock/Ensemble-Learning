@@ -7,6 +7,14 @@
 #include "EnsembleLearning/message/Coster.hpp"
 #include "EnsembleLearning/message/Moments.hpp"
 #include "EnsembleLearning/message/NaturalParameters.hpp"
+#include "EnsembleLearning/exponential_model/Gaussian.hpp"
+#include "EnsembleLearning/exponential_model/RectifiedGaussian.hpp"
+#include "EnsembleLearning/exponential_model/Gamma.hpp"
+#include "EnsembleLearning/exponential_model/Discrete.hpp"
+#include "EnsembleLearning/exponential_model/Dirichlet.hpp"
+#include "EnsembleLearning/message/Moments.hpp"
+#include "EnsembleLearning/message/NaturalParameters.hpp"
+
 #include "EnsembleLearning.hpp"
 //#include "rng.hpp"
 #include <boost/test/unit_test.hpp>

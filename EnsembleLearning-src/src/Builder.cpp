@@ -1,52 +1,46 @@
-#include "EnsembleLearning.hpp"
 
-// #include "EnsembleLearning/node/variable/Constant.hpp"
-// #include "EnsembleLearning/node/variable/Data.hpp"
-#include "EnsembleLearning/node/variable/Hidden.hpp"
-// #include "EnsembleLearning/node/variable/Dirichlet.hpp"
-#include "EnsembleLearning/node/variable/Calculation.hpp"
-// #include "EnsembleLearning/variable/Forwarding.hpp"
+/***********************************************************************************
+ ***********************************************************************************
+ **                                                                               **
+ **  Copyright (C) 2011 Tom Shorrock <t.h.shorrock@gmail.com> 
+ **                                                                               **
+ **                                                                               **
+ **  This program is free software; you can redistribute it and/or                **
+ **  modify it under the terms of the GNU General Public License                  **
+ **  as published by the Free Software Foundation; either version 2               **
+ **  of the License, or (at your option) any later version.                       **
+ **                                                                               **
+ **  This program is distributed in the hope that it will be useful,              **
+ **  but WITHOUT ANY WARRANTY; without even the implied warranty of               **
+ **  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                **
+ **  GNU General Public License for more details.                                 **
+ **                                                                               **
+ **  You should have received a copy of the GNU General Public License            **
+ **  along with this program; if not, write to the Free Software                  **
+ **  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.  **
+ **                                                                               **
+ ***********************************************************************************
+ ***********************************************************************************/
 
+
+
+//builder
+#include "EnsembleLearning/Builder.hpp"
+//factors
 #include "EnsembleLearning/node/factor/Calculation.hpp"
 #include "EnsembleLearning/node/factor/Factor.hpp"
 #include "EnsembleLearning/node/factor/Mixture.hpp"
-// #include "EnsembleLearning/factor/DeterministicFactor.hpp"
-
-#include "EnsembleLearning/exponential_model/RectifiedGaussian.hpp"
-
+//nodes
+#include "EnsembleLearning/node/variable/Hidden.hpp"
+#include "EnsembleLearning/node/variable/Observed.hpp"
+#include "EnsembleLearning/node/variable/Calculation.hpp"
+#include <iostream>
+//algorithms
 #include "EnsembleLearning/detail/parallel_algorithms.hpp"
 
-// typedef ICR::EnsembleLearning::Factor<ICR::EnsembleLearning::RectifiedGaussianModel<T> >      RectifiedGaussianFactor;
-// typedef ICR::EnsembleLearning::Factor<ICR::EnsembleLearning::GaussianModel<T> >      GaussianFactor;
-// typedef ICR::EnsembleLearning::Factor<ICR::EnsembleLearning::GammaModel<T> >         GammaFactor;
-// typedef ICR::EnsembleLearning::Factor<ICR::EnsembleLearning::DirichletModel<T> >     DirichletFactor;
-// typedef ICR::EnsembleLearning::Factor<ICR::EnsembleLearning::DiscreteModel<T> >      DiscreteFactor;
-// typedef ICR::EnsembleLearning::Mixture<ICR::EnsembleLearning::RectifiedGaussianModel<T> >     RectifiedGaussianMixtureFactor;
-// typedef ICR::EnsembleLearning::Mixture<ICR::EnsembleLearning::GaussianModel<T> >     GaussianMixtureFactor;
+//stream
+#include <fstream>
 
-// typedef ICR::EnsembleLearning::Details::CalcGaussianFactor<ICR::EnsembleLearning::GaussianModel, T >  CalcGaussianFactor;
-
-// // typedef DeterministicFactor<GaussianModel,Det::Add, T >     AddFactor;
-// // typedef DeterministicFactor<GaussianModel,Det::Multiply, T >     MultiplyFactor;
-
-// typedef ICR::EnsembleLearning::HiddenNode<ICR::EnsembleLearning::GaussianModel<T> >      GaussianType;
-// typedef ICR::EnsembleLearning::HiddenNode<ICR::EnsembleLearning::RectifiedGaussianModel<T> >      RectifiedGaussianType;
-// typedef ICR::EnsembleLearning::HiddenNode<ICR::EnsembleLearning::GammaModel<T> >         GammaType;
-// typedef ICR::EnsembleLearning::HiddenNode<ICR::EnsembleLearning::DirichletModel<T> >     DirichletType;
-// typedef ICR::EnsembleLearning::DataNode<ICR::EnsembleLearning::GaussianConstant<T> >     GaussianDataType;
-// typedef ICR::EnsembleLearning::DataNode<ICR::EnsembleLearning::GammaConstant<T> >        GammaDataType;
-// typedef ICR::EnsembleLearning::ConstantNode<ICR::EnsembleLearning::GaussianConstant<T> > GaussianConstType;
-// typedef ICR::EnsembleLearning::ConstantNode<ICR::EnsembleLearning::GammaConstant<T> >    GammaConstType;
-// typedef ICR::EnsembleLearning::ConstantNode<ICR::EnsembleLearning::NormalConstant<T> >   NormalConstType;
-// typedef ICR::EnsembleLearning::ConstantNode<ICR::EnsembleLearning::DirichletConstant<T> >  DirichletConstType;
-// typedef ICR::EnsembleLearning::DeterministicNode<ICR::EnsembleLearning::GaussianModel<T>, T>    GaussianResultType;
-
-      
-// typedef ICR::EnsembleLearning::HiddenNode<DirichletModel<T> >     WeightsType;
-// typedef ICR::EnsembleLearning::HiddenNode<DiscreteModel<T> >      CatagoryType;
-//      typedef ForwardingNode<GaussianModel<T> >   GaussianMixtureType;
-
-      
 template<class T>
 ICR::EnsembleLearning::Builder<T>::Builder(const std::string& cost_file)
   : m_PrevCost(-1.0/0.0), // minus infty
