@@ -1,12 +1,50 @@
 #pragma once
+#ifndef RECTIFIEDGAUSSIAN_HPP
+#define RECTIFIEDGAUSSIAN_HPP
+
+
+/***********************************************************************************
+ ***********************************************************************************
+ **                                                                               **
+ **  Copyright (C) 2011 Tom Shorrock <t.h.shorrock@gmail.com> 
+ **                                                                               **
+ **                                                                               **
+ **  This program is free software; you can redistribute it and/or                **
+ **  modify it under the terms of the GNU General Public License                  **
+ **  as published by the Free Software Foundation; either version 2               **
+ **  of the License, or (at your option) any later version.                       **
+ **                                                                               **
+ **  This program is distributed in the hope that it will be useful,              **
+ **  but WITHOUT ANY WARRANTY; without even the implied warranty of               **
+ **  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                **
+ **  GNU General Public License for more details.                                 **
+ **                                                                               **
+ **  You should have received a copy of the GNU General Public License            **
+ **  along with this program; if not, write to the Free Software                  **
+ **  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.  **
+ **                                                                               **
+ ***********************************************************************************
+ ***********************************************************************************/
+
+
+
+#include "Random.hpp"
+#include "EnsembleLearning/detail/parallel_algorithms.hpp"
+#include "EnsembleLearning/message/Moments.hpp"
+#include "EnsembleLearning/message/NaturalParameters.hpp"
+#include "EnsembleLearning/node/Node.hpp"
 #include "EnsembleLearning/node/variable/Calculation.hpp"
 #include "EnsembleLearning/calculation_tree/Context.hpp"
 #include "EnsembleLearning/calculation_tree/Expression.hpp"
 #include "EnsembleLearning/calculation_tree/Placeholder.hpp"
 
+#include <boost/call_traits.hpp> 
+#include <boost/assert.hpp> 
 
-#include "Random.hpp"
 #include <gsl/gsl_sf_erf.h>
+
+#include <vector>
+#include <cmath>
 
 namespace ICR{
   namespace EnsembleLearning{
@@ -533,3 +571,5 @@ ICR::EnsembleLearning::RectifiedGaussian<T>::CalcNP2Deterministic(expression_par
   return NP_t(  Expr->Evaluate(C0) *prec  , -0.5*prec);
 
 }
+
+#endif  // guard for RECTIFIEDGAUSSIAN_HPP
