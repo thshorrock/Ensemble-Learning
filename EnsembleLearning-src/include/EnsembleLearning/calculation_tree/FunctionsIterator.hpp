@@ -39,6 +39,7 @@
 namespace ICR{
   namespace EnsembleLearning{
 
+    namespace detail{
     
     /**Iterator to iterate down the function tree (towards the root).*/ 
     template <class function>
@@ -112,7 +113,7 @@ namespace ICR{
       function* m_function;
       function* m_previous;
     };
-    
+    }
   }
 }
 

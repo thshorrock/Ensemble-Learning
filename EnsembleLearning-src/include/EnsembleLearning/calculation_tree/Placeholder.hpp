@@ -93,8 +93,8 @@ namespace ICR{
       
     private:
       
-      typedef  FunctionIterator<const Function<T> > const_iterator;
-      typedef  FunctionIterator<Function<T> > iterator;
+      typedef  detail::FunctionIterator<const Function<T> > const_iterator;
+      typedef  detail::FunctionIterator<Function<T> > iterator;
       
       
       typedef typename boost::call_traits<Function<T>*>::param_type

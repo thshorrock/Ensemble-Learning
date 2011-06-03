@@ -37,8 +37,9 @@ namespace ICR{
     
     //Forward declarations
     template<class>  class SubContext;
-    template<class>  class FunctionIterator;
-    
+    namespace detail{
+      template<class>  class FunctionIterator;
+    }
     template<class T>
     class Plus;
     
@@ -99,7 +100,7 @@ namespace ICR{
       friend class Plus<T>;
       friend class Times<T>;
       friend class Placeholder<T>;
-      template<class> friend  class FunctionIterator;
+      template<class> friend  class detail::FunctionIterator;
       
       /** Set the parent to the expression.
        * @param fp The function that is the parent
