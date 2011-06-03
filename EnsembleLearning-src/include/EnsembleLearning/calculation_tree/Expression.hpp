@@ -1,7 +1,3 @@
-#pragma once
-#ifndef EXPRESSION_HPP
-#define EXPRESSION_HPP
-
 
 
 /***********************************************************************************
@@ -28,6 +24,12 @@
  ***********************************************************************************/
 
 
+#pragma once
+#ifndef EXPRESSION_HPP
+#define EXPRESSION_HPP
+
+
+#include <boost/call_traits.hpp>
 
 namespace ICR{
 

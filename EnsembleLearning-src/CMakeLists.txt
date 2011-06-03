@@ -15,7 +15,7 @@ set(LIBS ${LIBS} ${GSL_LIBRARIES} ${GSLCBLAS_LIBRARIES})
 INCLUDE_DIRECTORIES( "include" ${BOOST_INCLUDE_DIRS} )
 
 #make the ensemble learning library
-ADD_LIBRARY(EnsembleLearning  src/Builder.cpp)
+ADD_LIBRARY(EnsembleLearning  src/Builder.cpp src/Factory.cpp)
 target_link_libraries(EnsembleLearning  ${LIBS}) #link
 install(DIRECTORY include/ DESTINATION include
           FILES_MATCHING PATTERN "*.hpp")

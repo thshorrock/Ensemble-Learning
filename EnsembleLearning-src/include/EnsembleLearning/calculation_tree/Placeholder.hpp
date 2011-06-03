@@ -7,6 +7,7 @@
 #include "Context.hpp"
 #include<string>
 
+#include <boost/assert.hpp>
 namespace ICR{
 
   namespace EnsembleLearning{

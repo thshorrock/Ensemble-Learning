@@ -11,7 +11,7 @@ project EnsembleLearning
 ;
 
 lib EnsembleLearning : 
-    Builder.cpp
+    Builder.cpp Factory.cpp
    $(TOP)//threaded-library 
    $(TOP)//asio-library
    $(TOP)//maths-library
