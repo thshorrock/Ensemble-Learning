@@ -585,13 +585,9 @@ ICR::EnsembleLearning::Builder<T>::HasConverged(const T Cost, const T epsilon)
     std::cout<<"COST = "<<Cost<<" PREV COST = "<<m_PrevCost<<" pc DIFF = "<<100.0*(((Cost-m_PrevCost)/std::fabs(Cost)))<<std::endl;
   if (m_cost_file != "") { 
     std::ofstream CostFile(m_cost_file.c_str(),std::ios_base::app);
-    // CostFile->open("Cost.txt",std::ios_base::app);
     CostFile<<Cost<<"\n";
   }
   }
-  // CostFile->close();
-  // if (Cost<m_PrevCost) 
-  //   std::cerr<<"WARNING:: BOUND HAS DECREASED - THIS IS A BAD SIGN - try making the priors less commital!\n";
   if (100.0*std::fabs((Cost - m_PrevCost)/Cost)<epsilon) 
     return true;
 	
