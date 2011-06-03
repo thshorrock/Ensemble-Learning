@@ -28,7 +28,6 @@
 
 
 
-
 #include "Random.hpp"
 #include "EnsembleLearning/detail/parallel_algorithms.hpp"
 #include "EnsembleLearning/message/Moments.hpp"
@@ -36,13 +35,10 @@
 #include "EnsembleLearning/node/Node.hpp"
 #include "EnsembleLearning/node/variable/Calculation.hpp"
 #include "EnsembleLearning/calculation_tree/Context.hpp"
+#include "EnsembleLearning/calculation_tree/Expression.hpp"
 #include "EnsembleLearning/calculation_tree/Placeholder.hpp"
 
-#include <boost/call_traits.hpp> 
-#include <boost/assert.hpp> 
-
-#include <vector>
-#include <cmath>
+#include "Random.hpp"
 
 namespace ICR{
   namespace EnsembleLearning{
@@ -76,6 +72,8 @@ namespace ICR{
       
       typedef typename boost::call_traits< DeterministicNode<Gaussian<T>, T>* >::param_type
       deterministic_parameter;
+      typedef typename boost::call_traits< Expression<T>* >::param_type
+      expression_parameter;
       
       typedef typename boost::call_traits<Context<T> >::param_type
       context_parameter;
