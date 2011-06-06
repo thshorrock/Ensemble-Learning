@@ -7,10 +7,28 @@
 
 project(test_EnsembleLearning)
 
-#require the omp library
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fprofile-arcs -ftest-coverage")
+set(CMAKE_EXE_LINKER_FLAGS
+    "${CMAKE_EXE_LINKER_FLAGS} -fprofile-arcs -ftest-coverage")
+
 FIND_PACKAGE(OpenMP REQUIRED) 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
 SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_C_FLAGS}")
+
+ IF (CMAKE_COMPILER_IS_GNUCC)
+
+    ADD_CUSTOM_COMMAND(TARGET helloworld PRE_BUILD
+        COMMAND ${CMAKE_SOURCE_DIR}/../scripts/test4ccache ${CMAKE_C_COMPILER}
+        COMMENT "Testing for ccache"
+        )
+    SET(CMAKE_C_FLAGS "-g -O0 -Wall -fprofile-arcs -ftest-coverage --coverage ")
+    SET(CMAKE_CXX_FLAGS "-g -O0 -Wall -fprofile-arcs -ftest-coverage --coverage ")
+    SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fprofile-arcs -ftest-coverage  --coverage -lgcov")
+    # add lcov target
+    include(${CMAKE_SOURCE_DIR}/cmake/lcov.cmake)
+    #ADD_DEPENDENCIES(lcov helloworld)
+ ENDIF()
+#require the omp library
 
 add_executable(test_EnsembleLearning test_EnsembleLearning.cpp)
 target_link_libraries (test_EnsembleLearning EnsembleLearning)

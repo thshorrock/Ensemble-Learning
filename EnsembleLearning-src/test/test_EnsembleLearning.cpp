@@ -675,6 +675,8 @@ BOOST_AUTO_TEST_CASE( Gamma_test  )
 
 BOOST_AUTO_TEST_CASE( Dirichlet_test  )
 {
+  
+
   //Initialise
   std::vector<double> u(3,1.1);
   Moments<double> Us(u);
@@ -699,6 +701,27 @@ BOOST_AUTO_TEST_CASE( Dirichlet_test  )
   BOOST_CHECK_CLOSE(Update[0], gsl_sf_psi(1.1)-gsl_sf_psi(3.3), 0.0001); 
   BOOST_CHECK_CLOSE(Update[1], gsl_sf_psi(1.1)-gsl_sf_psi(3.3), 0.0001); 
   BOOST_CHECK_CLOSE(Update[2], gsl_sf_psi(1.1)-gsl_sf_psi(3.3), 0.0001); 
+  
+  //check mean
+  std::vector<double> mean =  Dirichlet<double>::CalcMean(NPData);
+  BOOST_CHECK_CLOSE(mean[0], 1.0/3.0, 0.0001); 
+  BOOST_CHECK_CLOSE(mean[1], 1.0/3.0, 0.0001); 
+  BOOST_CHECK_CLOSE(mean[2], 1.0/3.0, 0.0001); 
+  
+  //check precision
+  std::vector<double> precision =  Dirichlet<double>::CalcPrecision(NPData);
+  BOOST_CHECK_CLOSE(precision[0], 1.0/((2.0/9.0)/(4.3)), 0.0001); 
+  BOOST_CHECK_CLOSE(precision[1],  1.0/((2.0/9.0)/(4.3)), 0.0001); 
+  BOOST_CHECK_CLOSE(precision[2],  1.0/((2.0/9.0)/(4.3)), 0.0001); 
+  
+  HiddenNode<Dirichlet<double, double > Node;
+
+  //calc 1000 samples and check mean and precision.
+  std::vector< Moments<double> > sample(1000);
+  for(size_t i=0;i<sample.size();++i){
+    sample[i] = Dirichlet<double>::CalcSample();
+  }
+
 
   //BOOST_CHECK_CLOSE(3*std::exp(Update[0]), 1.0, 0.0001);
 

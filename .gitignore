@@ -24,6 +24,7 @@ bin.v2/
 bin/
 backups/
 CMakeFiles/
+coverage
 
 # Packages #
 ############

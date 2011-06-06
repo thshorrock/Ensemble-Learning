@@ -582,11 +582,11 @@ ICR::EnsembleLearning::Builder<T>::HasConverged(const T Cost, const T epsilon)
 {
 #pragma omp critical
   {
-    std::cout<<"COST = "<<Cost<<" PREV COST = "<<m_PrevCost<<" pc DIFF = "<<100.0*(((Cost-m_PrevCost)/std::fabs(Cost)))<<std::endl;
-  if (m_cost_file != "") { 
-    std::ofstream CostFile(m_cost_file.c_str(),std::ios_base::app);
-    CostFile<<Cost<<"\n";
-  }
+    std::cout<<"COST = "<<Cost<<"\t% difference = "<<100.0*(((Cost-m_PrevCost)/std::fabs(Cost)))<<std::endl;
+    if (m_cost_file != "") { 
+      std::ofstream CostFile(m_cost_file.c_str(),std::ios_base::app);
+      CostFile<<Cost<<"\n";
+    }
   }
   if (100.0*std::fabs((Cost - m_PrevCost)/Cost)<epsilon) 
     return true;

@@ -514,6 +514,19 @@ namespace ICR{
 	    WeightsNode Weights,
 	    const T data );
 	
+   /** Join Gaussian Modelled data to a mixture model.
+       *  @param MeanBegin The iterator at the beginning of the the container containing all the  variables representing the means.
+       *  @param PrecBegin The iterator at the beginning of the the container containing all the  variables representing the precisions.
+       *  @param Weights The Weights node that stores the weights.
+       *  @param data The value of the data.
+       */
+      template<class MeanIterator, class PrecIterator>
+      void
+      join( MeanIterator MeanBegin, 
+	    PrecIterator PrecBegin, 
+	    WeightsNode Weights,
+	    const T data );
+
 
       ///@}
 
@@ -599,8 +612,8 @@ ICR::EnsembleLearning::Builder<T>::gaussian_mixture(const MeanIterator& MeanBegi
 {
   const size_t number = Weights->size();
   //put in vector form
-  std::vector<Variable> vMean;
-  std::vector<Variable> vPrec;
+  std::vector<Variable> vMean(number);
+  std::vector<Variable> vPrec(number);
 	
   std::copy(MeanBegin,MeanBegin+number, vMean.begin());
   std::copy(PrecBegin,PrecBegin+number, vPrec.begin());
@@ -618,8 +631,8 @@ ICR::EnsembleLearning::Builder<T>::rectified_gaussian_mixture(const MeanIterator
   
   const size_t number = Weights->size();
   //put in vector form
-  std::vector<Variable> vMean;
-  std::vector<Variable> vPrec;
+  std::vector<Variable> vMean(number);
+  std::vector<Variable> vPrec(number);
 	
   std::copy(MeanBegin,MeanBegin+number, vMean.begin());
   std::copy(PrecBegin,PrecBegin+number, vPrec.begin());
@@ -628,5 +641,25 @@ ICR::EnsembleLearning::Builder<T>::rectified_gaussian_mixture(const MeanIterator
 }
 
 
+
+template<class T>
+template<class MeanIterator, class PrecIterator>
+void
+ICR::EnsembleLearning::Builder<T>::join( MeanIterator MeanBegin, 
+					 PrecIterator PrecBegin, 
+					 WeightsNode Weights,
+					 const T data )
+{
+  const size_t number = Weights->size();
+
+  //put in vector form
+  std::vector<Variable> vMean(number);
+  std::vector<Variable> vPrec(number);
+	
+  std::copy(MeanBegin,MeanBegin+number, vMean.begin());
+  std::copy(PrecBegin,PrecBegin+number, vPrec.begin());
+  
+  join(vMean, vPrec, Weights,data);
+}
 
 #endif //BUILDER_HPP guard

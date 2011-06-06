@@ -84,12 +84,14 @@ IF( BUILD_EXAMPLES )
   
 
   message(STATUS "")
-  colormsg(_HIBLUE_ "Example starting")
+  colormsg(_HIBLUE_ "Building Examples")
   message(STATUS "")
 
 
 
-  add_subdirectory(example/InferData)
+  add_subdirectory(example/InferData1)
+  add_subdirectory(example/InferMixtureData1)
+  add_subdirectory(example/InferScaledData1)
   add_subdirectory(example/ICA/build)
   
 

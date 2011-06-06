@@ -46,49 +46,10 @@
  * 
  * Provide a cross platform c++ library for Inference by Variational Ensemble Learning.
  *
+ *
  * @section example_sec Example:
- * @code#include "EnsembleLearning.hpp"
- * #include <vector>
- * #include <iostream>
- * using namespace ICR::EnsembleLearning;
- * 
- * int
- * main  (int ac, char **av)
- * {
- *   //Create the data
- *   rng* random = Random::Instance(); //a random number generator.
- *   std::vector<double> data(10);
- *   for(size_t i = 0; i<10; ++i)
- *   {
- *     data[i] = random->Gaussian(2, 3); //mean = 3, standard deviation = 2
- *   }
  *
- *   //Build the model
- *   Builder<double> build;  
- *  
- *   typedef Builder<double>::Variable Variable;  //A convenient alias
- *
- *   //Nodes to hold the learnt mean and precision
- *   Variable mean = build.gaussian(0.01,0.01);
- *   Variable prec = build.gamma(0.01,0.1);
- *
- *   //Model The data as Gaussian distributed, 
- *   //  each data point is modelled indepenantly
- *   for(size_t i; i<data.size(); ++i)
- *   {
- *    build.join(mean,prec,data[i];
- *   }
- * 
- *   //The model is complete, now need to do the inference.
- *   //  Iterate until convergance to within 0.1% or 100 iterations
- *   build.run(0.1,100);
- *
- *   //output the inferred mean and precision
- *   std::cout<<"mean      = "<<Mean(mean)<<" +- "<<StandardDeviation(mean)<<std::endl;
- *   std::cout<<"precision = "<<Mean(prec)<<" +- "<<StandardDeviation(prec)<<std::endl;
- *
- * }
- * @endcode
+ *  See the list of examples.  The source code is found in the example folder.
  *
  * \section feature_sec Feature
  * A swig interface file is provided for this library.
@@ -112,10 +73,6 @@
  * - R
  * - Ruby
  * - Tcl/Tk
- *
- * The following python script repeates the previous example.
- * @code
- * @endcode
  *
  *
  * \section dependancies_sec Dependancies.
@@ -173,8 +130,64 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  * @endverbatim
+ *
+ *
+ * @example InferData1.cpp
+ *  In this example 20 data points are drawn at random from a Gaussian distribution
+ *  with a mean equal to 3 and a precision (the inverse of the variance) equal to 10.
+ *
+ *  The distribution from which the data points were sampled is inferred from the data.
+ *
+ *  The generated data points are as plotted.
+ * @image html data_points.png
+ * @image latex  data_points.eps  "data points"
+ *
+ *  The data is modelled (correctly) as being Gaussian distrubuted. 
+ *  The mean and precision of the Gaussian are inferred from the data.
+ *  The prior knowledge assumed on the mean and precision is fairly non-commital,
+ *  as is seen from the plots.
+ * @image html priors.png
+ * @image latex  priors.eps  "Prior distributions for the mean and precision"
+ *  
+ *  Nevertheless, the inferred mean and precision is dominated by the 20 data points.
+ *   - The inferred mean is  \f$ 3.012 \pm 0.078 \f$
+ *   - The inferred precision is \f$ 8.14 \pm 2.45 \f$
+ *
+ * @example InferMixture1.cpp
+ *  In this example 500 data points are drawn at random from three different
+ * Gaussian distributions, with
+ *   - mean equal to 3 and precision 10,
+ *   - mean equal to 6 and precision 6,
+ *   - mean equal to 3 and precision 2
+ *
+ *  The distribution from which the data points were sampled is inferred from the data.
+ *
+ *  The generated data points are as plotted.
+ * @image html data_points.png
+ * @image latex  data_points.eps  "data points"
+ *
+ *  The data is modelled  as being taken from a mixture of 5 Gaussian distrubutions
+ *  The mean, precision and weight of each distribution  are inferred from the data.
+ *  The prior knowledge assumed on the mean and precision is fairly non-commital,
+ *  as is seen from the plots.
+ * @image html priors.png
+ * @image latex  priors.eps  "Prior distributions for the mean and precision"
+ *  
+ *  The inferred weights for  500  data points are drawn in the table, the cost is  -1.40356.
+ *  
+ *  <table>
+ *  <tr>
+ *  <th></th> <th>weight</th> <th>mean</th><th>precision</th>
+ *  </tr>
+ *  <tr><th>Component 1</th> <td>45.8% +- 2.2%</td> <td>3.00 +- 0.02</td> <td>9.2 +- 0.9</td></tr>
+ *  <tr><th>Component 2</th> <td>29.1% +- 2.0%</td> <td>6.00 +- 0.04</td> <td>5.1 +- 0.6</td></tr>
+ *  <tr><th>Component 3</th> <td>21.0% +- 1.8%</td> <td>2.90 +- 0.07</td> <td>2.0 +- 0.3</td></tr>
+ *  <tr><th>Component 4</th> <td>2.9%  +- 0.8%</td> <td>3.79 +- 0.02</td> <td>170 +- 61</td></tr>
+ *  <tr><th>Component 5</th> <td>1.1%  +- 0.5%</td> <td>4.55 +- 0.06</td> <td>66  +- 35</td></tr>
+ *  </table>
+ *
+ *
  */
-
 /** @file EnsembleLearning.hpp
  *  @brief The lecroy header files are specified
  *
