@@ -74,9 +74,9 @@ public:
     
     //m_Build approximation to the mixing matrix
     if (positive_mixing) 
-      build_mixing_matrix(Int2Type<true>(),M,T);
+      build_mixing_matrix(Int2Type<true>(),N,M);
     else
-      build_mixing_matrix(Int2Type<false>(),M,T);
+      build_mixing_matrix(Int2Type<false>(),N,M);
       
 
     //m_Build the noise mean approximation
@@ -206,15 +206,15 @@ private:
   build_vector(vector<GammaNode>& V)
   {
     std::generate(V.begin(), V.end(), boost::bind(&ICR::EnsembleLearning::Builder<data_t>::gamma,
-					     m_Build,
-					     1.0, 1.0));
+						  boost::ref(m_Build),
+						  1.0, 1.0));
   }
   void 
   build_vector(vector<WeightsNode>& V, size_t components)
   {
     std::generate(V.begin(), V.end(), boost::bind(&ICR::EnsembleLearning::Builder<data_t>::weights,
-					     m_Build,
-					     components));
+						  boost::ref(m_Build),
+						  components));
   }
   
   void
