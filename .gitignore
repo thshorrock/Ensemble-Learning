@@ -42,6 +42,8 @@ CMakeFiles/
 ##############
 *.dat
 *.txt
+#except CMakeLists.txt
+!CMakeLists.txt
 
 # Logs and databases #
 ######################

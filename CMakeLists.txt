@@ -89,6 +89,7 @@ IF( BUILD_EXAMPLES )
 
 
 
+  add_subdirectory(example/InferData)
   add_subdirectory(example/ICA/build)
   
 
