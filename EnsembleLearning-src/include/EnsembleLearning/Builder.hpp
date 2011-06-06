@@ -145,12 +145,12 @@ namespace ICR{
       typedef HiddenNode<RectifiedGaussian<T>, T >      RectifiedGaussianType;
       typedef HiddenNode<Gamma<T>, T >         GammaType;
       typedef HiddenNode<Dirichlet<T>, T >     DirichletType;
-      typedef ObservedNode<Gaussian<T>, T >     GaussianDataType;
-      typedef ObservedNode<Gamma<T>, T >        GammaDataType;
-      typedef ObservedNode<Gaussian<T>, T > GaussianConstType;
-      typedef ObservedNode<Gamma<T> , T>    GammaConstType;
-      typedef ObservedNode<Gaussian<T>, T >   NormalConstType;
-      typedef ObservedNode<Dirichlet<T>, T >  DirichletConstType;
+      typedef ObservedNode<Gaussian, T >     GaussianDataType;
+      typedef ObservedNode<Gamma, T >        GammaDataType;
+      typedef ObservedNode<Gaussian, T > GaussianConstType;
+      typedef ObservedNode<Gamma, T>    GammaConstType;
+      typedef ObservedNode<Gaussian, T >   NormalConstType;
+      typedef ObservedNode<Dirichlet, T >  DirichletConstType;
       typedef DeterministicNode<Gaussian<T>, T>    GaussianResultType;
 
       
@@ -165,10 +165,10 @@ namespace ICR{
       typedef HiddenNode<RectifiedGaussian<T>, T >*      RectifiedGaussianNode;
       typedef HiddenNode<Gaussian<T>, T >*      GaussianNode;
       typedef HiddenNode<Gamma<T>, T >*         GammaNode;
-      typedef ObservedNode<Gaussian<T>, T >*     GaussianDataNode;
-      typedef ObservedNode<Gamma<T>, T >*        GammaDataNode;
-      typedef ObservedNode<Gaussian<T>, T >* GaussianConstNode;
-      typedef ObservedNode<Gamma<T>, T >*    GammaConstNode;
+      typedef ObservedNode<Gaussian, T >*     GaussianDataNode;
+      typedef ObservedNode<Gamma, T >*        GammaDataNode;
+      typedef ObservedNode<Gaussian, T >* GaussianConstNode;
+      typedef ObservedNode<Gamma, T >*    GammaConstNode;
       typedef DeterministicNode<Gaussian<T>, T>*    GaussianResultNode;
       
       typedef HiddenNode<Dirichlet<T>, T >*      WeightsNode;

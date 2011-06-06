@@ -49,7 +49,7 @@ namespace ICR{
      *    For example, Data might be modelled by a Gaussian distribution.
      *  @tparam T The data type used in calculations - either float or double.
      */
-    template<class Model, class T>
+    template<template<class> class Model, class T>
     class ObservedNode : public VariableNode<T>
     {
     public:
@@ -57,7 +57,7 @@ namespace ICR{
        *  @param value The observed value of the node.
        */
       ObservedNode( const T& value)
-	: m_Moments(make_Moments(2, value, Model() ) ), 
+	: m_Moments(make_Moments(2, value, Model<T>() ) ), 
 	  m_parent(0),
 	  m_children()
       {}
@@ -67,7 +67,7 @@ namespace ICR{
        * @param  value The value of each of the elements 
        */
       ObservedNode(const size_t& elements, const T& value)
-	: m_Moments(make_Moments(elements,value, Model() ) ), 
+	: m_Moments(make_Moments(elements,value, Model<T>() ) ), 
 	  m_parent(0), 
 	  m_children()
       {}
@@ -123,7 +123,7 @@ namespace ICR{
   }
 }
 
-template<class model,class T>
+template<template<class> class model,class T>
 inline
 const ICR::EnsembleLearning::Moments<T>&
 ICR::EnsembleLearning::ObservedNode<model,T>::GetMoments() const
@@ -132,7 +132,7 @@ ICR::EnsembleLearning::ObservedNode<model,T>::GetMoments() const
   return m_Moments;
 }
 
-template<class model,class T>
+template<template<class> class model,class T>
 inline
 void
 ICR::EnsembleLearning::ObservedNode<model,T>::AddChildFactor(FactorNode<T>* f)
@@ -146,7 +146,7 @@ ICR::EnsembleLearning::ObservedNode<model,T>::AddChildFactor(FactorNode<T>* f)
 }
 
 
-template<class Model, class T>
+template<template<class> class Model, class T>
 inline
 void
 ICR::EnsembleLearning::ObservedNode<Model,T>::SetParentFactor(FactorNode<T>* f)
@@ -156,7 +156,7 @@ ICR::EnsembleLearning::ObservedNode<Model,T>::SetParentFactor(FactorNode<T>* f)
 }
   
 
-template<class Model,class T>
+template<template<class> class Model,class T>
 inline
 const std::vector<T>
 ICR::EnsembleLearning::ObservedNode<Model,T>::GetMean() 
@@ -165,7 +165,7 @@ ICR::EnsembleLearning::ObservedNode<Model,T>::GetMean()
   return Mean;
 }
    
-template<class Model,class T>
+template<template<class> class Model,class T>
 inline
 const std::vector<T>
 ICR::EnsembleLearning::ObservedNode<Model,T>::GetVariance() 
@@ -174,7 +174,7 @@ ICR::EnsembleLearning::ObservedNode<Model,T>::GetVariance()
   return Var;
 }
 
-template<class Model, class T>
+template<template<class> class Model, class T>
 inline
 void
 ICR::EnsembleLearning::ObservedNode<Model,T>::Iterate(Coster& Total)
