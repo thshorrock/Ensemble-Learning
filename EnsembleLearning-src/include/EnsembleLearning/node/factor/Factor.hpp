@@ -117,7 +117,8 @@ namespace ICR{
 	//Initialise up the tree first
 	m_parent1_node->InitialiseMoments();
 	m_parent2_node->InitialiseMoments();
-	return  Model::CalcSample(m_parent1_node,m_parent2_node );
+	return  Model::CalcSample(m_parent1_node->GetMoments(),
+				  m_parent2_node->GetMoments());
       }
       
       /** Calculate the Log Normalisation.
@@ -227,7 +228,7 @@ namespace ICR{
       {
 	//Initialise up the tree first
 	m_prior_node->InitialiseMoments();
-	return Dirichlet<T>::CalcSample(m_prior_node);
+	return Dirichlet<T>::CalcSample(m_prior_node->GetMoments());
       }
 
 
@@ -328,7 +329,7 @@ namespace ICR{
       Moments<T>
       InitialiseMoments() const
       {
-	return Discrete<T>::CalcSample(m_prior_node);
+	return Discrete<T>::CalcSample(m_prior_node->GetMoments());
       }
 
 

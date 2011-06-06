@@ -72,6 +72,8 @@ namespace ICR{
       variable_vector_parameter;
       typedef typename boost::call_traits< std::vector<VariableNode<T>*> >::value_type
       variable_vector_t;
+      typedef typename boost::call_traits< Moments<T> >::value_type
+      moments_t;
 
       typedef typename boost::call_traits<HiddenNode<Discrete<T>,T >*>::value_type
       discrete_t;
@@ -122,14 +124,25 @@ namespace ICR{
 	  m_parent2_nodes[i]->InitialiseMoments();
 	}
 
-	// std::for_each(m_parent1_nodes.begin(), m_parent1_nodes.end(),
-	// 		 boost::bind(&VariableNode<T>::InitialiseMoments, _1)
-	// 		 );
-	// std::for_each(m_parent2_nodes.begin(), m_parent2_nodes.end(),
-	// 		 boost::bind(&VariableNode<T>::InitialiseMoments, _1)
-	// 		 );
+	std::vector<moments_t > moments1(m_parent1_nodes.size());
+	std::vector<moments_t > moments2(m_parent2_nodes.size());
+
+	PARALLEL_TRANSFORM(m_parent1_nodes.begin(),m_parent1_nodes.end(),
+			   moments1.begin(), 
+			   boost::bind(&VariableNode<T>::GetMoments,
+				       _1)
+			   );
+	
+	PARALLEL_TRANSFORM(m_parent2_nodes.begin(), m_parent2_nodes.end(),
+			   moments2.begin(), 
+			   boost::bind(&VariableNode<T>::GetMoments,
+				       _1)
+			   );
 	m_weights_node->InitialiseMoments();
-	return Model::CalcSample(m_parent1_nodes,m_parent2_nodes, m_weights_node );
+	return Model::CalcSample(moments1,
+				 moments2, 
+				 m_weights_node ->GetMoments()
+				 );
       }
 
       T

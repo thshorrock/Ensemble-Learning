@@ -133,8 +133,8 @@ namespace ICR{
        */
       static
       moments_t
-      CalcSample(variable_parameter Shape,
-		 variable_parameter IScale);
+      CalcSample(moments_parameter Shape,
+		 moments_parameter IScale);
         
       /** Calculate the Mean from the Natural Paramters.
        *  @param NP The NaturalParameters from which to calcualate the moments.
@@ -271,12 +271,12 @@ ICR::EnsembleLearning::Gamma<T>::CalcAvLog(moments_parameter Shape,
 template<class T>
 inline
 typename ICR::EnsembleLearning::Gamma<T>::moments_t
-ICR::EnsembleLearning::Gamma<T>::CalcSample(variable_parameter Shape,
-				    variable_parameter IScale) 
+ICR::EnsembleLearning::Gamma<T>::CalcSample(moments_parameter Shape,
+				    moments_parameter IScale) 
 {
   rng* random = Random::Instance();
-  const data_t shape  = Shape->GetMoments()[0];
-  const data_t iscale = IScale->GetMoments()[0];
+  const data_t shape  = Shape[0];
+  const data_t iscale = IScale[0];
 
   //cannot be zero so add something small incase of numerical error.
   const data_t x=  random->gamma(shape,1.0/iscale) + 1e-16; 

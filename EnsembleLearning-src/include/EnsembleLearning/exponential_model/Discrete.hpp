@@ -111,7 +111,7 @@ namespace ICR{
        */
       static
       moments_t
-      CalcSample(variable_parameter prior);
+      CalcSample(moments_parameter prior);
       
       /** Calculate the Mean from the Natural Paramters.
        *  @param NP The NaturalParameters from which to calcualate the moments.
@@ -165,17 +165,7 @@ namespace ICR{
       {
 	data_t operator()(data_parameter d) {return std::exp(d);}
       };
-      struct take_log
-      {
-	data_t operator()(data_parameter d){ return std::log(d);}
-      };
-      struct divide_by
-      {
-	divide_by(data_parameter d) : m_d(d) {};
-	data_t operator()(data_parameter n){ return n/m_d;}
-	data_t m_d;
-      };
- 
+
       struct subtract
       {
 	subtract(data_parameter d) : m_d(d) {};
@@ -253,9 +243,8 @@ ICR::EnsembleLearning::Discrete<T>::CalcLogNorm(NP_parameter NP)
 template<class T>
 inline
 typename ICR::EnsembleLearning::Discrete<T>::moments_t
-ICR::EnsembleLearning::Discrete<T>::CalcSample(variable_parameter prior) 
+ICR::EnsembleLearning::Discrete<T>::CalcSample(moments_parameter PM) 
 {
-  const moments_t PM = prior->GetMoments();
   std::vector<data_t> M(PM.size());
   std::transform(PM.begin(),PM.end(),M.begin(),exponentiate());
   return moments_t(M);

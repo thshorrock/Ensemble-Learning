@@ -166,9 +166,10 @@ namespace ICR{
       {
 	if (m_rng!=0) {
 	  delete m_rng;
-	  m_rng = new rng(seed);
-	  m_Destroyer.SetSingleton(m_rng); 
 	}
+	m_rng = new rng(seed);
+	m_Destroyer.SetSingleton(m_rng); 
+	  
 	return m_rng;
       }; 
     private:
@@ -201,10 +202,8 @@ ICR::EnsembleLearning::SingletonDestroyer<T>::SingletonDestroyer(T* s)
 template<class T>
 ICR::EnsembleLearning::SingletonDestroyer<T>::~SingletonDestroyer() 
 {
-  if (m_singleton!=0) {
-    delete m_singleton;
-    m_singleton = 0;
-  } 
+  delete m_singleton;
+  m_singleton = 0;
 }
 
 template<class T>

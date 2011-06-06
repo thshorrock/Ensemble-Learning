@@ -112,7 +112,7 @@ namespace ICR{
        */
       static
       moments_t
-      CalcSample(Variable_parameter V);
+      CalcSample(moments_parameter V);
 
       /** Calculate the Mean from the Natural Paramters.
        *  @param NP The NaturalParameters from which to calcualate the moments.
@@ -259,10 +259,9 @@ ICR::EnsembleLearning::Dirichlet<T>::CalcLogNorm(NP_parameter NP)
 template<class T>
 inline
 typename ICR::EnsembleLearning::Dirichlet<T>::moments_t
-ICR::EnsembleLearning::Dirichlet<T>::CalcSample(Variable_parameter V) 
+ICR::EnsembleLearning::Dirichlet<T>::CalcSample(moments_parameter Mus) 
 {
   rng* random = Random::Instance();
-  const moments_t  Mus = V->GetMoments();
   const size_t     size   = Mus.size();
 
   double u[size]; //double to go to rng
@@ -271,7 +270,10 @@ ICR::EnsembleLearning::Dirichlet<T>::CalcSample(Variable_parameter V)
   random->dirichlet(size, u, x);
 	
   std::vector<data_t> M(size);
+
   PARALLEL_TRANSFORM(x,x+size,M.begin(),take_log());
+
+  
   return moments_t(M);
 }
 

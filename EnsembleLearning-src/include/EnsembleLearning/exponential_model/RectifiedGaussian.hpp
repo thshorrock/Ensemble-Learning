@@ -68,8 +68,8 @@ namespace ICR{
       variable_parameter;
       typedef typename boost::call_traits< VariableNode<T>* const>::value_type
       variable_t;
-      typedef typename boost::call_traits< std::vector<VariableNode<T>*> >::param_type
-      variable_vector_parameter;
+      typedef typename boost::call_traits< std::vector<Moments<T> > >::param_type
+      moments_vector_parameter;
 
       
       typedef typename boost::call_traits< Moments<T> >::param_type
@@ -145,8 +145,8 @@ namespace ICR{
        */
       static
       moments_t
-      CalcSample(variable_parameter Mean,
-		 variable_parameter Precision) ;
+      CalcSample(moments_parameter Mean,
+		 moments_parameter Precision) ;
 
 
       /** Calculate a random sample from a mixture.
@@ -158,9 +158,9 @@ namespace ICR{
        */
       static
       moments_t
-      CalcSample(variable_vector_parameter mean_nodes,
-		 variable_vector_parameter precision_nodes,
-		 variable_parameter weights_node);
+      CalcSample(moments_vector_parameter mean_nodes,
+		 moments_vector_parameter precision_nodes,
+		 moments_parameter weights_node);
 
 
       /** Calculate the Mean from the Natural Paramters.
@@ -335,13 +335,13 @@ ICR::EnsembleLearning::RectifiedGaussian<T>::CalcAvLog(moments_parameter Mean,
 template<class T>
 inline
 typename ICR::EnsembleLearning::RectifiedGaussian<T>::moments_t
-ICR::EnsembleLearning::RectifiedGaussian<T>::CalcSample(variable_parameter Mean,
-					   variable_parameter Precision) 
+ICR::EnsembleLearning::RectifiedGaussian<T>::CalcSample(moments_parameter Mean,
+					   moments_parameter Precision) 
 {
 
   rng* random = Random::Instance();
-  const data_t mean = Mean->GetMoments()[0];
-  const data_t prec = Precision->GetMoments()[0];
+  const data_t mean = Mean[0];
+  const data_t prec = Precision[0];
   const data_t x=  random->gaussian_tail(1.0/std::sqrt(prec),mean);
   return moments_t(x, x*x +1.0/prec);
 	
@@ -350,26 +350,11 @@ ICR::EnsembleLearning::RectifiedGaussian<T>::CalcSample(variable_parameter Mean,
 
 template<class T>
 typename ICR::EnsembleLearning::RectifiedGaussian<T>::moments_t
-ICR::EnsembleLearning::RectifiedGaussian<T>::CalcSample(variable_vector_parameter m_mean_nodes,
-					   variable_vector_parameter m_precision_nodes,
-					   variable_parameter m_weights_node)
+ICR::EnsembleLearning::RectifiedGaussian<T>::CalcSample(moments_vector_parameter mean,
+							moments_vector_parameter precision,
+							moments_parameter weights)
 	
 {
-  const moments_t weights = m_weights_node->GetMoments();
-  std::vector<moments_t > mean(weights.size());
-  std::vector<moments_t > precision(weights.size());
-
-  PARALLEL_TRANSFORM(m_mean_nodes.begin(), m_mean_nodes.end(),
-		     mean.begin(), 
-		     boost::bind(&VariableNode<T>::GetMoments,
-				 _1)
-		     );
-	
-  PARALLEL_TRANSFORM(m_precision_nodes.begin(), m_precision_nodes.end(),
-		     precision.begin(), 
-		     boost::bind(&VariableNode<T>::GetMoments,
-				 _1)
-		     );
 	
   moments_t AvMean(0,0);
   AvMean= PARALLEL_INNERPRODUCT(weights.begin(), weights.end(),mean.begin(), AvMean);
