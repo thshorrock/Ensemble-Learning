@@ -497,6 +497,9 @@ BOOST_AUTO_TEST_CASE( iterator_test  )
 
 BOOST_AUTO_TEST_SUITE_END()
 
+
+
+
 /*****************************************************
  *****************************************************
  *****      Exponential Models      TEST       *******
@@ -541,6 +544,23 @@ BOOST_AUTO_TEST_CASE( Gaussian_test  )
   BOOST_CHECK_CLOSE(Update[0],2.0 , 0.0001);  
   BOOST_CHECK_CLOSE(Update[1],4.0+1.0/3.0 , 0.0001);  
 
+  //check mean & precision
+  std::vector<double> mean      =  Gaussian<double>::CalcMean(SumNP);
+  std::vector<double> precision =  Gaussian<double>::CalcPrecision(SumNP);
+  BOOST_CHECK_CLOSE(mean[0],2.0 , 0.0001); 
+  BOOST_CHECK_CLOSE(precision[0],3.0  , 0.0001); 
+  
+
+  //calc 1000 samples and check mean
+  std::vector< Moments<double> > sample(5000);
+  double av = 0;
+  for(size_t i=0;i<sample.size();++i){
+    sample[i] = Gaussian<double>::CalcSample(Mean,Precision);
+    av+=sample[i][0];
+  }
+  av*=(1.0/sample.size());
+  BOOST_CHECK_CLOSE(av,  2.0, 5); 
+  
 
   BOOST_CHECK_CLOSE(LogNorm1, 0.5*(std::log(3.) - 3*5 - std::log(2*M_PI)) , 0.0001);  
   BOOST_CHECK_CLOSE(LogNorm2, 0.5*(std::log(3.) - 3*4 - std::log(2*M_PI)), 0.0001);  
@@ -628,6 +648,23 @@ BOOST_AUTO_TEST_CASE( RectifiedGaussian_test  )
 
 
 
+  //check mean & precision
+  std::vector<double> mean      =  RectifiedGaussian<double>::CalcMean(SumNP);
+  std::vector<double> precision =  RectifiedGaussian<double>::CalcPrecision(SumNP);
+  BOOST_CHECK_CLOSE(mean[0],2.0 , 0.0001); 
+  BOOST_CHECK_CLOSE(precision[0],3.0  , 0.0001); 
+  
+
+  //calc 1000 samples and check mean
+  std::vector< Moments<double> > sample(5000);
+  double av = 0;
+  for(size_t i=0;i<sample.size();++i){
+    sample[i] = RectifiedGaussian<double>::CalcSample(Parent1,Parent2);
+    av+=sample[i][0];
+  }
+  av*=(1.0/sample.size());
+  BOOST_CHECK_CLOSE(av,  2.0, 5); 
+  
 
   BOOST_CHECK_CLOSE(LogNorm1, 0.5*(std::log(2.*3) - 3*5 - std::log(M_PI)) - gsl_sf_log_erfc(-2.0*std::sqrt(3.0/2.0)) , 0.0001);  
   BOOST_CHECK_CLOSE(LogNorm2,  0.5*(std::log(2.*3) - 3*4 - std::log(M_PI)) - gsl_sf_log_erfc(-2.0*std::sqrt(3.0/2.0)), 0.0001);  
@@ -665,7 +702,24 @@ BOOST_AUTO_TEST_CASE( Gamma_test  )
 
   BOOST_CHECK_CLOSE(Update[0], 2.0/3.0, 0.0001);  
   BOOST_CHECK_CLOSE(Update[1], gsl_sf_psi(2.0) - std::log(3.0), 0.0001);  
+ 
+  //check mean & precision
+  std::vector<double> mean      =  Gamma<double>::CalcMean(SumNP);
+  std::vector<double> precision =  Gamma<double>::CalcPrecision(SumNP);
+  BOOST_CHECK_CLOSE(mean[0],2.0/3.0 , 0.0001); 
+  BOOST_CHECK_CLOSE(precision[0], 9.0/2.0 , 0.0001); 
+  
 
+  //calc 1000 samples and check mean
+  std::vector< Moments<double> > sample(5000);
+  double av = 0;
+  for(size_t i=0;i<sample.size();++i){
+    sample[i] = Gamma<double>::CalcSample(Shape,IScale);
+    av+=sample[i][0];
+  }
+  av*=(1.0/sample.size());
+  BOOST_CHECK_CLOSE(av,  Shape[0]/IScale[0], 5); 
+  
 
   BOOST_CHECK_CLOSE(LogNorm1, 2.0*std::log(3.0) - gsl_sf_lngamma(2.0) , 0.0001);  
   BOOST_CHECK_CLOSE(LogNorm2, LogNorm1, 0.0001);  
@@ -714,14 +768,27 @@ BOOST_AUTO_TEST_CASE( Dirichlet_test  )
   BOOST_CHECK_CLOSE(precision[1],  1.0/((2.0/9.0)/(4.3)), 0.0001); 
   BOOST_CHECK_CLOSE(precision[2],  1.0/((2.0/9.0)/(4.3)), 0.0001); 
   
-  HiddenNode<Dirichlet<double, double > Node;
 
-  //calc 1000 samples and check mean and precision.
-  std::vector< Moments<double> > sample(1000);
+  //calc 1000 samples and check mean
+  std::vector< Moments<double> > sample(5000);
+  std::vector<double> av(3);
   for(size_t i=0;i<sample.size();++i){
-    sample[i] = Dirichlet<double>::CalcSample();
-  }
+    sample[i] = Dirichlet<double>::CalcSample(Us);
+    for(size_t j=0;j<3;++j){
+      av[j]+=std::exp(sample[i][j]);
+      // std::cout<<"av["<<j<<"] = "<<av[j]<<std::endl;
 
+    }
+  }
+  for(size_t j=0;j<3;++j){
+    av[j]*=(1.0/sample.size());
+  }
+  
+  BOOST_CHECK_CLOSE((av[0]), (1.0/3.0), 5.0); 
+  BOOST_CHECK_CLOSE((av[1]), (1.0/3.0), 5.0); 
+  BOOST_CHECK_CLOSE((av[2]), (1.0/3.0), 5.0); 
+
+  
 
   //BOOST_CHECK_CLOSE(3*std::exp(Update[0]), 1.0, 0.0001);
 
@@ -771,6 +838,20 @@ BOOST_AUTO_TEST_CASE( Discrete_test  )
    BOOST_CHECK_CLOSE(Update[1], std::exp(-0.9+LogNorm1), 0.0001); 
    BOOST_CHECK_CLOSE(Update[2], std::exp(-0.5+LogNorm1), 0.0001); 
 
+  //check mean
+  std::vector<double> mean =  Discrete<double>::CalcMean(NPData);
+  BOOST_CHECK_CLOSE(mean[0], 1.6, 1); 
+  
+  //check precision
+  std::vector<double> precision =  Discrete<double>::CalcPrecision(NPData);
+  BOOST_CHECK_CLOSE(precision[0], 1.0/(0.4*0.36+0.6*.16), 1); 
+  
+  //check calcsample
+  Moments<double> sample =  Discrete<double>::CalcSample(dirichlet);
+  for(size_t i=0;i<3;++i){
+    BOOST_CHECK_CLOSE(discrete[i]+1.0,sample[i]+1.0,  5); 
+  }
+
    
   BOOST_CHECK_CLOSE(Update[0]+Update[1]+Update[2], 1.0, 0.0001);
 
@@ -781,6 +862,36 @@ BOOST_AUTO_TEST_CASE( Discrete_test  )
 
 BOOST_AUTO_TEST_SUITE_END()
 
+
+/*****************************************************
+ *****************************************************
+ *****      Random      TEST       *******
+ *****************************************************
+ *****************************************************/
+
+
+BOOST_AUTO_TEST_SUITE( Random_test )
+
+
+BOOST_AUTO_TEST_CASE( Singleton_test  )
+{
+  rng* random1 = Random::Instance(100);
+  
+  
+  rng* random2 = Random::Restart(10);
+  double d1 = random2->uniform();
+  double d2 = random2->uniform(1,2);
+  
+  BOOST_CHECK(d1<1);
+  BOOST_CHECK(d1>=0);
+  BOOST_CHECK(d2<2);
+  BOOST_CHECK(d2>=1);
+  
+  
+}
+
+
+BOOST_AUTO_TEST_SUITE_END()
 
 /*****************************************************
  *****************************************************
