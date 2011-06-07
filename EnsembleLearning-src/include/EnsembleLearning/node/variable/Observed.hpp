@@ -69,6 +69,16 @@ namespace ICR{
     
     }
 
+    /** An observed node.
+     *  A node that contains data that is a known constant.
+     *  Examples include data nodes (where the data is experimentally determined)
+     *   and prior knowledge - the mean of the data is 4.0, say).
+     *  @tparam Model The model catagory into which the data falls.
+     *    For example, Data might be modelled by a Gaussian distribution.
+     *    The Model may be either Dirichlet, Gamma, RectifiedGaussian or Gaussian.
+     *    Attempting to call any other class will not compile.
+     *  @tparam T The data type used in calculations - either float or double.
+     */
     template<template<class> class Model, class T, class Enable = void>
     class ObservedNode ; //uninitialised
     
@@ -78,6 +88,8 @@ namespace ICR{
      *   and prior knowledge - the mean of the data is 4.0, say).
      *  @tparam Model The model catagory into which the data falls.
      *    For example, Data might be modelled by a Gaussian distribution.
+     *    The Model may be either Dirichlet, Gamma, RectifiedGaussian or Gaussian.
+     *    Attempting to call any other class will not compile.
      *  @tparam T The data type used in calculations - either float or double.
      */
     template<template<class> class Model, class T>
