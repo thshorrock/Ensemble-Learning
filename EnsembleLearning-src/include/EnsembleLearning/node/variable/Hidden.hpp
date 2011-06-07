@@ -211,7 +211,6 @@ ICR::EnsembleLearning::HiddenNode<Model,T>::Iterate(Coster& C)
   const NaturalParameters<T> ParentNP = (m_parent->GetNaturalNot(this));
   C +=  (ParentNP - NP)*m_Moments +m_parent->CalcLogNorm() -  LogNorm;
 
-
 }
 
 #endif  // guard for HIDDEN_HPP

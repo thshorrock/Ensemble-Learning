@@ -198,13 +198,13 @@ namespace ICR{
      *  Expression<double>* Expr = Factory.Add(XY,Z);
      *  
      *  //Create some variables
-     *  Builder builder;
-     *  Builder::GaussianNode x = Builder.Gaussian(0.01,0.01);
-     *  Builder::GaussianNode y = Builder.Gaussian(0.01,0.01);
-     *  Builder::GaussianNode z = Builder.Gaussian(0.01,0.01);
+     *  Builder<double> builder;
+     *  Builder<double>::GaussianNode x = builder.gaussian(0.01,0.01);
+     *  Builder<double>::GaussianNode y = builder.gaussian(0.01,0.01);
+     *  Builder<double>::GaussianNode z = builder.gaussian(0.01,0.01);
      *  
      *  //Assign this context to the expression.
-     *  Context context;
+     *  Context<double> context;
      *  context.Assign(X,x);
      *  context.Assign(Y,y);
      *  context.Assign(Z,z);
