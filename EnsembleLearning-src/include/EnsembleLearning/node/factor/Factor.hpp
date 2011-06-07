@@ -119,7 +119,7 @@ namespace ICR{
 	m_parent1_node->InitialiseMoments();
 	m_parent2_node->InitialiseMoments();
 	return  Model<T>::CalcSample(m_parent1_node->GetMoments(),
-				  m_parent2_node->GetMoments());
+				     m_parent2_node->GetMoments());
       }
       
       /** Calculate the Log Normalisation.
@@ -254,7 +254,7 @@ namespace ICR{
       NP_t
       GetNaturalNot( variable_parameter v) const
       {
-	BOOST_ASSERT(v==m_prior_node);
+	BOOST_ASSERT(v==m_child_node);
 	moments_t prior = m_prior_node->GetMoments();
 	m_LogNorm = Dirichlet<T>::CalcLogNorm(prior);
 
