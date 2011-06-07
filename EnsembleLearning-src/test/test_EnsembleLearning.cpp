@@ -1039,7 +1039,7 @@ BOOST_AUTO_TEST_CASE( Factor_Gaussian_test  )
   
   NaturalParameters<double> NPp1 = GF.GetNaturalNot(&obsGaussian);
   NaturalParameters<double> NPp2 = GF.GetNaturalNot(&obsGamma);
-  NaturalParameters<double> NPd = GF.GetNaturalNot(&obsData);
+  NaturalParameters<double> NPd  = GF.GetNaturalNot(&obsData);
   
   BOOST_CHECK_CLOSE(NPp1[0], 12.0 , 0.0001);
   BOOST_CHECK_CLOSE(NPp1[1], -1.5 ,0.0001 );
@@ -1145,155 +1145,73 @@ BOOST_AUTO_TEST_CASE( Factor_Discrete_test  )
 
 BOOST_AUTO_TEST_SUITE_END()
 
-// /*****************************************************
-//  *****************************************************
-//  *****       Hidden Nodes and Factor TEST      *******
-//  *****************************************************
-//  *****************************************************/
+/*****************************************************
+ *****************************************************
+ *****       Hidden Nodes TEST                 *******
+ *****************************************************
+ *****************************************************/
 
 
-// BOOST_AUTO_TEST_SUITE( Hidden_Node_test )
+BOOST_AUTO_TEST_SUITE( Hidden_Node_test )
 
-// BOOST_AUTO_TEST_CASE( Hidden_Gaussian_test  )
-// {
-//   HiddenNode<Gaussian,double> G; //2 elements value 2.0
+BOOST_AUTO_TEST_CASE( Hidden_Gaussian_test  )
+{
+  HiddenNode<Gaussian,double> G; //2 elements value 2.0
+  Moments<double> M2 = G.GetMoments();
+  BOOST_CHECK_EQUAL(M2.size(), size_t(2));
+  BOOST_CHECK_CLOSE(M2[0], 0.0, 0.0001);
+  BOOST_CHECK_CLOSE(M2[1], 0.0, 0.0001);
 
-//   Moments<double> M2 = G.GetMoments();
-//   BOOST_CHECK_EQUAL(M2.size(), size_t(2));
-//   BOOST_CHECK_CLOSE(M2[0], 0.0, 0.0001);
-//   BOOST_CHECK_CLOSE(M2[1], 0.0, 0.0001);
-  
-  
-  
+  ObservedNode<Gaussian,double> obsGaussian(2.0);
+  ObservedNode<Gamma,double>    obsGamma(3.0); 
 
-//   std::vector<double> mean2 = obs2.GetMean();
-//   std::vector<double> var2 = obs2.GetVariance();
-  
-//   BOOST_CHECK_CLOSE(mean2[0], 2.0, 0.0001);
-//   BOOST_CHECK_EQUAL(mean2.size(), size_t(1));
-  
+  Random::Restart(10);
+  detail::Factor<Gaussian,double> GF(&obsGaussian, &obsGamma, &G);
 
-//   BOOST_CHECK_CLOSE(var2[0], 0.0, 0.0001);
-//   BOOST_CHECK_EQUAL(var2.size(), size_t(1));
   
-//   Coster C = 0;
-//   obs2.Iterate(C);
-//   BOOST_CHECK_CLOSE(double(C), 0.0, 0.0001);
-  
-// }
-// BOOST_AUTO_TEST_CASE( Hidden_RGaussian_test  )
-// {
-//   HiddenNode<RectifiedGaussian,double> obs2; //2 elements value 2.0
-  
-//   Moments<double> M2 = obs2.GetMoments();
-//   BOOST_CHECK_EQUAL(M2.size(), size_t(2));
-//   BOOST_CHECK_CLOSE(M2[0], 2.0, 0.0001);
-//   BOOST_CHECK_CLOSE(M2[1], 4.0, 0.0001);
+  Moments<double> M22 = G.GetMoments();
+  BOOST_CHECK_EQUAL(M22.size(), size_t(2));
+  BOOST_CHECK_CLOSE(M22[0], 1.7337736219042532, 0.0001); //inialised
+  BOOST_CHECK_CLOSE(M22[1], 3.3393043053443257, 0.0001); //inialised
 
-
-//   std::vector<double> mean2 = obs2.GetMean();
-//   std::vector<double> var2 = obs2.GetVariance();
+  std::vector<double> mean2 = G.GetMean();
+  std::vector<double> var2  = G.GetVariance();
   
-//   BOOST_CHECK_CLOSE(mean2[0], 2.0, 0.0001);
-//   BOOST_CHECK_EQUAL(mean2.size(), size_t(1));
+  BOOST_CHECK_CLOSE(mean2[0], 2.0, 0.0001);
+  BOOST_CHECK_EQUAL(mean2.size(), size_t(1));
   
 
-//   BOOST_CHECK_CLOSE(var2[0], 0.0, 0.0001);
-//   BOOST_CHECK_EQUAL(var2.size(), size_t(1));
+  BOOST_CHECK_CLOSE(var2[0], 1.0/3.0, 0.0001);
+  BOOST_CHECK_EQUAL(var2.size(), size_t(1));
   
-//   Coster C = 0;
-//   obs2.Iterate(C);
-//   BOOST_CHECK_CLOSE(double(C), 0.0, 0.0001);
+  Coster C = 0; 
+  G.Iterate(C);
+  BOOST_CHECK_CLOSE(double(C), 0.0 , 0.0001); //No child so no cost
   
-// }
-// BOOST_AUTO_TEST_CASE( Hidden_Gamma_test  )
-// {
-//   HiddenNode<Gamma,double> obs2; //2 elements value 2.0
-  
-//   Moments<double> M2 = obs2.GetMoments();
-//   BOOST_CHECK_EQUAL(M2.size(), size_t(2));
-//   BOOST_CHECK_CLOSE(M2[0], 2.0, 0.0001);
-//   BOOST_CHECK_CLOSE(M2[1], std::log(2), 0.0001);
+  Moments<double> M23 = G.GetMoments();
+  BOOST_CHECK_EQUAL(M23.size(), size_t(2));
+  BOOST_CHECK_CLOSE(M23[0], 2.0, 0.0001);
+  BOOST_CHECK_CLOSE(M23[1], 13.0/3.0, 0.0001);
 
+  //Next 
 
-//   std::vector<double> mean2 = obs2.GetMean();
-//   std::vector<double> var2  = obs2.GetVariance();
+  ObservedNode<Gaussian,double> obsData1(4.0); 
+  detail::Factor<Gaussian,double> GF2(&G, &obsGamma, &obsData1);
   
-//   BOOST_CHECK_CLOSE(mean2[0], 2.0, 0.0001);
-//   BOOST_CHECK_EQUAL(mean2.size(), size_t(1));
+  G.Iterate(C);
+  double Cost =( -12*3 +  1.5*(9+1.0/6.0) )   -6.36963 +27.0231 ;
+  BOOST_CHECK_CLOSE(double(C), Cost , 0.01); //No child so no cost
   
+  Moments<double> M33 = G.GetMoments();
+  BOOST_CHECK_EQUAL(M33.size(), size_t(2));
+  BOOST_CHECK_CLOSE(M33[0], 3.0, 0.0001);
+  BOOST_CHECK_CLOSE(M33[1], 9+1.0/6.0, 0.0001);
 
-//   BOOST_CHECK_CLOSE(var2[0], 0.0, 0.0001);
-//   BOOST_CHECK_EQUAL(var2.size(), size_t(1));
   
-//   Coster C = 0;
-//   obs2.Iterate(C);
-//   BOOST_CHECK_CLOSE(double(C), 0.0, 0.0001);
-  
-// }
+  BOOST_CHECK_EQUAL(G.size(), size_t(2));
+}
 
-// BOOST_AUTO_TEST_CASE( Hidden_Dirichlet_test  )
-// {
-//   HiddenNode<Dirichlet,double> obs3(3); //3 elements value 2.0
-  
-//   Moments<double> M3 = obs3.GetMoments();
-//   BOOST_CHECK_EQUAL(M3.size(), size_t(3));
-//   BOOST_CHECK_CLOSE(M3[0], 2.0, 0.0001);
-//   BOOST_CHECK_CLOSE(M3[1], 2.0, 0.0001);
-//   BOOST_CHECK_CLOSE(M3[2], 2.0, 0.0001);
-
-
-//   std::vector<double> mean3 = obs3.GetMean();
-//   std::vector<double> var3  = obs3.GetVariance();
-  
-//   BOOST_CHECK_EQUAL(mean3.size(), size_t(3));
-//   BOOST_CHECK_CLOSE(mean3[0], 2.0, 0.0001);
-//   BOOST_CHECK_CLOSE(mean3[1], 2.0, 0.0001);
-//   BOOST_CHECK_CLOSE(mean3[2], 2.0, 0.0001);
-  
-
-//   BOOST_CHECK_EQUAL(var3.size(), size_t(3));
-//   BOOST_CHECK_CLOSE(var3[0], 0.0, 0.0001);
-//   BOOST_CHECK_CLOSE(var3[1], 0.0, 0.0001);
-//   BOOST_CHECK_CLOSE(var3[2], 0.0, 0.0001);
-  
-//   Coster C = 0;
-//   obs3.Iterate(C);
-//   BOOST_CHECK_CLOSE(double(C), 0.0, 0.0001);
-  
-// }
-
-// BOOST_AUTO_TEST_CASE( Hidden_Discrete_test  )
-// {
-//   HiddenNode<Discrete,double> obs3(3); //3 elements value 2.0
-  
-//   Moments<double> M3 = obs3.GetMoments();
-//   BOOST_CHECK_EQUAL(M3.size(), size_t(3));
-//   BOOST_CHECK_CLOSE(M3[0], 2.0, 0.0001);
-//   BOOST_CHECK_CLOSE(M3[1], 2.0, 0.0001);
-//   BOOST_CHECK_CLOSE(M3[2], 2.0, 0.0001);
-
-
-//   std::vector<double> mean3 = obs3.GetMean();
-//   std::vector<double> var3  = obs3.GetVariance();
-  
-//   BOOST_CHECK_EQUAL(mean3.size(), size_t(3));
-//   BOOST_CHECK_CLOSE(mean3[0], 2.0, 0.0001);
-//   BOOST_CHECK_CLOSE(mean3[1], 2.0, 0.0001);
-//   BOOST_CHECK_CLOSE(mean3[2], 2.0, 0.0001);
-  
-
-//   BOOST_CHECK_EQUAL(var3.size(), size_t(3));
-//   BOOST_CHECK_CLOSE(var3[0], 0.0, 0.0001);
-//   BOOST_CHECK_CLOSE(var3[1], 0.0, 0.0001);
-//   BOOST_CHECK_CLOSE(var3[2], 0.0, 0.0001);
-  
-//   Coster C = 0;
-//   obs3.Iterate(C);
-//   BOOST_CHECK_CLOSE(double(C), 0.0, 0.0001);
-  
-// }
-// BOOST_AUTO_TEST_SUITE_END()
+ BOOST_AUTO_TEST_SUITE_END()
 
 
 
@@ -1316,14 +1234,64 @@ BOOST_AUTO_TEST_CASE( ExpressionFactor_test  )
   Placeholder<double>* Z = Factory.placeholder();
   Expression<double>* XY = Factory.Multiply(X,Y);
   Expression<double>* Expr = Factory.Add(XY,Z);
+
+  
+  //Create some variables
+  Builder<double> builder;
+  Builder<double>::GaussianNode x = builder.gaussian(0.0,0.01);
+  Builder<double>::GaussianNode y = builder.gaussian(0.0,0.01);
+  Builder<double>::GaussianNode z = builder.gaussian(0.0,0.01);
+
+  Random::Restart(10);
+  x->InitialiseMoments();
+  Random::Restart(10);
+  y->InitialiseMoments();
+  Random::Restart(10);
+  z->InitialiseMoments();
+
+  Moments<double> Mx = x->GetMoments();
+  BOOST_CHECK_EQUAL(Mx.size(), size_t(2));
+  BOOST_CHECK_CLOSE(Mx[0], -4.6111761317687545, 0.0001); //inialised
+  BOOST_CHECK_CLOSE(Mx[1], 121.26294531819386, 0.0001); //inialised
+  Moments<double> My = y->GetMoments();
+  Moments<double> Mz = z->GetMoments();
+
+  
+  //Assign this context to the expression.
+  Context<double> context;
+  context.Assign(X,x);
+  context.Assign(Y,y);
+  context.Assign(Z,z);
+
+  //The context provides the Moments of every element in expression.
+  const SubContext<double> M0 = context[0];  //All the first moments  (the <x>'s of every element in expr)
+  const SubContext<double> M1 = context[1];  //The second moment (the <x^2> of every element of expression)
+  
+  BOOST_CHECK_CLOSE(Expr->Evaluate(M0), Mx[0]*My[0]+Mz[0]  , 0.001);
+  BOOST_CHECK_CLOSE(Expr->Evaluate(M1), Mx[1]*My[1]+Mz[1]  , 0.001);
+  const double prec = 1.0/(Expr->Evaluate(M1) - Expr->Evaluate(M0*M0) );
+
+  BOOST_CHECK_CLOSE(prec,6.9673840417644678e-05, 0.001);
+  
+  BOOST_CHECK_CLOSE(Gaussian<double>::CalcNP2Deterministic(Expr,context)[0],
+		    Expr->Evaluate(M0) *prec, 0.001);
+  BOOST_CHECK_CLOSE(Gaussian<double>::CalcNP2Deterministic(Expr,context)[1],
+		    -0.5*prec, 0.001);
+
+
+  // typedef detail::Deterministic<Gaussian, double >  DeterministicFactor;
+  // Builder<double>::GaussianResultNode D  = new Builder<double>::GaussianResultNode();
+  // DeterministicFactor DF = new DeterministicFactor(Expr,context,D);
+  
+  
+  
+
+  // BOOST_CHECK_CLOSE(Gaussian<double>::CalcNP2Parent(Expr,context)[0],
+  // 		    Expr->Evaluate(M0) *prec, 0.001);
+  // BOOST_CHECK_CLOSE(Gaussian<double>::CalcNP2Parent(Expr,context)[1],
+  // 		    -0.5*prec, 0.001);
 }
 
-BOOST_AUTO_TEST_CASE( SubContext_test  )
-{
-  SubContext<double> C;
-  
-  
-}
 
 
 BOOST_AUTO_TEST_SUITE_END()
