@@ -55,7 +55,7 @@ namespace ICR{
 
     //Forward declarations of Factors
     namespace detail{
-      template<class Model, class T> class Factor;
+      template<template<class> class Model, class T> class Factor;
       template<class Model, class T> class Mixture;
       template<template<class> class Model, class T> class Deterministic;
     }
@@ -131,11 +131,11 @@ namespace ICR{
     class Builder
     {
 
-      typedef detail::Factor<RectifiedGaussian<T>, T >      RectifiedGaussianFactor;
-      typedef detail::Factor<Gaussian<T>, T >      GaussianFactor;
-      typedef detail::Factor<Gamma<T>, T >         GammaFactor;
-      typedef detail::Factor<Dirichlet<T>, T >     DirichletFactor;
-      typedef detail::Factor<Discrete<T>, T >      DiscreteFactor;
+      typedef detail::Factor<RectifiedGaussian, T >      RectifiedGaussianFactor;
+      typedef detail::Factor<Gaussian, T >      GaussianFactor;
+      typedef detail::Factor<Gamma, T >         GammaFactor;
+      typedef detail::Factor<Dirichlet, T >     DirichletFactor;
+      typedef detail::Factor<Discrete, T >      DiscreteFactor;
       typedef detail::Mixture<RectifiedGaussian<T>, T >     RectifiedGaussianMixtureFactor;
       typedef detail::Mixture<Gaussian<T>, T >     GaussianMixtureFactor;
 

@@ -57,7 +57,7 @@ namespace ICR{
      *  This general templated class is suitable for Gaussian, RectifiedGaussian and Gamma models.  The Dirichlet and Discrete models have partial specialisations.
      * @tparam T The data type used - either float or double.
      */
-    template<class Model, class T>
+      template<template<class> class Model, class T>
     class Factor : public FactorNode<T>
     {
       //Non-copiable
@@ -117,7 +117,7 @@ namespace ICR{
 	//Initialise up the tree first
 	m_parent1_node->InitialiseMoments();
 	m_parent2_node->InitialiseMoments();
-	return  Model::CalcSample(m_parent1_node->GetMoments(),
+	return  Model<T>::CalcSample(m_parent1_node->GetMoments(),
 				  m_parent2_node->GetMoments());
       }
       
@@ -144,21 +144,21 @@ namespace ICR{
 	  {
 	    const moments_t parent2 = m_parent2_node->GetMoments();
 	    const moments_t child = m_child_node->GetMoments();
-	    return Model::CalcNP2Parent1(parent2,child);
+	    return Model<T>::CalcNP2Parent1(parent2,child);
 	  }
 	else if (v==m_parent2_node)
 	  {
 	    const moments_t parent1 = m_parent1_node->GetMoments();
 	    const moments_t child = m_child_node->GetMoments();
-	    return Model::CalcNP2Parent2(parent1,child);
+	    return Model<T>::CalcNP2Parent2(parent1,child);
 	  }
 	else 
 	  {
 	    BOOST_ASSERT(v == m_child_node);
 	    const moments_t parent1 = m_parent1_node->GetMoments();
 	    const moments_t parent2 = m_parent2_node->GetMoments();
-	    m_LogNorm = Model::CalcLogNorm(parent1,parent2);
-	    return Model::CalcNP2Data(parent1,parent2);
+	    m_LogNorm = Model<T>::CalcLogNorm(parent1,parent2);
+	    return Model<T>::CalcNP2Data(parent1,parent2);
 	  }
       }
 
@@ -176,9 +176,9 @@ namespace ICR{
      *  @tparam T The data type, double or float
      */
     template<class T>
-    class Factor<Dirichlet<T>,T > : public FactorNode<T>
+    class Factor<Dirichlet,T > : public FactorNode<T>
     {
-      Factor(const Factor<Dirichlet<T>, T>& f) {};
+      Factor(const Factor<Dirichlet, T>& f) {};
     public:
       
       /** @name Useful typdefs for types that are exposed to the user.
@@ -276,7 +276,7 @@ namespace ICR{
      *  @tparam T The data type, double or float
      */
     template<class T>
-    class Factor<Discrete<T>, T> : public FactorNode<T>
+    class Factor<Discrete, T> : public FactorNode<T>
     {
     public:
       
