@@ -34,6 +34,7 @@
 #include "EnsembleLearning/detail/parallel_algorithms.hpp"
 #include "EnsembleLearning/detail/Mutex.hpp"
 
+#include <boost/assert.hpp> 
 #include <boost/bind.hpp>
 #include <vector>
 
@@ -153,7 +154,7 @@ const ICR::EnsembleLearning::NaturalParameters<T>
 ICR::EnsembleLearning::HiddenNode<Model,T>::GetNP()
 {
   //EVALUATE THE COST
-
+  BOOST_ASSERT(m_parent != 0);
   //first get the NP from the parent
   const NaturalParameters<T> ParentNP = (m_parent->GetNaturalNot(this));
   //The initial value in the total
