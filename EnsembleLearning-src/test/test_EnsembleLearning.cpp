@@ -893,6 +893,124 @@ BOOST_AUTO_TEST_CASE( Singleton_test  )
 
 BOOST_AUTO_TEST_SUITE_END()
 
+
+/*****************************************************
+ *****************************************************
+ *****       Observed Nodes TEST               *******
+ *****************************************************
+ *****************************************************/
+
+
+BOOST_AUTO_TEST_SUITE( Observed_Node_test )
+
+BOOST_AUTO_TEST_CASE( Observed_Gaussian_test  )
+{
+  ObservedNode<Gaussian,double> obs2(2.0); //2 elements value 2.0
+  
+  Moments<double> M2 = obs2.GetMoments();
+  BOOST_CHECK_EQUAL(M2.size(), size_t(2));
+  BOOST_CHECK_CLOSE(M2[0], 2.0, 0.0001);
+  BOOST_CHECK_CLOSE(M2[1], 4.0, 0.0001);
+
+
+  std::vector<double> mean2 = obs2.GetMean();
+  std::vector<double> var2 = obs2.GetVariance();
+  
+  BOOST_CHECK_CLOSE(mean2[0], 2.0, 0.0001);
+  BOOST_CHECK_EQUAL(mean2.size(), size_t(1));
+  
+
+  BOOST_CHECK_CLOSE(var2[0], 0.0, 0.0001);
+  BOOST_CHECK_EQUAL(var2.size(), size_t(1));
+  
+  Coster C = 0;
+  obs2.Iterate(C);
+  BOOST_CHECK_CLOSE(double(C), 0.0, 0.0001);
+  
+}
+BOOST_AUTO_TEST_CASE( Observed_RGaussian_test  )
+{
+  ObservedNode<RectifiedGaussian,double> obs2(2.0); //2 elements value 2.0
+  
+  Moments<double> M2 = obs2.GetMoments();
+  BOOST_CHECK_EQUAL(M2.size(), size_t(2));
+  BOOST_CHECK_CLOSE(M2[0], 2.0, 0.0001);
+  BOOST_CHECK_CLOSE(M2[1], 4.0, 0.0001);
+
+
+  std::vector<double> mean2 = obs2.GetMean();
+  std::vector<double> var2 = obs2.GetVariance();
+  
+  BOOST_CHECK_CLOSE(mean2[0], 2.0, 0.0001);
+  BOOST_CHECK_EQUAL(mean2.size(), size_t(1));
+  
+
+  BOOST_CHECK_CLOSE(var2[0], 0.0, 0.0001);
+  BOOST_CHECK_EQUAL(var2.size(), size_t(1));
+  
+  Coster C = 0;
+  obs2.Iterate(C);
+  BOOST_CHECK_CLOSE(double(C), 0.0, 0.0001);
+  
+}
+BOOST_AUTO_TEST_CASE( Observed_Gamma_test  )
+{
+  ObservedNode<Gamma,double> obs2(2.0); //2 elements value 2.0
+  
+  Moments<double> M2 = obs2.GetMoments();
+  BOOST_CHECK_EQUAL(M2.size(), size_t(2));
+  BOOST_CHECK_CLOSE(M2[0], 2.0, 0.0001);
+  BOOST_CHECK_CLOSE(M2[1], std::log(2), 0.0001);
+
+
+  std::vector<double> mean2 = obs2.GetMean();
+  std::vector<double> var2  = obs2.GetVariance();
+  
+  BOOST_CHECK_CLOSE(mean2[0], 2.0, 0.0001);
+  BOOST_CHECK_EQUAL(mean2.size(), size_t(1));
+  
+
+  BOOST_CHECK_CLOSE(var2[0], 0.0, 0.0001);
+  BOOST_CHECK_EQUAL(var2.size(), size_t(1));
+  
+  Coster C = 0;
+  obs2.Iterate(C);
+  BOOST_CHECK_CLOSE(double(C), 0.0, 0.0001);
+  
+}
+
+BOOST_AUTO_TEST_CASE( Observed_Dirichlet_test  )
+{
+  ObservedNode<Dirichlet,double> obs3(3,2.0); //3 elements value 2.0
+  
+  Moments<double> M3 = obs3.GetMoments();
+  BOOST_CHECK_EQUAL(M3.size(), size_t(3));
+  BOOST_CHECK_CLOSE(M3[0], 2.0, 0.0001);
+  BOOST_CHECK_CLOSE(M3[1], 2.0, 0.0001);
+  BOOST_CHECK_CLOSE(M3[2], 2.0, 0.0001);
+
+
+  std::vector<double> mean3 = obs3.GetMean();
+  std::vector<double> var3  = obs3.GetVariance();
+  
+  BOOST_CHECK_EQUAL(mean3.size(), size_t(3));
+  BOOST_CHECK_CLOSE(mean3[0], 2.0, 0.0001);
+  BOOST_CHECK_CLOSE(mean3[1], 2.0, 0.0001);
+  BOOST_CHECK_CLOSE(mean3[2], 2.0, 0.0001);
+  
+
+  BOOST_CHECK_EQUAL(var3.size(), size_t(3));
+  BOOST_CHECK_CLOSE(var3[0], 0.0, 0.0001);
+  BOOST_CHECK_CLOSE(var3[1], 0.0, 0.0001);
+  BOOST_CHECK_CLOSE(var3[2], 0.0, 0.0001);
+  
+  Coster C = 0;
+  obs3.Iterate(C);
+  BOOST_CHECK_CLOSE(double(C), 0.0, 0.0001);
+  
+}
+BOOST_AUTO_TEST_SUITE_END()
+
 /*****************************************************
  *****************************************************
  *****      Calculation Tree        TEST       *******
