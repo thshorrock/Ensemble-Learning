@@ -99,7 +99,8 @@ namespace ICR{
 	      variable_parameter Child)
 	: m_parent1_node(Parent1),
 	  m_parent2_node(Parent2),
-	  m_child_node(Child)
+	  m_child_node(Child),
+	  m_LogNorm(0)
       {
     	Parent1->AddChildFactor(this);
     	Parent2->AddChildFactor(this);
@@ -211,7 +212,8 @@ namespace ICR{
       Factor( variable_parameter Prior,  
 	      variable_parameter Child)
 	: m_prior_node(Prior),
-	  m_child_node(Child)
+	  m_child_node(Child),
+	  m_LogNorm(0)
       {
     	Prior->AddChildFactor(this);
     	Child->SetParentFactor(this);
@@ -252,14 +254,11 @@ namespace ICR{
       NP_t
       GetNaturalNot( variable_parameter v) const
       {
-	if (v==m_child_node)
-	  {
-	    moments_t prior = m_prior_node->GetMoments();
-	    m_LogNorm = Dirichlet<T>::CalcLogNorm(prior);
+	BOOST_ASSERT(v==m_prior_node);
+	moments_t prior = m_prior_node->GetMoments();
+	m_LogNorm = Dirichlet<T>::CalcLogNorm(prior);
 
-	    return Dirichlet<T>::CalcNP2Data(prior);
-	  }
-       	throw ("Unknown Node in GetNaturalNot");
+	return Dirichlet<T>::CalcNP2Data(prior);
       }
       
     private: 
@@ -315,7 +314,8 @@ namespace ICR{
        */
       Factor( variable_parameter Prior,  variable_parameter Child)
 	: m_prior_node(Prior),
-	  m_child_node(Child)
+	  m_child_node(Child),
+	  m_LogNorm(0)
       {
     	Prior->AddChildFactor(this);
     	Child->SetParentFactor(this);
