@@ -14,6 +14,7 @@
 #include "EnsembleLearning/exponential_model/Dirichlet.hpp"
 #include "EnsembleLearning/message/Moments.hpp"
 #include "EnsembleLearning/message/NaturalParameters.hpp"
+#include "EnsembleLearning/node/factor/Factor.hpp"
 
 #include "EnsembleLearning.hpp"
 //#include "rng.hpp"
@@ -58,6 +59,40 @@ private:
     std::ostream & mOriginal;
   std::streambuf * mOldBuffer;
 };
+
+
+/*****************************************************
+ *****************************************************
+ *****      Random      TEST       *******
+ *****************************************************
+ *****************************************************/
+
+
+BOOST_AUTO_TEST_SUITE( Random_test )
+
+
+BOOST_AUTO_TEST_CASE( Singleton_test  )
+{
+  Random::Restart(100);
+  
+  rng* random1 = Random::Instance(100);
+  
+  
+  rng* random2 = Random::Restart(10);
+  double d1 = random2->uniform();
+  double d2 = random2->uniform(1,2);
+  
+  BOOST_CHECK(d1<1);
+  BOOST_CHECK(d1>=0);
+  BOOST_CHECK(d2<2);
+  BOOST_CHECK(d2>=1);
+  
+  
+}
+
+
+BOOST_AUTO_TEST_SUITE_END()
+
 
 /*****************************************************
  *****************************************************
@@ -765,8 +800,8 @@ BOOST_AUTO_TEST_CASE( Dirichlet_test  )
   //check precision
   std::vector<double> precision =  Dirichlet<double>::CalcPrecision(NPData);
   BOOST_CHECK_CLOSE(precision[0], 1.0/((2.0/9.0)/(4.3)), 0.0001); 
-  BOOST_CHECK_CLOSE(precision[1],  1.0/((2.0/9.0)/(4.3)), 0.0001); 
-  BOOST_CHECK_CLOSE(precision[2],  1.0/((2.0/9.0)/(4.3)), 0.0001); 
+  BOOST_CHECK_CLOSE(precision[1], 1.0/((2.0/9.0)/(4.3)), 0.0001); 
+  BOOST_CHECK_CLOSE(precision[2], 1.0/((2.0/9.0)/(4.3)), 0.0001); 
   
 
   //calc 1000 samples and check mean
@@ -859,37 +894,6 @@ BOOST_AUTO_TEST_CASE( Discrete_test  )
   BOOST_CHECK_CLOSE(LogNorm2, LogNorm1, 0.0001);  
   
 } 
-
-BOOST_AUTO_TEST_SUITE_END()
-
-
-/*****************************************************
- *****************************************************
- *****      Random      TEST       *******
- *****************************************************
- *****************************************************/
-
-
-BOOST_AUTO_TEST_SUITE( Random_test )
-
-
-BOOST_AUTO_TEST_CASE( Singleton_test  )
-{
-  rng* random1 = Random::Instance(100);
-  
-  
-  rng* random2 = Random::Restart(10);
-  double d1 = random2->uniform();
-  double d2 = random2->uniform(1,2);
-  
-  BOOST_CHECK(d1<1);
-  BOOST_CHECK(d1>=0);
-  BOOST_CHECK(d2<2);
-  BOOST_CHECK(d2>=1);
-  
-  
-}
-
 
 BOOST_AUTO_TEST_SUITE_END()
 
@@ -1010,6 +1014,289 @@ BOOST_AUTO_TEST_CASE( Observed_Dirichlet_test  )
   
 }
 BOOST_AUTO_TEST_SUITE_END()
+
+
+
+
+
+/*****************************************************
+ *****************************************************
+ *****       Factor TEST                       *******
+ *****************************************************
+ *****************************************************/
+
+BOOST_AUTO_TEST_SUITE( Factor_Node_test )
+
+BOOST_AUTO_TEST_CASE( Factor_Gaussian_test  )
+{
+
+  ObservedNode<Gaussian,double> obsGaussian(2.0);
+  ObservedNode<Gamma,double>    obsGamma(3.0); 
+  ObservedNode<Gaussian,double> obsData(4.0); 
+  
+  detail::Factor<Gaussian,double> GF(&obsGaussian, &obsGamma, &obsData);
+  BOOST_CHECK_CLOSE(GF.CalcLogNorm(), 0.0, 0.0001);
+  
+  NaturalParameters<double> NPp1 = GF.GetNaturalNot(&obsGaussian);
+  NaturalParameters<double> NPp2 = GF.GetNaturalNot(&obsGamma);
+  NaturalParameters<double> NPd = GF.GetNaturalNot(&obsData);
+  
+  BOOST_CHECK_CLOSE(NPp1[0], 12.0 , 0.0001);
+  BOOST_CHECK_CLOSE(NPp1[1], -1.5 ,0.0001 );
+  BOOST_CHECK_CLOSE(NPp2[0], -0.5*(16 - 16+ 4),0.0001 );
+  BOOST_CHECK_CLOSE(NPp2[1], 0.5 ,0.0001 );
+  BOOST_CHECK_CLOSE(NPd[0], 6 ,0.0001 );
+  BOOST_CHECK_CLOSE(NPd[1], -1.5 ,0.0001 );
+  BOOST_CHECK_CLOSE(GF.CalcLogNorm(), 0.5* ( std::log(3/(2.0*M_PI)) - (3) * (4)), 0.0001);
+  
+  
+  //calc 5000 samples and check mean
+  std::vector< Moments<double> > sample(5000);
+  double av = 0;
+  double av_squared = 0;
+  for(size_t i=0;i<sample.size();++i){
+    sample[i] = GF.InitialiseMoments();
+    const double av_tmp = sample[i][0];
+    av+=av_tmp;
+    av_squared+=av_tmp*av_tmp;
+  }
+  av*=(1.0/sample.size());
+  double var = av_squared*(1.0/sample.size()) - av*av;
+  BOOST_CHECK_CLOSE(av,  2.0, 5);
+  BOOST_CHECK_CLOSE(var, 1.0/3.0, 5);
+  
+
+}
+BOOST_AUTO_TEST_CASE( Factor_Dirichlet_test  )
+{
+
+  ObservedNode<Dirichlet,double> obsDirichlet(3,1.1); 
+  ObservedNode<Gaussian,double> obsData(4.0); 
+  
+  detail::Factor<Dirichlet,double> GF(&obsDirichlet,  &obsData);
+  BOOST_CHECK_CLOSE(GF.CalcLogNorm(), 0.0, 0.0001);
+  
+  NaturalParameters<double> NPd = GF.GetNaturalNot(&obsData);
+  
+  BOOST_CHECK_CLOSE(NPd[0], 0.1 , 0.0001);  //1.1-1
+  BOOST_CHECK_CLOSE(NPd[1], 0.1 , 0.0001);  //1.1-1
+  BOOST_CHECK_CLOSE(NPd[2], 0.1 , 0.0001);  //1.1-1
+  BOOST_CHECK_CLOSE(GF.CalcLogNorm(),gsl_sf_lngamma(3.3) -3.0*gsl_sf_lngamma(1.1) , 0.0001);
+  
+  
+  //calc 5000 samples and check mean
+  std::vector< Moments<double> > sample(5000);
+  std::vector<double> av(3);
+  std::vector<double> av_squared(3);
+  for(size_t i=0;i<sample.size();++i){
+    sample[i] = GF.InitialiseMoments();
+    for(size_t j=0;j<3;++j){
+      const double av_tmp = std::exp(sample[i][j]);
+      av[j]+=av_tmp;
+      av_squared[j]+=av_tmp*av_tmp;
+    }
+  }
+  std::vector<double> var(3);
+  for(size_t j=0;j<3;++j){
+    av[j]*=(1.0/sample.size());
+    var[j] =  av_squared[j]*(1.0/sample.size()) - av[j]*av[j];
+    BOOST_CHECK_CLOSE(av[j],  1.0/3.0, 5);
+    BOOST_CHECK_CLOSE(var[j], ((2.0/9.0)/(4.3)), 5);
+  }
+}
+
+BOOST_AUTO_TEST_CASE( Factor_Discrete_test  )
+{
+
+  ObservedNode<Dirichlet,double> obsPrior(3,1.0/3.0); 
+  ObservedNode<Dirichlet,double> obsData(3,2.0/3.0); 
+  
+  detail::Factor<Discrete,double> GF(&obsPrior,  &obsData);
+  BOOST_CHECK_CLOSE(GF.CalcLogNorm(), 0.0, 0.0001);
+  
+  NaturalParameters<double> NPp = GF.GetNaturalNot(&obsPrior);
+  NaturalParameters<double> NPd = GF.GetNaturalNot(&obsData);
+  
+  BOOST_CHECK_CLOSE(NPp[0],  2.0/3.0, 0.0001);  //1.1-1
+  BOOST_CHECK_CLOSE(NPp[1],  2.0/3.0 , 0.0001);  //1.1-1
+  BOOST_CHECK_CLOSE(NPp[2],  2.0/3.0 , 0.0001);  //1.1-1
+  BOOST_CHECK_CLOSE(NPd[0],  1.0/3.0, 0.0001);  //1.1-1
+  BOOST_CHECK_CLOSE(NPd[1],  1.0/3.0, 0.0001);  //1.1-1
+  BOOST_CHECK_CLOSE(NPd[2],  1.0/3.0, 0.0001);  //1.1-1
+  BOOST_CHECK_CLOSE(GF.CalcLogNorm(),-1.431945622001443, 0.0001);
+  
+  
+  //calc 5000 samples and check mean
+  std::vector< Moments<double> > sample(1);
+  double av = 0;
+  double av_squared = 0;
+  for(size_t i=0;i<sample.size();++i){
+    sample[i] = GF.InitialiseMoments();
+    const double av_tmp = sample[i][0];
+    av+=av_tmp;
+    av_squared+=av_tmp*av_tmp;
+  }
+  av*=(1.0/sample.size());
+  double var = av_squared*(1.0/sample.size()) - av*av;
+  BOOST_CHECK_CLOSE(av,  1.3956124250860897, 5);
+  BOOST_CHECK_CLOSE(var, 0, 5);
+  
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
+// /*****************************************************
+//  *****************************************************
+//  *****       Hidden Nodes and Factor TEST      *******
+//  *****************************************************
+//  *****************************************************/
+
+
+// BOOST_AUTO_TEST_SUITE( Hidden_Node_test )
+
+// BOOST_AUTO_TEST_CASE( Hidden_Gaussian_test  )
+// {
+//   HiddenNode<Gaussian,double> G; //2 elements value 2.0
+
+//   Moments<double> M2 = G.GetMoments();
+//   BOOST_CHECK_EQUAL(M2.size(), size_t(2));
+//   BOOST_CHECK_CLOSE(M2[0], 0.0, 0.0001);
+//   BOOST_CHECK_CLOSE(M2[1], 0.0, 0.0001);
+  
+  
+  
+
+//   std::vector<double> mean2 = obs2.GetMean();
+//   std::vector<double> var2 = obs2.GetVariance();
+  
+//   BOOST_CHECK_CLOSE(mean2[0], 2.0, 0.0001);
+//   BOOST_CHECK_EQUAL(mean2.size(), size_t(1));
+  
+
+//   BOOST_CHECK_CLOSE(var2[0], 0.0, 0.0001);
+//   BOOST_CHECK_EQUAL(var2.size(), size_t(1));
+  
+//   Coster C = 0;
+//   obs2.Iterate(C);
+//   BOOST_CHECK_CLOSE(double(C), 0.0, 0.0001);
+  
+// }
+// BOOST_AUTO_TEST_CASE( Hidden_RGaussian_test  )
+// {
+//   HiddenNode<RectifiedGaussian,double> obs2; //2 elements value 2.0
+  
+//   Moments<double> M2 = obs2.GetMoments();
+//   BOOST_CHECK_EQUAL(M2.size(), size_t(2));
+//   BOOST_CHECK_CLOSE(M2[0], 2.0, 0.0001);
+//   BOOST_CHECK_CLOSE(M2[1], 4.0, 0.0001);
+
+
+//   std::vector<double> mean2 = obs2.GetMean();
+//   std::vector<double> var2 = obs2.GetVariance();
+  
+//   BOOST_CHECK_CLOSE(mean2[0], 2.0, 0.0001);
+//   BOOST_CHECK_EQUAL(mean2.size(), size_t(1));
+  
+
+//   BOOST_CHECK_CLOSE(var2[0], 0.0, 0.0001);
+//   BOOST_CHECK_EQUAL(var2.size(), size_t(1));
+  
+//   Coster C = 0;
+//   obs2.Iterate(C);
+//   BOOST_CHECK_CLOSE(double(C), 0.0, 0.0001);
+  
+// }
+// BOOST_AUTO_TEST_CASE( Hidden_Gamma_test  )
+// {
+//   HiddenNode<Gamma,double> obs2; //2 elements value 2.0
+  
+//   Moments<double> M2 = obs2.GetMoments();
+//   BOOST_CHECK_EQUAL(M2.size(), size_t(2));
+//   BOOST_CHECK_CLOSE(M2[0], 2.0, 0.0001);
+//   BOOST_CHECK_CLOSE(M2[1], std::log(2), 0.0001);
+
+
+//   std::vector<double> mean2 = obs2.GetMean();
+//   std::vector<double> var2  = obs2.GetVariance();
+  
+//   BOOST_CHECK_CLOSE(mean2[0], 2.0, 0.0001);
+//   BOOST_CHECK_EQUAL(mean2.size(), size_t(1));
+  
+
+//   BOOST_CHECK_CLOSE(var2[0], 0.0, 0.0001);
+//   BOOST_CHECK_EQUAL(var2.size(), size_t(1));
+  
+//   Coster C = 0;
+//   obs2.Iterate(C);
+//   BOOST_CHECK_CLOSE(double(C), 0.0, 0.0001);
+  
+// }
+
+// BOOST_AUTO_TEST_CASE( Hidden_Dirichlet_test  )
+// {
+//   HiddenNode<Dirichlet,double> obs3(3); //3 elements value 2.0
+  
+//   Moments<double> M3 = obs3.GetMoments();
+//   BOOST_CHECK_EQUAL(M3.size(), size_t(3));
+//   BOOST_CHECK_CLOSE(M3[0], 2.0, 0.0001);
+//   BOOST_CHECK_CLOSE(M3[1], 2.0, 0.0001);
+//   BOOST_CHECK_CLOSE(M3[2], 2.0, 0.0001);
+
+
+//   std::vector<double> mean3 = obs3.GetMean();
+//   std::vector<double> var3  = obs3.GetVariance();
+  
+//   BOOST_CHECK_EQUAL(mean3.size(), size_t(3));
+//   BOOST_CHECK_CLOSE(mean3[0], 2.0, 0.0001);
+//   BOOST_CHECK_CLOSE(mean3[1], 2.0, 0.0001);
+//   BOOST_CHECK_CLOSE(mean3[2], 2.0, 0.0001);
+  
+
+//   BOOST_CHECK_EQUAL(var3.size(), size_t(3));
+//   BOOST_CHECK_CLOSE(var3[0], 0.0, 0.0001);
+//   BOOST_CHECK_CLOSE(var3[1], 0.0, 0.0001);
+//   BOOST_CHECK_CLOSE(var3[2], 0.0, 0.0001);
+  
+//   Coster C = 0;
+//   obs3.Iterate(C);
+//   BOOST_CHECK_CLOSE(double(C), 0.0, 0.0001);
+  
+// }
+
+// BOOST_AUTO_TEST_CASE( Hidden_Discrete_test  )
+// {
+//   HiddenNode<Discrete,double> obs3(3); //3 elements value 2.0
+  
+//   Moments<double> M3 = obs3.GetMoments();
+//   BOOST_CHECK_EQUAL(M3.size(), size_t(3));
+//   BOOST_CHECK_CLOSE(M3[0], 2.0, 0.0001);
+//   BOOST_CHECK_CLOSE(M3[1], 2.0, 0.0001);
+//   BOOST_CHECK_CLOSE(M3[2], 2.0, 0.0001);
+
+
+//   std::vector<double> mean3 = obs3.GetMean();
+//   std::vector<double> var3  = obs3.GetVariance();
+  
+//   BOOST_CHECK_EQUAL(mean3.size(), size_t(3));
+//   BOOST_CHECK_CLOSE(mean3[0], 2.0, 0.0001);
+//   BOOST_CHECK_CLOSE(mean3[1], 2.0, 0.0001);
+//   BOOST_CHECK_CLOSE(mean3[2], 2.0, 0.0001);
+  
+
+//   BOOST_CHECK_EQUAL(var3.size(), size_t(3));
+//   BOOST_CHECK_CLOSE(var3[0], 0.0, 0.0001);
+//   BOOST_CHECK_CLOSE(var3[1], 0.0, 0.0001);
+//   BOOST_CHECK_CLOSE(var3[2], 0.0, 0.0001);
+  
+//   Coster C = 0;
+//   obs3.Iterate(C);
+//   BOOST_CHECK_CLOSE(double(C), 0.0, 0.0001);
+  
+// }
+// BOOST_AUTO_TEST_SUITE_END()
+
+
+
 
 /*****************************************************
  *****************************************************
