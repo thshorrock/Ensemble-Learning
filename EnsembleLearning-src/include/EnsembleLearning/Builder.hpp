@@ -141,10 +141,10 @@ namespace ICR{
 
       typedef detail::Deterministic<Gaussian, T >  DeterministicFactor;
 
-      typedef HiddenNode<Gaussian<T>, T >      GaussianType;
-      typedef HiddenNode<RectifiedGaussian<T>, T >      RectifiedGaussianType;
-      typedef HiddenNode<Gamma<T>, T >         GammaType;
-      typedef HiddenNode<Dirichlet<T>, T >     DirichletType;
+      typedef HiddenNode<Gaussian, T >      GaussianType;
+      typedef HiddenNode<RectifiedGaussian, T >      RectifiedGaussianType;
+      typedef HiddenNode<Gamma, T >         GammaType;
+      typedef HiddenNode<Dirichlet, T >     DirichletType;
       typedef ObservedNode<Gaussian, T >     GaussianDataType;
       typedef ObservedNode<Gamma, T >        GammaDataType;
       typedef ObservedNode<Gaussian, T > GaussianConstType;
@@ -154,25 +154,25 @@ namespace ICR{
       typedef DeterministicNode<Gaussian<T>, T>    GaussianResultType;
 
       
-      typedef HiddenNode<Dirichlet<T>, T >     WeightsType;
-      typedef HiddenNode<Discrete<T>, T >      CatagoryType;
+      typedef HiddenNode<Dirichlet, T >     WeightsType;
+      typedef HiddenNode<Discrete, T >      CatagoryType;
     public:
       
       /** @name Useful typdefs for types that are exposed to the user.
        */
       ///@{
       typedef VariableNode<T>*                    Variable;
-      typedef HiddenNode<RectifiedGaussian<T>, T >*      RectifiedGaussianNode;
-      typedef HiddenNode<Gaussian<T>, T >*      GaussianNode;
-      typedef HiddenNode<Gamma<T>, T >*         GammaNode;
+      typedef HiddenNode<RectifiedGaussian, T >*      RectifiedGaussianNode;
+      typedef HiddenNode<Gaussian, T >*      GaussianNode;
+      typedef HiddenNode<Gamma, T >*         GammaNode;
       typedef ObservedNode<Gaussian, T >*     GaussianDataNode;
       typedef ObservedNode<Gamma, T >*        GammaDataNode;
       typedef ObservedNode<Gaussian, T >* GaussianConstNode;
       typedef ObservedNode<Gamma, T >*    GammaConstNode;
       typedef DeterministicNode<Gaussian<T>, T>*    GaussianResultNode;
       
-      typedef HiddenNode<Dirichlet<T>, T >*      WeightsNode;
-      typedef HiddenNode<Discrete<T>, T >*       CatagoryNode;
+      typedef HiddenNode<Dirichlet, T >*      WeightsNode;
+      typedef HiddenNode<Discrete, T >*       CatagoryNode;
       ///@}
 
       /** A constructor.

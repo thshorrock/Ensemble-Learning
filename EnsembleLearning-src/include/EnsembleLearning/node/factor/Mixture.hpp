@@ -44,7 +44,7 @@ namespace ICR{
     template<class T>
     class Discrete;
     
-    template <class Model, class T>
+    template <template<class> class Model, class T>
     class HiddenNode; //only used as pointer here.
     
     namespace detail{
@@ -75,9 +75,9 @@ namespace ICR{
       typedef typename boost::call_traits< Moments<T> >::value_type
       moments_t;
 
-      typedef typename boost::call_traits<HiddenNode<Discrete<T>,T >*>::value_type
+      typedef typename boost::call_traits<HiddenNode<Discrete,T >*>::value_type
       discrete_t;
-      typedef typename boost::call_traits<HiddenNode<Discrete<T>,T >*>::value_type
+      typedef typename boost::call_traits<HiddenNode<Discrete,T >*>::value_type
       discrete_parameter;
 
       ///@}

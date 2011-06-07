@@ -48,7 +48,7 @@ namespace ICR{
      *  @tparam Model  The model to use for the inferred data.
      *  @tparam T The data type (float or double)
      */
-    template <class Model, class T>
+    template <template<class> class Model, class T>
     class HiddenNode : public VariableNode<T>
     {
     public:
@@ -102,13 +102,13 @@ namespace ICR{
 }
 
 
-template<class Model,class T>
+template<template<class> class Model,class T>
 ICR::EnsembleLearning::HiddenNode<Model,T>::HiddenNode(const size_t moment_size) 
   :   m_parent(0), m_children(), m_Moments(moment_size)
 {}
 
 
-template<class Model,class T>
+template<template<class> class Model,class T>
 inline 
 void
 ICR::EnsembleLearning::HiddenNode<Model,T>::SetParentFactor(FactorNode<T>* f)
@@ -123,7 +123,7 @@ ICR::EnsembleLearning::HiddenNode<Model,T>::SetParentFactor(FactorNode<T>* f)
 
 
    
-template<class Model,class T>
+template<template<class> class Model,class T>
 inline
 void
 ICR::EnsembleLearning::HiddenNode<Model,T>::AddChildFactor(FactorNode<T>* f)
@@ -135,7 +135,7 @@ ICR::EnsembleLearning::HiddenNode<Model,T>::AddChildFactor(FactorNode<T>* f)
   }
 }
 
-template<class Model,class T>
+template<template<class> class Model,class T>
 inline
 const ICR::EnsembleLearning::Moments<T>&
 ICR::EnsembleLearning::HiddenNode<Model,T>::GetMoments() const
@@ -147,7 +147,7 @@ ICR::EnsembleLearning::HiddenNode<Model,T>::GetMoments() const
   return m_Moments;
 }
    
-template<class Model,class T>
+template<template<class> class Model,class T>
 inline
 const ICR::EnsembleLearning::NaturalParameters<T>
 ICR::EnsembleLearning::HiddenNode<Model,T>::GetNP()
@@ -173,20 +173,20 @@ ICR::EnsembleLearning::HiddenNode<Model,T>::GetNP()
   return NP;
 }
 
-template<class Model,class T>
+template<template<class> class Model,class T>
 inline
 const std::vector<T>
 ICR::EnsembleLearning::HiddenNode<Model,T>::GetMean() 
 {
-  return Model::CalcMean(GetNP());
+  return Model<T>::CalcMean(GetNP());
 }
    
-template<class Model,class T>
+template<template<class> class Model,class T>
 inline
 const std::vector<T>
 ICR::EnsembleLearning::HiddenNode<Model,T>::GetVariance() 
 {
-  std::vector<T> prec = Model::CalcPrecision(GetNP());
+  std::vector<T> prec = Model<T>::CalcPrecision(GetNP());
   std::vector<T> var(prec.size());
   for(size_t i=0;i<prec.size();++i){
     var[i] = 1.0/prec[i];
@@ -194,17 +194,17 @@ ICR::EnsembleLearning::HiddenNode<Model,T>::GetVariance()
   return var;
 }
 
-template<class Model,class T>
+template<template<class> class Model,class T>
 inline
 void 
 ICR::EnsembleLearning::HiddenNode<Model,T>::Iterate(Coster& C)
 {
   const NaturalParameters<T> NP = GetNP();
   //Get the moments and update the model
-  const T LogNorm = Model::CalcLogNorm(NP);
+  const T LogNorm = Model<T>::CalcLogNorm(NP);
   {
     Lock lock(m_mutex);
-    m_Moments = Model::CalcMoments(NP);  //update the moments and the model
+    m_Moments = Model<T>::CalcMoments(NP);  //update the moments and the model
   }
   //first get the NP from the parent
   const NaturalParameters<T> ParentNP = (m_parent->GetNaturalNot(this));
