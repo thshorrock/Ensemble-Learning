@@ -25,6 +25,9 @@ bin/
 backups/
 CMakeFiles/
 coverage
+build-release
+build-profile
+build-debug
 
 # Packages #
 ############
