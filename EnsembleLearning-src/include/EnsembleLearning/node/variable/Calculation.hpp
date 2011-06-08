@@ -70,7 +70,7 @@ namespace ICR{
       Iterate(Coster& C);
 
       const Moments<T>&
-      GetMoments() const;
+      GetMoments() ;
 
       //should make a const version of this 
       /** Forward moments to the deterministic function.
@@ -101,7 +101,7 @@ namespace ICR{
       
       FactorNode<T>* m_parent;
       std::vector<FactorNode<T>*> m_children;
-      Moments<T> m_Moments;
+      mutable Moments<T> m_Moments;
       mutable Mutex m_mutex;
     };
 
@@ -143,13 +143,17 @@ ICR::EnsembleLearning::DeterministicNode<Model,T>::AddChildFactor(FactorNode<T>*
 template<class Model,class T>
 inline
 const ICR::EnsembleLearning::Moments<T>&
-ICR::EnsembleLearning::DeterministicNode<Model,T>::GetMoments() const
+ICR::EnsembleLearning::DeterministicNode<Model,T>::GetMoments() 
 {
 
   /*This value is update in Iterate and called to evaluate other Hidden Nodes
    * (also in iterate mode).  It therefore needs to be protected by a mutex.
    */
+  //first get the NP from the parent
+  NaturalParameters<T> ParentNP = (m_parent->GetNaturalNot(this));
+  //Calcualate the moments
   Lock lock(m_mutex);
+  m_Moments =  Model::CalcMoments(ParentNP);  
   return m_Moments;
 }
    
@@ -203,16 +207,6 @@ ICR::EnsembleLearning::DeterministicNode<Model,T>::GetVariance()
 template<class Model,class T>
 void 
 ICR::EnsembleLearning::DeterministicNode<Model,T>::Iterate(Coster& C)
-{
-  //EVALUATE THE COST
-
-  //first get the NP from the parent
-  NaturalParameters<T> ParentNP = (m_parent->GetNaturalNot(this));
-  //Calcualate the moments
-  {
-    Lock lock(m_mutex);
-    m_Moments = Model::CalcMoments(ParentNP);  
-  }
-}
+{}
 
 #endif  // guard for VARIABLE_CALCULATION_HPP

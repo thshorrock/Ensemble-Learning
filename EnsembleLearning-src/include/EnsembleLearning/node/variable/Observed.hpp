@@ -133,7 +133,7 @@ namespace ICR{
       InitialiseMoments(){};
 
       const Moments<T>&
-      GetMoments() const;
+      GetMoments() ;
       
       const std::vector<T>
       GetMean() ;
@@ -257,7 +257,7 @@ inline
 const ICR::EnsembleLearning::Moments<T>&
 ICR::EnsembleLearning::ObservedNode<Model,T,
 		       typename boost::enable_if<ICR::EnsembleLearning::detail::is_observable<Model,T> >::type>
-::GetMoments() const
+::GetMoments() 
 {
   //Obvserved moments are not modified and so this is thead safe.
   return m_Moments;

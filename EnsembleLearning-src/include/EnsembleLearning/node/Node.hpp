@@ -59,7 +59,7 @@ namespace ICR{
        *  @return The stored moments */
       virtual
       const Moments<T>&
-      GetMoments() const = 0;
+      GetMoments()  = 0;
 
       /** Initialise the moments to this node.
        *  The moments are random based upon the prior moments (of the parent nodes)*/

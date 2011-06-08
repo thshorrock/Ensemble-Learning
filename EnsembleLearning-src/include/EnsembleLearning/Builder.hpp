@@ -564,12 +564,13 @@ namespace ICR{
        *    The model will stop running once the increase in the cost reduced to this threshold.
        *  @param max_iterations The maximum number of iterations.
        *   The model will stop running once this number of iterations has been surpassed.
+       *  @param skip Skip n iterations at the beginning while the initial moments are getting flushed.  This value should be the span of the graph.
        *  @return Whether the convergance criterium was met.  
        *   If false, then the number of iterations exceeded the maximum.
        *  
        */
       bool
-      run(const double& epsilon = 1e-6, const size_t& max_iterations = 100);
+      run(const double& epsilon = 1e-6, const size_t& max_iterations = 100, size_t skip = 1);
       
       ///@}
     private:
@@ -579,8 +580,6 @@ namespace ICR{
       bool
       HasConverged(const T Cost, const T epsilon);
       
-      void
-      Initialise();
 
       T m_PrevCost;
       std::vector<boost::shared_ptr<FactorNode<T> > > m_Factors;

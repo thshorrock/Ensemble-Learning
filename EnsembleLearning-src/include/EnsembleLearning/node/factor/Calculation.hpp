@@ -78,8 +78,8 @@ namespace ICR{
 	    m_child_node(Child)
 	{
 
-	  context.AddChildFactor(this);
 	  Child->SetParentFactor(this);
+	  context.AddChildFactor(this);
 	  
 	};
       

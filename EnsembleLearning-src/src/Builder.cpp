@@ -555,13 +555,12 @@ ICR::EnsembleLearning::Builder<T>::iterate()
 
 template<class T>
 bool
-ICR::EnsembleLearning::Builder<T>::run(const double& epsilon, const size_t& max_iterations )
+ICR::EnsembleLearning::Builder<T>::run(const double& epsilon, const size_t& max_iterations , size_t skip)
 {
-  std::cout<<"initialising"<<std::endl;
-
-  Initialise();
-  
-  std::cout<<" ... initialised"<<std::endl;
+  //std::cout<<"initialising"<<std::endl;
+  for(size_t i=0;i<skip;++i){
+    iterate();
+  }
 	
   for(size_t i=0;i<max_iterations;++i){
     double Cost = iterate()/m_data_nodes;
@@ -595,18 +594,6 @@ ICR::EnsembleLearning::Builder<T>::HasConverged(const T Cost, const T epsilon)
   return false;
 }
     
-template<class T>  
-void
-ICR::EnsembleLearning::Builder<T>::Initialise()
-{
-  if (!m_initialised) {
-    PARALLEL_FOREACH(m_Nodes.begin(), m_Nodes.end(),
-		     boost::bind(&VariableNode<T>::InitialiseMoments, _1)
-		     );
-    m_initialised=true;
-  }
-
-}
 
 
 template class ICR::EnsembleLearning::Builder<double>;

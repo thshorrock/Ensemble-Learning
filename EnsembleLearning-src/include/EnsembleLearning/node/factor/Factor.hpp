@@ -102,9 +102,9 @@ namespace ICR{
 	  m_child_node(Child),
 	  m_LogNorm(0)
       {
+    	Child->SetParentFactor(this);
     	Parent1->AddChildFactor(this);
     	Parent2->AddChildFactor(this);
-    	Child->SetParentFactor(this);
       };
       
       /** Initialise the Moments for the child moment.
@@ -116,8 +116,8 @@ namespace ICR{
       InitialiseMoments() const
       {
 	//Initialise up the tree first
-	m_parent1_node->InitialiseMoments();
-	m_parent2_node->InitialiseMoments();
+	//m_parent1_node->InitialiseMoments();
+	//m_parent2_node->InitialiseMoments();
 	return  Model<T>::CalcSample(m_parent1_node->GetMoments(),
 				     m_parent2_node->GetMoments());
       }
@@ -215,8 +215,8 @@ namespace ICR{
 	  m_child_node(Child),
 	  m_LogNorm(0)
       {
-    	Prior->AddChildFactor(this);
     	Child->SetParentFactor(this);
+    	Prior->AddChildFactor(this);
 
       };
       
@@ -317,8 +317,8 @@ namespace ICR{
 	  m_child_node(Child),
 	  m_LogNorm(0)
       {
-    	Prior->AddChildFactor(this);
     	Child->SetParentFactor(this);
+    	Prior->AddChildFactor(this);
       };
       
       /** Initialise the Moments for the child moment.

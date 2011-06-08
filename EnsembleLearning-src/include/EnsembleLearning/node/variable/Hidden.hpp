@@ -76,7 +76,7 @@ namespace ICR{
 
 
       const Moments<T>&
-      GetMoments() const;
+      GetMoments() ;
 
       const std::vector<T>
       GetMean() ;
@@ -139,7 +139,7 @@ ICR::EnsembleLearning::HiddenNode<Model,T>::AddChildFactor(FactorNode<T>* f)
 template<template<class> class Model,class T>
 inline
 const ICR::EnsembleLearning::Moments<T>&
-ICR::EnsembleLearning::HiddenNode<Model,T>::GetMoments() const
+ICR::EnsembleLearning::HiddenNode<Model,T>::GetMoments() 
 {
   /*This value is update in Iterate and called to evaluate other Hidden Nodes
    * (also in iterate mode).  It therefore needs to be protected by a mutex.

@@ -104,12 +104,12 @@ namespace ICR{
 	//Need to be as many parents to both.
 	BOOST_ASSERT(Parent1.size() == Parent2.size());
 	
+    	child->SetParentFactor(this);
 	for(size_t i=0;i<Parent1.size();++i){
 	  m_parent1_nodes[i]->AddChildFactor(this);
 	  m_parent2_nodes[i]->AddChildFactor(this);
 	}
 	Weights->AddChildFactor(this);
-    	child->SetParentFactor(this);
       };
       
       
