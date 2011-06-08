@@ -22,6 +22,69 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 
 ##########################################################################
+# MAKE SOME EXTRA BUILD TYPES:
+#  MAINTAINER: with some extra warnings (only gcc)
+#  PROFILE:  Profiling mode (only gcc)
+###########################################################################
+##########################################################################
+#  MAINTAINTER
+##########################################################################
+
+IF (CMAKE_COMPILER_IS_GNUCC)
+SET( CMAKE_CXX_FLAGS_MAINTAINER "-Wall -Wabi" CACHE STRING
+    "Flags used by the C++ compiler during maintainer builds."
+    FORCE )
+SET( CMAKE_C_FLAGS_MAINTAINER "-Wall -pedantic" CACHE STRING
+    "Flags used by the C compiler during maintainer builds."
+    FORCE )
+SET( CMAKE_EXE_LINKER_FLAGS_MAINTAINER
+    "-Wl,--warn-unresolved-symbols,--warn-once" CACHE STRING
+    "Flags used for linking binaries during maintainer builds."
+    FORCE )
+SET( CMAKE_SHARED_LINKER_FLAGS_MAINTAINER
+    "-Wl,--warn-unresolved-symbols,--warn-once" CACHE STRING
+    "Flags used by the shared libraries linker during maintainer builds."
+    FORCE )
+MARK_AS_ADVANCED(
+    CMAKE_CXX_FLAGS_MAINTAINER
+    CMAKE_C_FLAGS_MAINTAINER
+    CMAKE_EXE_LINKER_FLAGS_MAINTAINER
+    CMAKE_SHARED_LINKER_FLAGS_MAINTAINER )
+# Update the documentation string of CMAKE_BUILD_TYPE for GUIs
+SET( CMAKE_BUILD_TYPE "${CMAKE_BUILD_TYPE}" CACHE STRING
+    "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel Maintainer."
+    FORCE )
+ENDIF()
+##########################################################################
+#  PROFILE
+##########################################################################
+
+IF (CMAKE_COMPILER_IS_GNUCC)
+SET( CMAKE_CXX_FLAGS_PROFILE "-O2 -g -pg" CACHE STRING
+    "Flags used by the C++ compiler during profile builds."
+    FORCE )
+SET( CMAKE_C_FLAGS_PROFILE "-O2 -g -pg" CACHE STRING
+    "Flags used by the C compiler during profile builds."
+    FORCE )
+SET( CMAKE_EXE_LINKER_FLAGS_PROFILE
+    "-pg " CACHE STRING #-static-libgcc -lc_p
+    "Flags used for linking binaries during profile builds."
+    FORCE )
+SET( CMAKE_SHARED_LINKER_FLAGS_PROFILE
+    "-pg  " CACHE STRING #-static-libgcc -lc_p
+    "Flags used by the shared libraries linker during profile builds."
+    FORCE )
+MARK_AS_ADVANCED(
+    CMAKE_CXX_FLAGS_PROFILE
+    CMAKE_C_FLAGS_PROFILE
+    CMAKE_EXE_LINKER_FLAGS_PROFILE
+    CMAKE_SHARED_LINKER_FLAGS_PROFILE )
+# Update the documentation string of CMAKE_BUILD_TYPE for GUIs
+SET( CMAKE_BUILD_TYPE "${CMAKE_BUILD_TYPE}" CACHE STRING
+    "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel  Maintainer Profile."
+    FORCE )
+ENDIF()
+##########################################################################
 # The libraries and executables depend upon boost and gsl library.
 # If these already exist on system then want to use the existing install.
 #  If not (and if BUILD_MISSING_DEPENDANCIES is ON) then want to build them.
@@ -51,7 +114,7 @@ ENDIF()
 ##########################################################################
 #  Now gsl subset
 ##########################################################################
-set(GSL_DIR, 
+set(GSL_DIR cmake)
 find_package(GSL REQUIRED)
 IF("${GSL_FOUND}")
   include_directories(${GSL_INCLUDE_DIRS} ${GSLCBLAS_INCLUDE_DIRS})
