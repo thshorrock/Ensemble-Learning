@@ -43,6 +43,7 @@ coverage
 ##############
 *.dat
 *.txt
+*.out
 #except CMakeLists.txt
 !CMakeLists.txt
 

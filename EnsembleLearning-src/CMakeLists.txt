@@ -19,6 +19,10 @@ target_link_libraries(EnsembleLearning  ${LIBS}) #link
 install(DIRECTORY include/ DESTINATION include
           FILES_MATCHING PATTERN "*.hpp")
 
+#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}  -pg")
+#SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}  -pg")
+#set(CMAKE_BUILD_TYPE DEBUG)
+install (TARGETS EnsembleLearning DESTINATION lib)
 #Test
 add_subdirectory(test)
 

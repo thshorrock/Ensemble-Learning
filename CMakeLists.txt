@@ -51,7 +51,7 @@ ENDIF()
 ##########################################################################
 #  Now gsl subset
 ##########################################################################
-
+set(GSL_DIR, 
 find_package(GSL REQUIRED)
 IF("${GSL_FOUND}")
   include_directories(${GSL_INCLUDE_DIRS} ${GSLCBLAS_INCLUDE_DIRS})
@@ -68,7 +68,7 @@ ENDIF("${GSL_FOUND}" )
 ##########################################################################
 
 include(boost/tools/build/CMake/BoostUtils.cmake)
-message(STATUS "")
+message(STATUS "./cmake")
 colormsg(_HIBLUE_ "Ensemble Learning Project, starting ...")
 message(STATUS "")
 
