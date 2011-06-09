@@ -77,6 +77,7 @@ namespace ICR{
      *  
      *  @endcode
      *
+     *  @attention Not thread safe in initialisation.
      */
     template<class T>
     class Placeholder : public Expression<T>
@@ -88,11 +89,17 @@ namespace ICR{
       /** Constructor */
       Placeholder()
 	: Expression<T>(),
-	  m_parent(0)
-      {}
+	  m_parent(0),
+	  m_id(s_count)
+      {
+	++s_count;
+      }
       
+      size_t 
+      id() const {return m_id;}
     private:
       
+
       typedef  detail::FunctionIterator<const Function<T> > const_iterator;
       typedef  detail::FunctionIterator<Function<T> > iterator;
       
@@ -177,10 +184,11 @@ namespace ICR{
       Invert(const T rhs, subcontext_parameter c) const;
 
       function_t m_parent;
+      size_t m_id;
+      static size_t s_count;
       friend class SubContext<T>;
     };
-
-
+    
 
   }
 }

@@ -1,0 +1,14 @@
+diff --git a/HEAD:EnsembleLearning-src/src/Placeholder.cpp b/develop-0.1.1:EnsembleLearning-src/src/Placeholder.cpp
+index 6683c56..bd988c0 100644
+--- a/HEAD:EnsembleLearning-src/src/Placeholder.cpp
++++ b/develop-0.1.1:EnsembleLearning-src/src/Placeholder.cpp
+@@ -78,6 +78,9 @@ Placeholder<T>::Invert(const T rhs, subcontext_parameter c) const
+   return std::pair<T,T>((rhs-other), Factor);
+ }
+ 
++template<class T>
++size_t ICR::EnsembleLearning::Placeholder<T>::s_count = 0;
++
+ 
+ //The types we can use
+ template class ICR::EnsembleLearning::Placeholder<double>;

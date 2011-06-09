@@ -160,23 +160,9 @@ namespace ICR{
       }
     
     private:
-      //Do the actual subcontext mutliplcation
-      struct multiply_subcontext
-      {
-	typedef std::pair<placeholder_t const,data_t> Datum;
-	typedef typename boost::call_traits<Datum&>::param_type data_parameter;
-	multiply_subcontext(parameter C) : m_subcontext(C) {}
-	void
-	operator()(data_parameter d)
-	{
-	  d.second //the data
-	    *= m_subcontext.Lookup( d.first ); // the variable
-	}
-      private:
-	type m_subcontext;
-      };
-      //The map between the placeholders and the data
-      std::map<placeholder_t, data_t> m_map;
+      //The store the context
+      std::vector<data_t> m_context_data;
+      
     };
 
     /** A class that maps the placeholders to the Variables that they represent in an expression.
@@ -344,7 +330,7 @@ namespace ICR{
 	    it!= c.m_map.end();
 	    ++it)
 	  {
-	    out<<it->second<<" ";
+	    out<<*it<<" ";
 	  }
       }
       return out;
@@ -388,7 +374,7 @@ inline
 typename ICR::EnsembleLearning::SubContext<T>::data_const_reference
 ICR::EnsembleLearning::SubContext<T>::Lookup(placeholder_parameter P) const
 {
-  return  m_map.find(P)->second;
+  return  m_context_data[P->id()];
 };
 
 
@@ -406,11 +392,18 @@ ICR::EnsembleLearning::SubContext<T>::Assign(placeholder_parameter P,
   //make sure not trying to assign to things at once.
 #pragma omp critical
   {
-    ret = m_map.insert( Datum(P, V) );
-    if (ret.second == false) //already exists
+    if (P->id()<m_context_data.size())
+      m_context_data[P->id()] = V;
+    else
       {
-	ret.first->second = V;
+	m_context_data.resize(P->id()+1);
+	m_context_data[P->id()] = V;
       }
+    // ret = m_map.insert( Datum(P, V) );
+    // if (ret.second == false) //already exists
+    //   {
+    // 	ret.first->second = V;
+    //   }
   }
 }
 
@@ -423,10 +416,11 @@ ICR::EnsembleLearning::SubContext<T>::operator*=(parameter C)
   typedef std::map<placeholder_t,data_t> DataContainer;
   typedef std::pair<placeholder_t,data_t> Datum;
   typename DataContainer::iterator it;
-
-  PARALLEL_FOREACH(m_map.begin(),
-  		   m_map.end(),
-  		   multiply_subcontext(C));
+  
+  BOOST_ASSERT(m_context_data.size() == C.m_context_data.size());
+  for(size_t i=0;i<m_context_data.size();++i){
+    m_context_data[i]*=C.m_context_data[i];
+  }
 
   return *this;
 }

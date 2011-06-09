@@ -78,6 +78,9 @@ Placeholder<T>::Invert(const T rhs, subcontext_parameter c) const
   return std::pair<T,T>((rhs-other), Factor);
 }
 
+template<class T>
+size_t ICR::EnsembleLearning::Placeholder<T>::s_count = 0;
+
 
 //The types we can use
 template class ICR::EnsembleLearning::Placeholder<double>;
