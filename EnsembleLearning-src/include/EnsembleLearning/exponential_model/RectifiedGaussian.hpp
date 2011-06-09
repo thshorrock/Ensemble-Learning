@@ -374,9 +374,8 @@ inline
 typename ICR::EnsembleLearning::RectifiedGaussian<T>::vector_data_t
 ICR::EnsembleLearning::RectifiedGaussian<T>::CalcMean(NP_parameter NP)
 {
-  vector_data_t vmean(1);
-  vmean[0] =  NP[0]/(CalcPrecision(NP)[0]); 
-  return vmean;
+  const moments_t M = CalcMoments(NP);
+  return vector_data_t(1, M[0]);
 }
 
 template<class T>
@@ -384,8 +383,11 @@ inline
 typename ICR::EnsembleLearning::RectifiedGaussian<T>::vector_data_t
 ICR::EnsembleLearning::RectifiedGaussian<T>::CalcPrecision(NP_parameter NP)
 {
+  
+  const moments_t M = CalcMoments(NP);
+  
   vector_data_t vprec(1);
-  vprec[0] = -NP[1]*2.0;
+  vprec[0] = 1.0/(M[1] - std::pow(M[0],2));
   return vprec;
 }
 
