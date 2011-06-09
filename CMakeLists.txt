@@ -12,6 +12,7 @@ OPTION( BUILD_SHARED_LIBS "Set to OFF to build static libraries" ON )
 OPTION( INSTALL_DOC "Set to OFF to skip build/install Documentation" ON )
 OPTION( BUILD_EXAMPLES "Set to OFF to skip building the examples" ON )
 OPTION( BUILD_MISSING_DEPENDANCIES "Set to OFF to skip building missing dependencies (you might want to build the latest versions yourself)" ON )
+OPTION( BUILD_COVERAGE "Set to ON to generate coverage information (make lcov)" OFF )
 
 # Put the libaries and binaries that get built into directories at the
 # top of the build tree rather than in hard-to-find leaf
@@ -84,6 +85,32 @@ SET( CMAKE_BUILD_TYPE "${CMAKE_BUILD_TYPE}" CACHE STRING
     "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel  Maintainer Profile."
     FORCE )
 ENDIF()
+
+
+##########################################################################
+# Check for architecture and sse extentions
+##########################################################################
+include(cmake/architecture.cmake)
+include(cmake/sse.cmake)
+
+
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${SSE_FLAGS}")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${MARCH_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SSE_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${MARCH_FLAGS}")
+
+
+##########################################################################
+# Add OpenMP support
+##########################################################################
+
+#require the omp library
+FIND_PACKAGE(OpenMP REQUIRED) 
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_C_FLAGS}")
+
+
 ##########################################################################
 # The libraries and executables depend upon boost and gsl library.
 # If these already exist on system then want to use the existing install.
