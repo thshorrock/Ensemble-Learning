@@ -144,7 +144,7 @@ main  (int ac, char **av)
 	  Mixing  M(number_of_sources,number_of_records, positive_mixing);
 	  
 	  Data =  prod(M,S);
-	  //AddNoise(Data,5000);
+	  AddNoise(Data,500);
   
 	  std::ofstream data(data_file.string().c_str());
 	  std::ofstream source(source_file.string().c_str());
