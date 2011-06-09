@@ -51,6 +51,10 @@ namespace ICR{
 
     namespace detail{
       
+      /** The struct that checks whether a given model is observable (at compile time).
+       * @tparam Model The Model to check
+       * @tparam T the data type (double or float).
+       */
     template<template<class> class Model,class T>
     struct is_observable
       : boost::mpl::or_<boost::is_same<Model<T>,Dirichlet<T> >,
@@ -78,6 +82,7 @@ namespace ICR{
      *    The Model may be either Dirichlet, Gamma, RectifiedGaussian or Gaussian.
      *    Attempting to call any other class will not compile.
      *  @tparam T The data type used in calculations - either float or double.
+     *  @tparam Enable Enable the Observed node. This is where the compile time checking of the model occurs.
      */
     template<template<class> class Model, class T, class Enable = void>
     class ObservedNode ; //uninitialised

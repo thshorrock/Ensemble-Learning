@@ -95,6 +95,9 @@ namespace ICR{
 	++s_count;
       }
       
+      /** The id of the placeholder.
+       *  @return a unique id for the given placeholder.
+       */
       size_t 
       id() const {return m_id;}
     private:

@@ -571,6 +571,11 @@ namespace ICR{
        */
       bool
       run(const double& epsilon = 1e-6, const size_t& max_iterations = 100, size_t skip = 1);
+
+      /** Reset all the moments based on their parents current variables.
+       *  @attention This is an experimental feature,
+       *   it is not recommended that you actually do perturb your variables.
+       */
       void
       perturb();
       
