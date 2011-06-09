@@ -46,17 +46,39 @@ public:
   Sources(size_t number_of_sources, size_t samples_per_source, bool positive = false)
     : m_sources(number_of_sources,samples_per_source)
   {
+    // ICR::EnsembleLearning::Random::Restart(11);
+
     ICR::EnsembleLearning::rng* random = ICR::EnsembleLearning::Random::Instance() ;// get the random
+      
     for(size_t i=0;i<number_of_sources;++i){
       matrix_row<matrix<double> > row(m_sources,i);
-      double mean = random->uniform(0,10);
-      double prec = random->gamma(1,1);
-      double amplitude;
-      if (positive) 
-	amplitude = random->gamma();
-      else
-	amplitude = random->gaussian();
-      row = amplitude * make_Gaussian(mean,prec,samples_per_source);
+      double mean1 = random->uniform(0,10);
+      double prec1 = random->gamma();
+      double mean2 = random->uniform(0,10);
+      double prec2 = random->gamma();
+      double amplitude1;
+      double amplitude2;
+      
+      vector<double> G0 =  make_Gaussian(mean1,prec1,samples_per_source);
+      vector<double> G1 =  make_Gaussian(mean2,prec2,samples_per_source);
+
+      if (positive) {
+      	amplitude1 = random->gamma();
+      	amplitude2 = random->gamma();
+      }
+      else {
+      	amplitude1 = random->gaussian();
+      	amplitude2 = random->gamma();
+      }
+      row = amplitude1 * G0 +  amplitude2 * G1;
+      
+      // if (i == 0)
+      // 	row = G0+G1+G2;
+      // if (i ==1)
+      // 	row = G3;
+      // if (i ==2) 
+      // 	row = G4;
+      
     }
   }
 
@@ -87,11 +109,11 @@ public:
     for(size_t i=0;i<m_mixing.size1();++i){
       for(size_t j=0;j<m_mixing.size2();++j){
 	double element;
-	if (positive)
-	  element = random->gamma();
-	else
-	  element = random->gaussian();
-	  
+	 if (positive)
+	   element = random->gamma();
+	 else
+	   element = random->gaussian(10,0);
+
 	m_mixing(i,j) = element;
       }
     }
@@ -133,13 +155,11 @@ DataRecords(size_t number_of_records,
 
 
 void
-AddNoise(matrix<double> M, double precision)
+AddNoise(matrix<double>& M, double precision)
 {
-  matrix<double> noise(M.size1(), M.size2());
   for(size_t r=0;r<M.size1();++r){
     matrix_row<matrix<double> > row(M,r);
     row+=make_noise(precision, M.size2());
   }
-  M+=noise;
 }
     

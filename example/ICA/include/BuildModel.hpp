@@ -84,7 +84,7 @@ public:
     //  m_noisePrecision(N);
     for(size_t n=0;n<N;++n){
       m_noiseMean[n] = m_Build.gaussian(0.00,0.1);
-      m_noisePrecision[n] = m_Build.gamma(1.0,1.0);
+      m_noisePrecision[n] = m_Build.gamma(0.1,0.1);
     }
     
     //m_noisePrecision = m_Build.gamma(1.0,1.0);
@@ -144,6 +144,8 @@ public:
     	AtimesSplusN(n,t) = m_Build.calc_gaussian(Expr,context);  
       }
     }
+    m_AtimesSplusN = AtimesSplusN;
+
     std::cout<<"built context - nodes = "<< m_Build.number_of_nodes() <<std::endl;
      
     //join to the data
@@ -190,6 +192,16 @@ public:
       row/=norm;
     }
   }
+  matrix<data_t> get_results() const
+  {
+    matrix<data_t> r(m_AtimesSplusN.size1(), m_AtimesSplusN.size2());
+    for(size_t i=0;i<m_AtimesSplusN.size1();++i){
+      for(size_t j=0; j<m_AtimesSplusN.size2();++j){
+	  r(i,j)= m_AtimesSplusN(i,j)->GetMoments()[0];
+      }
+    }
+    return r;
+  }
 
 private: 
   void 
@@ -207,7 +219,7 @@ private:
   {
     std::generate(V.begin(), V.end(), boost::bind(&ICR::EnsembleLearning::Builder<data_t>::gamma,
 						  boost::ref(m_Build),
-						  1.0, 1.0));
+						  0.1, 0.1));
   }
   void 
   build_vector(vector<WeightsNode>& V, size_t components)
@@ -246,7 +258,7 @@ private:
 	m_A(n,m) = m_Build.rectified_gaussian(AMean[m], APrecision[m]);
       }
     }
-    std::cout<<"built mixing - nodes = "<< m_Build.number_of_nodes() <<std::endl;
+    std::cout<<"built mixing (RG)- nodes = "<< m_Build.number_of_nodes() <<std::endl;
   };
 
 
@@ -309,15 +321,16 @@ private:
       }
     }
     
-    std::cout<<"built sources - nodes = "<< m_Build.number_of_nodes() <<std::endl;
+    std::cout<<"built sources  (RG) - nodes = "<< m_Build.number_of_nodes() <<std::endl;
      
   }
   
 
-ICR::EnsembleLearning::Builder<data_t> m_Build;
+  ICR::EnsembleLearning::Builder<data_t> m_Build;
   ICR::EnsembleLearning::ExpressionFactory<data_t> m_Factory;
   matrix<Variable> m_A;
   matrix<Variable> m_S;
+  matrix<Variable> m_AtimesSplusN; 
   vector<GaussianNode> m_noiseMean;
   vector<GammaNode>     m_noisePrecision;
   //GammaNode     m_noisePrecision;

@@ -127,7 +127,7 @@ namespace ICR{
      */
     template<class T>
     std::ostream&
-    operator<<(std::ostream& out, const VariableNode<T>* v)
+    operator<<(std::ostream& out,  VariableNode<T>* v)
     {
       printf("NODE: %p \t", v );
       out<<v->GetMoments();

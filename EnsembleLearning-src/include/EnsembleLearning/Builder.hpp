@@ -571,6 +571,8 @@ namespace ICR{
        */
       bool
       run(const double& epsilon = 1e-6, const size_t& max_iterations = 100, size_t skip = 1);
+      void
+      perturb();
       
       ///@}
     private:

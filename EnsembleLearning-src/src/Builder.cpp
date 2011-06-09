@@ -522,6 +522,16 @@ ICR::EnsembleLearning::Builder<T>::number_of_factors() const
 
 
 template<class T>
+void
+ICR::EnsembleLearning::Builder<T>::perturb()
+{
+  PARALLEL_FOREACH(m_Nodes.begin(), m_Nodes.end(),
+		   boost::bind(&VariableNode<T>::InitialiseMoments, _1)
+		   );
+}
+
+
+template<class T>
 double
 ICR::EnsembleLearning::Builder<T>::iterate()
 {
