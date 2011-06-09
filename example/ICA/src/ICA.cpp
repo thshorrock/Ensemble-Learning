@@ -144,7 +144,7 @@ main  (int ac, char **av)
 	  Mixing  M(number_of_sources,number_of_records, positive_mixing);
 	  
 	  Data =  prod(M,S);
-	  AddNoise(Data,500);
+	  AddNoise(Data,5000);
   
 	  std::ofstream data(data_file.string().c_str());
 	  std::ofstream source(source_file.string().c_str());
@@ -210,7 +210,8 @@ main  (int ac, char **av)
   fs::path source_file = fs::path(output_directory)/fs::path("InferedSources.txt");
   fs::path mixing_file = fs::path(output_directory)/fs::path("InferedMixing.txt");
   fs::path cost_file   = fs::path(output_directory)/fs::path("Cost.txt");
-  fs::path result_file   = fs::path(output_directory)/fs::path("InferredResult.txt");
+  fs::path result_file   = fs::path(output_directory)/fs::path("InferedResult.txt");
+  fs::path result_file2   = fs::path(output_directory)/fs::path("InferedResult2.txt");
   
   
 
@@ -253,13 +254,14 @@ main  (int ac, char **av)
 	std::ofstream sources(source_file.string().c_str());
 	std::ofstream mixing_matrix(mixing_file.string().c_str());
 	std::ofstream result_matrix(result_file.string().c_str());
+	std::ofstream result_matrix2(result_file2.string().c_str());
 	matrix<double> A(Data.size1(), assumed_sources);
 	matrix<double> S(assumed_sources,Data.size2());
 	Model.get_normalised_means(A,S);
 	sources<<S;
 	mixing_matrix<< matrix<double>(trans(A));
 	result_matrix<<Model.get_results();
-	//result_matrix<< matrix<double>(prod(A,S));
+	result_matrix2<< matrix<double>(prod(A,S));
 	++count;
       }
     }

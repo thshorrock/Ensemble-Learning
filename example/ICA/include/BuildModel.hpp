@@ -83,8 +83,8 @@ public:
     // m_noiseMean(N);
     //  m_noisePrecision(N);
     for(size_t n=0;n<N;++n){
-      m_noiseMean[n] = m_Build.gaussian(0.00,0.01);
-      m_noisePrecision[n] = m_Build.gamma(1,0.1);
+      m_noiseMean[n] = m_Build.gaussian(0.00,10);
+      m_noisePrecision[n] = m_Build.gamma(1,1);
     }
     
     //m_noisePrecision = m_Build.gamma(1.0,1.0);
@@ -212,14 +212,14 @@ private:
 			      (const data_t&, const data_t&)>
 			      (&ICR::EnsembleLearning::Builder<data_t>::gaussian),
 			      boost::ref(m_Build),
-			      0.0, 0.01));
+			      0.0, 0.1));
   }
   void 
   build_vector(vector<GammaNode>& V)
   {
     std::generate(V.begin(), V.end(), boost::bind(&ICR::EnsembleLearning::Builder<data_t>::gamma,
 						  boost::ref(m_Build),
-						  1, 0.1));
+						  1, 1));
   }
   void 
   build_vector(vector<WeightsNode>& V, size_t components)
