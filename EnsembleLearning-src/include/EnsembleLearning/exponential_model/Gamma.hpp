@@ -85,6 +85,8 @@ namespace ICR{
 
       typedef typename boost::call_traits<std::vector<T> >::value_type
       vector_data_t;
+      typedef typename boost::call_traits<std::vector<T> >::param_type
+      vector_data_param;
 
       ///@}
 
@@ -153,6 +155,18 @@ namespace ICR{
       static
       vector_data_t
       CalcPrecision(NP_parameter NP)  ;
+
+      /** Calculate the Moments the mean and variance.
+       *  @param mean A vector containing the mean
+       *  @param var A vector containing the variance
+       *  @return The Calculated Moments.  
+       * 
+       *  This function is caled from HiddenMoments or CalculationMoments.
+       */
+      static
+      moments_t
+      CalcMoments(vector_data_param mean,
+		  vector_data_param var);
 
       /** Calculate the Moments from the Natural Paramters.
        *  @param NP The NaturalParameters from which to calcualate the moments.
@@ -311,6 +325,23 @@ ICR::EnsembleLearning::Gamma<T>::CalcPrecision(NP_parameter NP)
 }
 
    
+template<class T>
+inline
+typename ICR::EnsembleLearning::Gamma<T>::moments_t
+ICR::EnsembleLearning::Gamma<T>::CalcMoments(vector_data_param mean,
+					     vector_data_param var)
+{
+  const data_t m = mean[0];
+  const data_t p = 1.0/var[0];
+  
+  const data_t shape  = std::pow(m,2)*p;
+  const data_t iscale = m*p;
+  BOOST_ASSERT(iscale>0);
+
+  return moments_t(shape/iscale,
+		   gsl_sf_psi(shape) - std::log(iscale) 
+		   );
+}
 
 template<class T>
 inline

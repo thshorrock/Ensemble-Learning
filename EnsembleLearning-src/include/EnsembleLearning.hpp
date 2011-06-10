@@ -28,6 +28,7 @@
 
 //The following header files contain classes that will be used by the user directly.
 #include "EnsembleLearning/Output.hpp"
+#include "EnsembleLearning/Input.hpp"
 #include "EnsembleLearning/Builder.hpp"
 #include "EnsembleLearning/calculation_tree/Factory.hpp"
 

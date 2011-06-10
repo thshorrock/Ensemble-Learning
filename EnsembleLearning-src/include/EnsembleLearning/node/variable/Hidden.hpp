@@ -84,6 +84,14 @@ namespace ICR{
       const std::vector<T>
       GetVariance() ;
 
+      void
+      SetMean(const std::vector<T>& mean) ;
+      
+      void
+      SetVariance(const std::vector<T>& v) ;
+
+      
+
       /** The number of elements in the stored Moments */
       size_t 
       size() const {return m_Moments.size();}
@@ -193,6 +201,22 @@ ICR::EnsembleLearning::HiddenNode<Model,T>::GetVariance()
     var[i] = 1.0/prec[i];
   }
   return var;
+}
+
+template<template<class> class Model,class T>
+inline
+void
+ICR::EnsembleLearning::HiddenNode<Model,T>::SetMean(const std::vector<T>& m) 
+{
+  m_Moments = Model<T>::CalcMoments(m,GetVariance());
+}
+   
+template<template<class> class Model,class T>
+inline
+void
+ICR::EnsembleLearning::HiddenNode<Model,T>::SetVariance(const std::vector<T>& v) 
+{
+  m_Moments = Model<T>::CalcMoments(GetMean(),v);
 }
 
 template<template<class> class Model,class T>

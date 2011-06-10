@@ -96,6 +96,8 @@ namespace ICR{
       
       typedef typename boost::call_traits<std::vector<T> >::value_type
       vector_data_t;
+      typedef typename boost::call_traits<std::vector<T> >::param_type
+      vector_data_param;
       
       
       ///@}
@@ -180,6 +182,18 @@ namespace ICR{
       static
       vector_data_t
       CalcPrecision(NP_parameter NP)  ;
+
+      /** Calculate the Moments the mean and variance.
+       *  @param mean A vector containing the mean
+       *  @param var A vector containing the variance
+       *  @return The Calculated Moments.  
+       * 
+       *  This function is caled from HiddenMoments or CalculationMoments.
+       */
+      static
+      moments_t
+      CalcMoments(vector_data_param mean,
+		  vector_data_param var);
 
       /** Calculate the Moments from the Natural Paramters.
        *  @param NP The NaturalParameters from which to calcualate the moments.
@@ -391,6 +405,20 @@ ICR::EnsembleLearning::RectifiedGaussian<T>::CalcPrecision(NP_parameter NP)
   return vprec;
 }
 
+ 
+template<class T>
+inline
+typename ICR::EnsembleLearning::RectifiedGaussian<T>::moments_t
+ICR::EnsembleLearning::RectifiedGaussian<T>::CalcMoments(vector_data_param m,
+					     vector_data_param v)
+{
+  const data_t prec    =  1.0/v[0];
+  const data_t mean    =  m[0];
+
+  NaturalParameters<T> NP(mean*prec,-0.5*prec);
+  return CalcMoments(NP);
+  
+}
 
 template<class T>
 inline

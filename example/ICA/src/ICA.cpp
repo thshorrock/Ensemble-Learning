@@ -17,7 +17,7 @@ int
 main  (int ac, char **av)
 {
   //start the Random number generator with fixed seed so model reproducable
-  ICR::EnsembleLearning::Random::Instance(10);
+  //ICR::EnsembleLearning::Random::Instance(10);
   
   bool   use_float = false;
   size_t assumed_sources;
@@ -26,11 +26,18 @@ main  (int ac, char **av)
   bool   positive_mixing = false;
   bool   model_noise_offset = false;
   bool   example = false;
+  bool   transpose_priors = false;
+  bool   transpose_mixing = false;
   double convergence_criterium;
+  double GaussianPrecision;
+  double GammaPrecision;
   size_t max_iterations;
   
   std::string data_file;
   std::string output_directory;
+  std::string mean_file;
+  std::string sigma_file;
+  std::string mixing_mean_file;
   
   
   //parse the command line
@@ -47,6 +54,12 @@ main  (int ac, char **av)
   file.add_options()
     ("output-directory,o", po::value<std::string>(&output_directory), 
      "Set the directory for output")
+    ("mean", po::value<std::string>(&mean_file)->default_value(""), 
+     "filename containing prior knowledge of the means")
+    ("sigma", po::value<std::string>(&sigma_file)->default_value(""), 
+     "filename containing prior knowledge of the standard-deviations")
+    ("mixing-mean", po::value<std::string>(&mixing_mean_file)->default_value(""), 
+     "filename containing prior knowledge of the Mixing means")
     ;
   
   // Hidden options, will be allowed both on command line and
@@ -73,6 +86,14 @@ main  (int ac, char **av)
      "The change in evidence when the model is assumed to have converged")
     ("iterations,i", po::value<size_t>(&max_iterations)->default_value(1000), 
      "The maximum number of interations")
+    ("Gaussian-precision", po::value<double>(&GaussianPrecision)->default_value(0.01), 
+     "The precision of the Gaussian Priors in the model")
+    ("Gamma-precision", po::value<double>(&GammaPrecision)->default_value(0.01), 
+     "The precision of the Gamma Priors in the model")
+    ("transpose-priors",  
+     "Transpose the data in the mean and sigma prior data files")
+    ("transpose-mixing",  
+     "Transpose the data in the mixing  prior data files")
     ;
   
   po::options_description cmdline_options;
@@ -100,6 +121,15 @@ main  (int ac, char **av)
       return 1;
     }
 
+  catch(boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::program_options::ambiguous_option> >& e)
+     {
+      std::cout << "Problem processing options: " 
+		<< e.what() << "\n\n"
+		<< visible  << "\n";
+      return 1;
+    }
+
+
   if (vm.count("help")) {
     std::cout << visible  << "\n";
     return 1;
@@ -116,12 +146,160 @@ main  (int ac, char **av)
     positive_mixing = true;
   if (vm.count("noise-offset")) 
     model_noise_offset = true;
+  if (vm.count("transpose-priors")) 
+    transpose_priors = true;
+  if (vm.count("transpose-mixing")) 
+    transpose_mixing = true;
 
 
   if ( !fs::exists(output_directory) ) {
     std::cout << "Output directory '"<<output_directory<<"' does not exist!\n\n"
 	      << visible  << "\n";
     return 1;
+  }
+
+  //check to see if mean file inputted
+  matrix<double> Means;
+  if ( mean_file != "") {
+    if (!fs::exists(mean_file))  { //wrong filename
+      std::cout << "The file '"<<mean_file<<"' does not exist!\n\n"
+		<< visible  << "\n";
+      return 1;
+    }
+    //load the data.
+    std::cout<<"loading means"<<std::endl;
+    std::string line;
+    std::ifstream myfile (mean_file.c_str());
+    std::vector< std::vector<double> > data;
+    while ( getline( myfile, line ) )
+      {
+	std::stringstream ss(line);
+	std::vector<double> v;
+	std::copy( 
+		  std::istream_iterator<double>(ss), 
+		  std::istream_iterator<double>( ),
+		  std::back_inserter(v)
+		   ); // copies all data into bufferdata[i]
+	data.push_back(v);
+      }
+    if (transpose_priors)
+      { 
+	const size_t rows = data[0].size();
+	const size_t cols = data.size(); //assume all the same size.
+	Means = matrix<double>(rows,cols);
+	for(size_t r=0;r<Means.size1();++r){
+	  for(size_t c=0;c<Means.size2();++c){
+	    Means(r,c) = data[c][r];
+	  }
+	}
+      }
+    else 
+      {
+	const size_t rows = data.size();
+	const size_t cols = data[0].size(); //assume all the same size.
+      
+	Means = matrix<double>(rows,cols);
+	for(size_t r=0;r<Means.size1();++r){
+	  for(size_t c=0;c<Means.size2();++c){
+	    Means(r,c) = data[r][c];
+	  }
+	}
+      }
+  }
+  //check to see if sigma file inputted and exists
+  matrix<double> Sigmas;
+  if ( sigma_file != "" ) { 
+    if (!fs::exists(sigma_file) ) {//wrong filename
+      std::cout << "The file '"<<sigma_file<<"' does not exist!\n\n"
+		<< visible  << "\n";
+      return 1;
+    }
+    //load the data.
+    std::cout<<"loading means"<<std::endl;
+    std::string line;
+    std::ifstream myfile (sigma_file.c_str());
+    std::vector< std::vector<double> > data;
+    while ( getline( myfile, line ) )
+      {
+	std::stringstream ss(line);
+	std::vector<double> v;
+	std::copy( 
+		  std::istream_iterator<double>(ss), 
+		  std::istream_iterator<double>( ),
+		  std::back_inserter(v)
+		   ); // copies all data into bufferdata[i]
+	data.push_back(v);
+      }
+    if (transpose_priors)
+      { 
+	const size_t rows = data[0].size();
+	const size_t cols = data.size(); //assume all the same size.
+	Sigmas = matrix<double>(rows,cols);
+	for(size_t r=0;r<Sigmas.size1();++r){
+	  for(size_t c=0;c<Sigmas.size2();++c){
+	    Sigmas(r,c) = data[c][r];
+	  }
+	}
+      }
+    else 
+      {
+	const size_t rows = data.size();
+	const size_t cols = data[0].size(); //assume all the same size.
+	Sigmas = matrix<double>(rows,cols);
+	for(size_t r=0;r<Sigmas.size1();++r){
+	  for(size_t c=0;c<Sigmas.size2();++c){
+	    Sigmas(r,c) = data[r][c];
+	  }
+	}
+      }
+  }
+    
+  //check to see if mixing_mean file inputted and exists
+  matrix<double> MixingMean;
+  if ( mixing_mean_file != "" ) { 
+    if (!fs::exists(mixing_mean_file) ) {//wrong filename
+      std::cout << "The file '"<<mixing_mean_file<<"' does not exist!\n\n"
+		<< visible  << "\n";
+      return 1;
+    }
+    //load the data.
+    std::cout<<"loading mixing"<<std::endl;
+    std::string line;
+    std::ifstream myfile (mixing_mean_file.c_str());
+    std::vector< std::vector<double> > data;
+    while ( getline( myfile, line ) )
+      {
+	std::stringstream ss(line);
+	std::vector<double> v;
+	std::copy( 
+		  std::istream_iterator<double>(ss), 
+		  std::istream_iterator<double>( ),
+		  std::back_inserter(v)
+		   ); // copies all data into bufferdata[i]
+	data.push_back(v);
+      }
+    if (transpose_mixing)
+      { 
+	const size_t rows = data[0].size();
+	const size_t cols = data.size(); //assume all the same size.
+	MixingMean = matrix<double>(rows,cols);
+	for(size_t r=0;r<MixingMean.size1();++r){
+	  for(size_t c=0;c<MixingMean.size2();++c){
+	    MixingMean(r,c) = data[c][r];
+	  }
+	}
+      }
+    else 
+      {
+	const size_t rows = data.size();
+	const size_t cols = data[0].size(); //assume all the same size.
+	MixingMean = matrix<double>(rows,cols);
+	for(size_t r=0;r<MixingMean.size1();++r){
+	  for(size_t c=0;c<MixingMean.size2();++c){
+	    MixingMean(r,c) = data[r][c];
+	  }
+	}
+      }
   }
 
   matrix<double> Data;
@@ -132,9 +310,6 @@ main  (int ac, char **av)
 	  size_t number_of_records = 5;
 	  size_t number_of_sources = 3;
 	  size_t samples_per_record = 100;
-	  
-	  //data examples
-	  //Data = DataRecords(5,2,50,positive_source,positive_mixing);
 	  
 	  fs::path data_file = fs::path(output_directory)/fs::path("OrigninalData.txt");
 	  fs::path source_file = fs::path(output_directory)/fs::path("SourceData.txt");
@@ -170,10 +345,6 @@ main  (int ac, char **av)
       std::ifstream myfile (data_file.c_str());
       std::vector< std::vector<double> > data;
       while ( getline( myfile, line ) )
-	//for(size_t i=0;i<4;++i){
-
-
-	//getline( myfile, line );
 	{
 	  std::stringstream ss(line);
 	  std::vector<double> v;
@@ -198,9 +369,6 @@ main  (int ac, char **av)
 
     }
   
-  
-  std::cout<<"sizeof data = "<<sizeof(Data)<<std::endl;
-
 
   std::cout<<"output direcotry = "<<output_directory<<std::endl;
   std::cout<<"input file = "<<data_file<<std::endl;
@@ -214,7 +382,6 @@ main  (int ac, char **av)
   fs::path result_file2   = fs::path(output_directory)/fs::path("InferedResult2.txt");
   
   
-
   
   if (use_float) 
     {
@@ -222,7 +389,10 @@ main  (int ac, char **av)
       BuildModel<float> Model(Data, assumed_sources, mixing_components, 
 			      positive_source,
 			      positive_mixing,
-			      model_noise_offset);
+			      model_noise_offset,
+			      GaussianPrecision,
+			      GammaPrecision
+			      );
       ICR::EnsembleLearning::Builder<float> Build = Model.get_builder();
       Build.set_cost_file(cost_file.string());
       std::cout<<"Running!"<<std::endl;
@@ -241,20 +411,23 @@ main  (int ac, char **av)
       BuildModel<double> Model(Data, assumed_sources, mixing_components, 
 			       positive_source,
 			       positive_mixing,
-			       model_noise_offset);
-      ICR::EnsembleLearning::Builder<double> Build = Model.get_builder();
-      Build.set_cost_file(cost_file.string());
-      std::cout<<"Running!"<<std::endl;
-      bool converged = false;
-      size_t count = 0;
-      while(!converged && count<10) {
-	converged = Build.run(convergence_criterium,max_iterations);
-
+			       model_noise_offset,
+			       GaussianPrecision,
+			       GammaPrecision
+			       );
+      if (mean_file !="") 
+	Model.set_means(Means);
+      if (sigma_file != "")
+	Model.set_sigmas(Sigmas);
+      if (mixing_mean_file != "")
+	Model.set_mixing_mean(MixingMean);
+      {
 
 	std::ofstream sources(source_file.string().c_str());
 	std::ofstream mixing_matrix(mixing_file.string().c_str());
 	std::ofstream result_matrix(result_file.string().c_str());
 	std::ofstream result_matrix2(result_file2.string().c_str());
+  
 	matrix<double> A(Data.size1(), assumed_sources);
 	matrix<double> S(assumed_sources,Data.size2());
 	Model.get_normalised_means(A,S);
@@ -262,7 +435,29 @@ main  (int ac, char **av)
 	mixing_matrix<< matrix<double>(trans(A));
 	result_matrix<<Model.get_results();
 	result_matrix2<< matrix<double>(prod(A,S));
-	++count;
+      }
+      
+      ICR::EnsembleLearning::Builder<double> Build = Model.get_builder();
+      Build.set_cost_file(cost_file.string());
+      std::cout<<"Running!"<<std::endl;
+      bool converged = false;
+      size_t count = 0;
+      while(!converged && count<10) {
+      	converged = Build.run(convergence_criterium,max_iterations);
+
+	std::ofstream sources(source_file.string().c_str());
+	std::ofstream mixing_matrix(mixing_file.string().c_str());
+	std::ofstream result_matrix(result_file.string().c_str());
+	std::ofstream result_matrix2(result_file2.string().c_str());
+
+	matrix<double> A(Data.size1(), assumed_sources);
+	matrix<double> S(assumed_sources,Data.size2());
+      	Model.get_normalised_means(A,S);
+      	sources<<S;
+      	mixing_matrix<< matrix<double>(trans(A));
+      	result_matrix<<Model.get_results();
+      	result_matrix2<< matrix<double>(prod(A,S));
+      	++count;
       }
     }
 }
