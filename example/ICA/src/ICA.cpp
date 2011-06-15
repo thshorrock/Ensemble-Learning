@@ -391,19 +391,48 @@ main  (int ac, char **av)
 			      positive_mixing,
 			      model_noise_offset,
 			      GaussianPrecision,
-			      GammaPrecision
-			      );
+			      GammaPrecision);
+      size_t size1 = Data.size1();
+      size_t size2 = Data.size2();
+      Data = matrix<float>(); //clear the memory (clear function doesn't do this)
+
+      {
+	
+	std::ofstream sources(source_file.string().c_str());
+	std::ofstream mixing_matrix(mixing_file.string().c_str());
+	std::ofstream result_matrix(result_file.string().c_str());
+	std::ofstream result_matrix2(result_file2.string().c_str());
+	matrix<float> A(size1, assumed_sources);
+	matrix<float> S(assumed_sources,size2);
+	Model.get_normalised_means(A,S);
+	sources<<S;
+	mixing_matrix<< matrix<float>(trans(A));
+	result_matrix<<Model.get_results();
+	result_matrix2<< matrix<float>(prod(A,S));
+      }
+      
       ICR::EnsembleLearning::Builder<float> Build = Model.get_builder();
       Build.set_cost_file(cost_file.string());
       std::cout<<"Running!"<<std::endl;
-      Build.run(convergence_criterium,max_iterations);
-      std::ofstream sources(source_file.string().c_str());
-      std::ofstream mixing_matrix(mixing_file.string().c_str());
-      matrix<float> A(Data.size1(), assumed_sources);
-      matrix<float> S(assumed_sources,Data.size2());
-      Model.get_normalised_means(A,S);
-      sources<<S;
-      mixing_matrix<< matrix<float>(trans(A));
+      bool converged = false;
+      size_t count = 0;
+      while(!converged && count<100) {
+      	converged = Build.run(convergence_criterium,max_iterations);
+
+	std::ofstream sources(source_file.string().c_str());
+	std::ofstream mixing_matrix(mixing_file.string().c_str());
+	std::ofstream result_matrix(result_file.string().c_str());
+	std::ofstream result_matrix2(result_file2.string().c_str());
+
+	matrix<float> A(size1, assumed_sources);
+	matrix<float> S(assumed_sources,size2);
+      	Model.get_normalised_means(A,S);
+      	sources<<S;
+      	mixing_matrix<< matrix<float>(trans(A));
+      	result_matrix<<Model.get_results();
+      	result_matrix2<< matrix<float>(prod(A,S));
+      	++count;
+      }
     }
   else
     {
@@ -415,6 +444,10 @@ main  (int ac, char **av)
 			       GaussianPrecision,
 			       GammaPrecision
 			       );
+      size_t size1 = Data.size1();
+      size_t size2 = Data.size2();
+      Data = matrix<double>(); //clear the memory (clear function doesn't do this)
+
       if (mean_file !="") 
 	Model.set_means(Means);
       if (sigma_file != "")
@@ -428,8 +461,8 @@ main  (int ac, char **av)
 	std::ofstream result_matrix(result_file.string().c_str());
 	std::ofstream result_matrix2(result_file2.string().c_str());
   
-	matrix<double> A(Data.size1(), assumed_sources);
-	matrix<double> S(assumed_sources,Data.size2());
+	matrix<double> A(size1, assumed_sources);
+	matrix<double> S(assumed_sources,size2);
 	Model.get_normalised_means(A,S);
 	sources<<S;
 	mixing_matrix<< matrix<double>(trans(A));
@@ -442,7 +475,7 @@ main  (int ac, char **av)
       std::cout<<"Running!"<<std::endl;
       bool converged = false;
       size_t count = 0;
-      while(!converged && count<10) {
+      while(!converged && count<100) {
       	converged = Build.run(convergence_criterium,max_iterations);
 
 	std::ofstream sources(source_file.string().c_str());
@@ -450,8 +483,8 @@ main  (int ac, char **av)
 	std::ofstream result_matrix(result_file.string().c_str());
 	std::ofstream result_matrix2(result_file2.string().c_str());
 
-	matrix<double> A(Data.size1(), assumed_sources);
-	matrix<double> S(assumed_sources,Data.size2());
+	matrix<double> A(size1, assumed_sources);
+	matrix<double> S(assumed_sources,size2);
       	Model.get_normalised_means(A,S);
       	sources<<S;
       	mixing_matrix<< matrix<double>(trans(A));

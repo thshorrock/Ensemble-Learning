@@ -282,8 +282,8 @@ public:
       //m_AtimesSplusN(m,t)->GetMoments(); //update 
     }
   
-    for(size_t m=0;m<SD.size1();++m){
-      for(size_t t=0;t<SD.size2(); ++t) {
+    for(size_t m=0;m<M.size1();++m){
+      for(size_t t=0;t<M.size2(); ++t) {
 	m_AtimesSplusN(m,t)->GetMoments(); //update 
       }
     }
@@ -440,7 +440,7 @@ private:
       for(size_t t=0;t<T;++t){ 
 	m_S(m,t) = m_Build.rectified_gaussian_mixture(ShypMean[m].begin(),
 						      ShypPrec[m].begin(),
-						      Weights[m]);
+			 			      Weights[m]);
       }
     }
     
@@ -458,8 +458,8 @@ private:
   vector<GammaNode>     m_noisePrecision;
   //GammaNode     m_noisePrecision;
   bool m_positive_mixing, m_positive_sources;
-  double m_GaussianPrecision;
-  double m_GammaVar;
+  data_t m_GaussianPrecision;
+  data_t m_GammaVar;
 
 };
 
