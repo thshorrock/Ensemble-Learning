@@ -230,6 +230,7 @@ namespace ICR{
       gaussian(MeanType<Gaussian,T,MeanId,2,MeanEnabler>* Mean, 
 	       PrecType<Gamma,T,PrecId,2,PrecEnabler>   * Precision);
 
+
     
       template<template<template<class> class,class,class,int,class> class MeanType,
 	       class MeanId, class MeanEnabler,
@@ -256,6 +257,7 @@ namespace ICR{
       HiddenNode<Gaussian, T, typename detail::TypeList::incr_id<MeanId>::type >*
       gaussian(MeanType<RectifiedGaussian,T,MeanId,2,MeanEnabler>* Mean, const T& precision);
 
+
       /** Create a Gaussian VariableNode.
        * @param mean The value of the mean.
        *  The model for the Mean node must be a Gaussian or Rectified Gaussian.
@@ -276,7 +278,7 @@ namespace ICR{
        */
       HiddenNode<Gaussian,T,typename detail::TypeList::incr_id<detail::TypeList::zeros >::type >*
       gaussian(const T mean, const T precision);
-      
+
       ///@}
       
       /** @name Create a RectifiedGaussian VariableNode.
@@ -289,7 +291,6 @@ namespace ICR{
        *  The model for the Precision node must be a Gamma.
        * @return The GaussianNode that holds the inferred Rectified Gaussian Moments.
        */
-      
 
       template<template<template<class> class,class,class,int,class> class MeanType,
 	       class MeanId, class MeanEnabler,
@@ -308,6 +309,7 @@ namespace ICR{
       rectified_gaussian(MeanType<RectifiedGaussian,T,MeanId,2,MeanEnabler>* Mean, 
 			 PrecType<Gamma,T,PrecId,2,PrecEnabler>   * Precision);
 
+
       /** Create a RectifiedGaussian VariableNode.
        * @param Mean The node that stores the Momets for the Mean.
        *  The model for the Mean node must be a Gaussian or Rectified Gaussian.
@@ -323,6 +325,7 @@ namespace ICR{
 	       class MeanId, class MeanEnabler>
       HiddenNode<RectifiedGaussian, T, typename detail::TypeList::incr_id<MeanId>::type >*
       rectified_gaussian(MeanType<RectifiedGaussian,T,MeanId,2,MeanEnabler>* Mean, const T& precision);
+
        /** Create a RectifiedGaussian VariableNode.
        * @param mean The value of the mean.
        *  The model for the Mean node must be a Gaussian or Rectified Gaussian.
@@ -336,6 +339,7 @@ namespace ICR{
 	       class PrecId, class PrecEnabler>
       HiddenNode<RectifiedGaussian,T, typename detail::TypeList::incr_id<detail::TypeList::zeros>::type >*
       rectified_gaussian(const T& mean,PrecType<Gamma,T,PrecId,2,PrecEnabler>*  Precision);
+
   
     /** Create a RectifiedGaussian VariableNode.
      * @param mean The value of the mean.
@@ -355,7 +359,8 @@ namespace ICR{
        *  @param iscale The value of the inverse scale of the GammaNode.
        *  @return The GammaNode that stores the inferred moments to the Gamma Distribution.
        */
-      GammaNode
+      template<class List>
+      Variable
       gamma(const T& shape, const T& iscale);
       ///@}
 
@@ -447,6 +452,11 @@ namespace ICR{
        */
       WeightsNode
       weights();
+// =======
+//       template<class List>
+//       Variable
+//       weights(const size_t size);
+// >>>>>>> git
 
       /** Gaussian Mixture Model.
        *  @param vMean The vector container containing all the  variables representing the means.
@@ -461,6 +471,13 @@ namespace ICR{
       gaussian_mixture( vMean_t& vMean, 
 		        vPrec_t& vPrecision, 
 			WeightsNode Weights);
+// =======
+//       template<class List>
+//       Variable
+//       gaussian_mixture( std::vector<Variable>& vMean, 
+// 		        std::vector<Variable>& vPrecision, 
+// 		       WeightsNode Weights);
+// >>>>>>> git
 	
 
   
@@ -472,7 +489,8 @@ namespace ICR{
        *   and must be the same as the size of the Weights Node.
        * @return The GaussianNode that holds the inferred Rectified Gaussian Moments.
        */
-      RectifiedGaussianNode
+      template<class List>
+      Variable
       rectified_gaussian_mixture( std::vector<Variable>& vMean, 
 				  std::vector<Variable>& vPrecision,
 				 WeightsNode Weights);
@@ -490,6 +508,13 @@ namespace ICR{
       // gaussian_mixture(const MeanIterator& MeanBegin, 
       // 		       const PrecIterator& PrecisionBegin, 
       // 		       WeightsNode Weights);
+// =======
+//       template<class MeanIterator, class PrecIterator,class List>
+//       Variable
+//       gaussian_mixture(const MeanIterator& MeanBegin, 
+// 		       const PrecIterator& PrecisionBegin, 
+// 		       WeightsNode Weights);
+// >>>>>>> git
 	
 
   
@@ -501,11 +526,19 @@ namespace ICR{
        *   and must be the same as the size of the Weights Node.
        * @return The GaussianNode that holds the inferred Rectified Gaussian Moments.
        */
+// <<<<<<< HEAD
       // template<class MeanIterator, class PrecIterator>
       // RectifiedGaussianNode
       // rectified_gaussian_mixture(const MeanIterator& MeanBegin, 
       // 				 const PrecIterator& PrecisionBegin,
       // 				 WeightsNode Weights);
+// =======
+//       template<class MeanIterator, class PrecIterator,class List>
+//       Variable
+//       rectified_gaussian_mixture(const MeanIterator& MeanBegin, 
+// 				 const PrecIterator& PrecisionBegin,
+// 				 WeightsNode Weights);
+// >>>>>>> git
       
       ///@}
       
@@ -519,7 +552,8 @@ namespace ICR{
        *  @param value The constant value of the node.
        *  @return The GaussianConstNode that holds the constant value.
        */
-      GaussianConstNode
+      template<class List>
+      Variable
       gaussian_const(const T value);
       
       /** Create a Gamma Constant.
@@ -528,7 +562,8 @@ namespace ICR{
        *  @param value The constant value of the node.
        *  @return The GammaConstNode that holds the constant value.
        */
-      GammaConstNode
+      template<class List>
+      Variable
       gamma_const(const T value);
       
       /** Create a Gaussian Data Constant.
@@ -536,7 +571,8 @@ namespace ICR{
        *  @param data The value of the data.
        *  @return The GaussianDataNode that holds the data.
        */
-      GaussianDataNode
+      template<class List>
+      Variable
       gaussian_data(const T data);
 
 
@@ -545,7 +581,8 @@ namespace ICR{
        *  @param data The value of the data.
        *  @return The GammaDataNode that holds the data.
        */
-      GammaDataNode
+      template<class List>
+      Variable
       gamma_data(const T data);
 
       ///@}
@@ -564,7 +601,8 @@ namespace ICR{
        *  which the calculation takes place.
        *  @return The GaussianResultsNode that holds the calculated Moments.
        */
-      GaussianResultNode
+      template<class List>
+      Variable
       calc_gaussian(Expression<T>* Expr,  Context<T>& context);
       ///@}
       
@@ -577,7 +615,8 @@ namespace ICR{
        *  @param IScale The node that infers the inverse scale.
        *  @param data The value of the data 
        */
-      void 
+      template<class List>
+      Variable
       join(T& shape, GammaNode IScale ,  const T& data );
 
       /** Join Gamma Data with a shape and inverse scale.
@@ -585,7 +624,8 @@ namespace ICR{
        *  @param iscale The value of the inverse scale
        *  @param Data The Data node that holds the data.
        */
-      void 
+      template<class List>
+      Variable
       join(T& shape, T& iscale, GammaDataNode Data  );
 
       /** Join Gamma Data with a shape and inverse scale.
@@ -593,7 +633,8 @@ namespace ICR{
        *  @param IScale The node that infers the inverse scale.
        *  @param Data The Data node that holds the data.
        */
-      void 
+      template<class List>
+      Variable
       join(T& shape, GammaNode IScale, GammaDataNode Data  );
 
       /** Join Gaussian Data with the mean and precision.

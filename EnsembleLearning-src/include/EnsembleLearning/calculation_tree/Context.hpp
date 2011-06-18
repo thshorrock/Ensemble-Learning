@@ -67,6 +67,7 @@ namespace proto = boost::proto;
 namespace ICR{
 
   namespace EnsembleLearning {
+    
     //Forward declaration.
     template<class> class Placeholder;
     

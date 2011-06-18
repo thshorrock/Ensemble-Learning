@@ -29,6 +29,7 @@
 
 #include "EnsembleLearning/node/Node.hpp"
 #include "EnsembleLearning/calculation_tree/Context.hpp"
+#include "EnsembleLearning/detail/TypeList.hpp"
 
 #include <boost/call_traits.hpp> 
 
@@ -42,8 +43,7 @@ namespace ICR{
     template <class Model, class T,class List> class DeterministicNode; //only used as a pointer here
     
     namespace detail{
-      
-      
+    
       /** A Deterministic Factor.
        *  The Calculation Nodes pass existing moments through an expression.
        *  @tparam Model  The model to use for the data data.
@@ -98,14 +98,15 @@ namespace ICR{
 	NaturalParameters<T>
 	GetNaturalNot( variable_parameter v) const
 	{
-	  if (v == m_child_node) 
+	  typedef variable_parameter::position id;
+	  if (v.node == m_child_node) 
 	    {
 	      return Model<T>::CalcNP2Deterministic(m_expr,m_context);
 	    }
 	  else
 	    {
 	      //parent node
-	      return Model<T>::CalcNP2Parent<v::id::value>(m_expr,m_context,m_child_node);
+	      return Model<T>::CalcNP2Parent<id>(m_expr,m_context,m_child_node);
 	    }
 	}
 	T

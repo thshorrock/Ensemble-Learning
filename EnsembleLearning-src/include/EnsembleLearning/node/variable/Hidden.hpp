@@ -50,9 +50,14 @@ namespace ICR{
      *  @tparam Model  The model to use for the inferred data.
      *  @tparam T The data type (float or double)
      */
+<<<<<<< HEAD
     template <template<class> class Model, class T, class List=detail::TypeList::zeros
 	      , int array_size =2,class Enable = void >
     class HiddenNode : public VariableNode<T, boost::mpl::int_<array_size>::value> //, public List
+=======
+    template <template<class> class Model, class T, class List>
+    class HiddenNode : public VariableNode<T>, public List
+>>>>>>> git
     {
       HiddenNode(HiddenNode<Model,T, List>& other); //non-copyable
       
