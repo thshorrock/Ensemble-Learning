@@ -28,17 +28,21 @@
 #ifndef TYPELIST_HPP
 #define TYPELIST_HPP
 
+// <<<<<<< HEAD
 #include <boost/mpl/vector.hpp>
 #include <boost/mpl/vector_c.hpp>
 #include <boost/mpl/at.hpp> 
 #include <boost/mpl/plus.hpp> 
 #include <boost/mpl/times.hpp> 
 #include <boost/mpl/apply_wrap.hpp>
+// =======
+// >>>>>>> few ideas - TypeList
 
 namespace ICR{
   namespace EnsembleLearning{
 
     namespace detail{
+// <<<<<<< HEAD
       namespace TypeList {
 	typedef boost::mpl::vector_c<int,0,0,0> zeros;
 	typedef boost::mpl::vector_c<int,1,0,0> id;
@@ -190,6 +194,46 @@ namespace ICR{
       // };
 
   }
+// =======
+
+//       template <class Prev>
+//       class TypeList
+//       {
+// 	enum
+// 	  {
+// 	    id        = (Prev::id) + 1,
+// 	    position  = (Prev::position),
+// 	    component = (Prev::component),
+// 	  };
+//       };
+      
+//       template <void>
+//       class TypeList
+//       {
+
+// 	enum
+// 	  {
+// 	    id        = 0,
+// 	    position  = 0,
+// 	    component = 0,
+// 	  };
+//       };
+      
+//       template <class Prev>
+//       class ContextList : TypeList<Prev>
+//       {
+//       public:
+// 	enum
+// 	  {
+// 	    id        = (Prev::id) + 1,
+// 	    position  = (Prev::position) + 1,
+// 	    component = (Prev::component),
+// 	  };
+	
+//       };
+
+//     }
+// >>>>>>> few ideas - TypeList
   }
 }
 #endif  // guard for TYPELIST_HPP
