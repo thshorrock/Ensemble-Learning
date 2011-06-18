@@ -180,15 +180,15 @@ public:
     	/**  Now need to replace the placeholders with given nodes 
     	 *   I.e. set up a context to the expression
     	 */
-	ICR::EnsembleLearning::Context<data_t> context;
+	ICR::EnsembleLearning::Context<data_t> context(2M+1);
     	for(size_t m=0;m<M;++m){
-	  context.push_back(m_A(n,m))
+	  context.assign(m+1,m_A(n,m))
     	}
     	for(size_t m=0;m<M;++m){
-	  context.push_back(m_S(n,m))
+	  context.assign(M+m+1,m_S(n,m))
     	}
 	if (noise_offset) 
-	  context.push_back(NP, m_noiseMean[n]);
+	  context.assign(2M+1, m_noiseMean[n]);
 	
     	AtimesSplusN(n,t) = m_Build.calc_gaussian(Expr,context);  
       }

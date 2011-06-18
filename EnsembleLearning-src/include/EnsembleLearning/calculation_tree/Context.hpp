@@ -25,10 +25,38 @@
  **                                                                               **
  ***********************************************************************************
  ***********************************************************************************/
+// Include all of Proto
+#include <boost/proto/proto.hpp>
+#include <iostream>
+#include <vector>
+#include <cmath>
+#include <cassert>
+
+#include <boost/type_traits.hpp>
+#include <boost/mpl/vector.hpp>
+#include <boost/mpl/range_c.hpp>
+#include <boost/mpl/if.hpp>
+#include <boost/mpl/bool.hpp>
+#include <boost/mpl/placeholders.hpp>
+#include <boost/mpl/transform.hpp>
+#include <boost/mpl/accumulate.hpp>
+#include <boost/mpl/vector_c.hpp>
+#include <boost/mpl/plus.hpp>
+#include <boost/mpl/times.hpp>
+#include <boost/bind.hpp>
+#include <algorithm>
+
+#include <boost/fusion/include/transform.hpp>
+#include <boost/fusion/include/for_each.hpp>
+// Create some namespace aliases
+namespace mpl = boost::mpl;
+namespace fusion = boost::fusion;
+namespace proto = boost::proto;
 
 
 //From this lib
 #include "EnsembleLearning/node/Node.hpp"
+#include "Placeholder.hpp"
 
 //From boost
 #include <boost/call_traits.hpp>
@@ -48,122 +76,208 @@ namespace ICR{
       class Deterministic ;
     }
 
-
-    /** A class that maps the placeholder in an expression
-     *    to a set of Moments values of a Varible Nodes of every element in the expression.
-     *
-     *  @tparam T The type of the stored data.  
-     *   This will be either double or float - with the latter used only for memory contrained models.
-     *
-     *  Example:
-     *  @code 
-     *  //The context provides the Moments of every element in expression.
-     *  Context<double> C;  
-     *  SubContext<T> C0 = C[0]; //All the first moments  (the <x>'s of every element in expr) 
-     *  SubContext<T> C1 = C[1];  //The second moment (the <x^2> of every element of expression)
-     *  @endcode
-     *  
-     *  @warning SubContext is not thread safe
-     *    in that it does not protect its internal data from read/write operations.
-     *    It is assumed it will be created and destroyed within a re-entrant member and not stored -
-     *    see the example.
-     *    
-     */
-    template<class T>
-    class SubContext{
-      
-      
+    template<int TerminalExpr>
+    class calculator_context
+    {
     public:
-      
-      /** @name Useful typdefs for types that are exposed to the user.
-       */
-      ///@{
-      
-      typedef typename boost::call_traits<T>::param_type
-      data_parameter;
-      
-      typedef typename boost::call_traits<T>::value_type
-      data_t;
-            
-      typedef typename boost::call_traits<T>::const_reference 
-      data_const_reference;
-      
-      typedef typename boost::call_traits<const Placeholder<T>*>::param_type
-      placeholder_parameter;
-
-      typedef typename boost::call_traits<const Placeholder<T>*>::value_type
-      placeholder_t;
-      
-      typedef typename boost::call_traits<SubContext<T> >::const_reference
-      const_reference;
-
-      typedef typename boost::call_traits<SubContext<T> >::reference
-      reference;
-      
-      typedef typename boost::call_traits<SubContext<T> >::param_type
-      parameter;
-
-      typedef typename boost::call_traits<SubContext<T> >::value_type
-      type;
-
-      ///@}
-
-      /** Obtain the value associated with for the placeholder.
-       *   @param P The placeholder.
-       *   @return A value taken from the moment of the Variable node represented by P.
-       */
-      data_const_reference
-      Lookup(placeholder_parameter P) const;
-      
-      /** Assign a placeholder a value.
-       *  @param P The placeholder.
-       *  @param V The value 
-       */
-      void 
-      Assign(placeholder_parameter P, 
-	     data_parameter V);
-      
-      /** Multiply to another subcontext.
-       *    This is an element-wise multiplication. 
-       *    In effect, the variable associated with every placeholder is squared.
-       *  @param C The other subcontext.
-       *  @return A reference to the product.
-       */
-      reference
-      operator*=(parameter C);
-
-      /** Output the SubContext to a stream. 
-       *  @param c The subcontext.
-       *  @param out The output stream.
-       *  @return A reference to the output stream.
-       *  This function is thread safe.
-       */
-      template<class U>
-      friend
-      std::ostream&
-      operator<<(std::ostream& out, const SubContext<U>&  c);
-
-      /** Multiply two subcontexts together.
-       *  @param A The first subcontext.
-       *  @param B The second subcontext.
-       *  @return The product.
-       *
-       *  @see operator*=(parameter)
-       *  For what it means to multiply subcontexts, 
-       */
-      friend 
-      type
-      operator*(parameter A, parameter B)
+      void push_back(const std::vector<double>& a)
       {
-	SubContext<T> tmp = A;
-	return tmp*=B;
+	std::copy(a.begin(), a.end(), std::back_inserter(m_args));
       }
-    
-    private:
-      //The store the context
-      std::vector<data_t> m_context_data;
+
+      calculator_context() { m_args.push_back(0.0); } //m_args(0) is the result placeholder.
+  
+      template<typename Expr
+	       // defaulted template parameters, so we can
+	       // specialize on the expressions that need
+	       // special handling.
+	       , typename Tag = typename proto::tag_of<Expr>::type
+	       , typename Arg0 = typename proto::result_of::child_c<Expr, 0>::type
+	       > struct eval;
       
+    // Handle placeholder terminals here...
+    template<typename Expr, int I>
+    struct eval<Expr, proto::tag::terminal, placeholder<I> >
+    {
+      typedef std::pair<double,double> result_type;
+      
+      result_type operator()(Expr &, calculator_context &ctx) const
+      {
+	return result_type(ctx.m_args[I],1);
+      }
     };
+
+    // Handle other terminals here...
+    template<typename Expr, typename Arg0>
+    struct eval<Expr, proto::tag::terminal, Arg0>
+    {
+      typedef std::pair<double,double> result_type;
+
+      result_type operator()(Expr &expr, calculator_context &) const
+      {
+	return result_type(proto::child(expr),1);
+      }
+    };
+
+    // Handle addition here...
+    template<typename Expr, typename Arg0>
+    struct eval<Expr, proto::tag::plus, Arg0>
+    {
+      typedef std::pair<double,double> result_type;
+
+    
+      result_type operator()(Expr &expr, calculator_context &ctx) const
+      {
+	typedef typename proto::result_of::child_c<Expr, 0>::type ltype_tmp;
+	typedef typename proto::result_of::child_c<Expr, 1>::type rtype_tmp;
+
+	typedef typename proto::result_of::child_c<rtype_tmp, 0>::type rtype;
+	typedef typename proto::result_of::child_c<ltype_tmp, 0>::type ltype;
+
+
+	if (boost::is_base_of<mpl::int_<TerminalExpr>,ltype>::value) 
+	  {
+	    //lhs is equal to the special placeholder.
+	    const double rhs1 = proto::eval(proto::right(expr), ctx).first;
+	    const double rhs2 = proto::eval(proto::right(expr), ctx).second;
+	    return result_type(rhs1, rhs2);
+	  }
+	else if (boost::is_base_of<mpl::int_<TerminalExpr>,rtype>::value)
+	  {
+	    //rhs is equal to the special placeholder.
+	    const double lhs1 = proto::eval(proto::left(expr), ctx).first;
+	    const double lhs2 = proto::eval(proto::left(expr), ctx).second;
+	    return result_type(lhs1, lhs2);
+	  } 
+	else
+	  {
+	    //no special placeholder
+	    const double lhs1 = proto::eval(proto::left(expr), ctx).first;
+	    const double lhs2 = proto::eval(proto::left(expr), ctx).second;
+	    const double rhs1 = proto::eval(proto::right(expr), ctx).first;
+	    const double rhs2 = proto::eval(proto::right(expr), ctx).second;
+	    return result_type(lhs1+rhs1, lhs2*rhs2);
+	  }
+      }
+    };
+
+    // Handle multiplication here...
+    template<typename Expr, typename Arg0>
+    struct eval<Expr, proto::tag::multiplies, Arg0>
+    {
+      typedef std::pair<double,double> result_type;
+
+      result_type 
+      operator()(Expr &expr, calculator_context &ctx) const
+      {
+
+    
+	typedef typename proto::result_of::child_c<Expr, 0>::type ltype_tmp;
+	typedef typename proto::result_of::child_c<Expr, 1>::type rtype_tmp;
+
+	typedef typename proto::result_of::child_c<rtype_tmp, 0>::type rtype;
+	typedef typename proto::result_of::child_c<ltype_tmp, 0>::type ltype;
+
+
+	if (boost::is_same<mpl::int_<TerminalExpr>,mpl::int_<0> >::value) 
+	  {
+	    //special case for results expression.
+	    const double lhs1 = proto::eval(proto::left(expr), ctx).first;
+	    const double rhs1 = proto::eval(proto::right(expr), ctx).first;
+	    //no special placeholder
+	    return result_type(lhs1*rhs1,1);
+	  }
+	else if (boost::is_base_of<mpl::int_<TerminalExpr>,ltype>::value) 
+	  {
+	    //lhs is equal to the special placeholder.
+	    return result_type(0, proto::eval(proto::right(expr), ctx).first);
+	  }
+	else if (boost::is_base_of<mpl::int_<TerminalExpr>,rtype>::value)
+	  {
+	    //rhs is equal to the special placeholder.
+	    return result_type(0, proto::eval(proto::left(expr), ctx).first);
+	
+	  } 
+	else if (boost::is_same<proto::tag::terminal,
+		 typename proto::tag_of<ltype_tmp>::type>::value)
+	  { //lhs is terminal but not special placeholder.
+	    const double lhs1 = proto::eval(proto::left(expr), ctx).first;
+	    const double rhs1 = proto::eval(proto::right(expr), ctx).first;
+	    const double rhs2 = proto::eval(proto::right(expr), ctx).second;
+	    return result_type(lhs1*rhs1,lhs1*rhs2);
+	  }
+	else if (boost::is_same<proto::tag::terminal,
+		 typename proto::tag_of<rtype_tmp>::type>::value)
+	  { //rhs is terminal but not special placeholder.
+	    const double lhs1 = proto::eval(proto::left(expr), ctx).first;
+	    const double rhs1 = proto::eval(proto::right(expr), ctx).first;
+	    const double lhs2 = proto::eval(proto::left(expr), ctx).second;
+	    return result_type(lhs1*rhs1,lhs2*rhs1);
+	  }
+	else
+	  {
+	    const double lhs1 = proto::eval(proto::left(expr), ctx).first;
+	    const double rhs1 = proto::eval(proto::right(expr), ctx).first;
+	    const double lhs2 = proto::eval(proto::left(expr), ctx).second;
+	    const double rhs2 = proto::eval(proto::right(expr), ctx).second;
+	    //no special placeholder
+	    return result_type(lhs1*rhs1,lhs2*rhs2);
+	  }
+      }
+    };
+
+
+      // Handle the placeholders:
+      template<int I>
+      double operator()(proto::tag::terminal, placeholder<I>) const
+      {
+	return this->m_args[I];
+      }
+private:
+  // The values with which we'll replace the placeholders
+  std::vector<double> m_args;
+    };
+    
+  // Define the grammar of calculator expressions
+  struct calculator_grammar
+    : proto::or_<
+    proto::plus< calculator_grammar, calculator_grammar >
+    , proto::multiplies< calculator_grammar, calculator_grammar >
+    , proto::terminal< proto::_ >
+    >
+  {};
+
+    // Forward-declare an expression wrapper
+    template<typename Expr>
+    struct calculator;
+
+  // Define a calculator domain. Expression within
+  // the calculator domain will be wrapped in the
+  // calculator<> expression wrapper.
+  struct calculator_domain
+    : proto::domain< proto::generator<calculator>, calculator_grammar >//, calculator_grammar 
+  {};
+  // Define a calculator expression wrapper. It behaves just like
+  // the expression it wraps, but with an extra operator() member
+  // function that evaluates the expression.    
+  template<typename Expr>
+struct calculator
+  : proto::extends<Expr, calculator<Expr>, calculator_domain>
+{
+  typedef
+  proto::extends<Expr, calculator<Expr>, calculator_domain>
+  base_type;
+
+  calculator(Expr const &expr = Expr())
+    : base_type(expr)
+  {}
+
+  typedef double result_type;
+
+  };
+
+
+
 
     /** A class that maps the placeholders to the Variables that they represent in an expression.
      *  The same expression can be used for multiple contexts.
@@ -200,21 +314,13 @@ namespace ICR{
      */
     template<class T>
     class Context{
-      typedef std::map<VariableNode<T>* const ,const Placeholder<T>* > DataContainer;
-      typedef std::pair<  VariableNode<T>*const,const Placeholder<T>*> Datum;
+      typedef std::vector<VariableNode<T>* const  > DataContainer;
+      typedef VariableNode<T>* const  Datum;
     public:
       /** @name Useful typdefs for types that are exposed to the user.
        */
       ///@{
       
-      typedef typename boost::call_traits<SubContext<T> >::value_type
-      subcontext_t;
-      
-      typedef typename boost::call_traits<const Placeholder<T>*>::param_type
-      placeholder_parameter;
-
-      typedef typename boost::call_traits<const Placeholder<T>*>::value_type
-      placeholder_t;
       
       typedef typename boost::call_traits< VariableNode<T>* const>::param_type
       variable_parameter;
@@ -226,56 +332,26 @@ namespace ICR{
       
       ///@}
       
-      /** Obtain the placeholder associated  with a particular VariableNoder.
-       *   @param V The VariableNode.
-       *   @return The placeholder associated with the variable.
-       */
-      placeholder_t
-      Lookup(variable_parameter V) const;
+      Context(const size_t size) : m_map(size) {}
       
       /** Assign a placeholder a VariableNode.
-       *  @param P The Placeholder.
+       *  @param i The Placeholder index.
        *  @param V The VariableNode 
        */
       void 
-      Assign(placeholder_parameter P, 
-	     variable_parameter  V );
+      Assign(size_t i, variable_parameter  V );
 
 
-      /** Splice a Context into Subcontext.
-       *  To evaluate an expression the average means of a variable, \f$<x>\f$,
-       *   or the average of the square of the means \f$<x^2>\f$ need to be obtained 
-       *   from the Varibale Moments that contain all such information.
-       *   Subcontext's are obtained from this function.
-       *  @param i The index of the subcontext requested
-       *  @return The resulting subcontext.
-       *
-       *  Example: 
-       *  @code
-       *  //The context provides the Moments of every element in expression.
-       *  Context<double>& M
-       *  SubContext<double> M0 = M[0];  //All the first moments  (the <x>'s of every element in expr)
-       *  SubContext<double> M1 = M[1];  //The second moment (the <x^2> of every element of expression)
-       *  //Precision is 1.0/ (<expr(x^2)> - <expr(x)>^2)
-       *  double precision = 1.0/(Expr->Evaluate(M1) - Expr->Evaluate(M0*M0) );
-       *  @endcode
-       */
-      subcontext_t
+      variable_t
       operator[](size_parameter i) const
       {
-	//Defer thread safety to the variable
-	// (m_map not being altered here)
-	SubContext<T> c;
-	for(typename DataContainer::const_iterator it = m_map.begin();
-	    it != m_map.end();
-	    ++it)
-	  {
-	    variable_t V = it->first;
-	    c.Assign( it->second,V->GetMoments()[i]);
-	  }
-	return c;
+	return m_map[i];
       }
-
+      
+      size_t
+      size() const
+      { return m_map.size();}
+      
       /** Output the Context to a stream. 
        *  @param c The context.
        *  @param out The output stream.
@@ -292,20 +368,6 @@ namespace ICR{
       template<template<class> class Model,  class U>
       friend class detail::Deterministic;
 
-      template<template<class> class Model,  class U>
-      void
-      AddChildFactor(detail::Deterministic<Model,U>* factor ) const
-      {
-	//Defer thread safety to the variable
-	// (m_map not being altered here)
-	typename DataContainer::const_iterator it;
-	for(  it = m_map.begin();
-	      it!= m_map.end();
-	      ++it)
-	  {
-	    it->first->AddChildFactor(factor);
-	  }
-      }
       mutable DataContainer m_map;
     };
 
@@ -371,62 +433,6 @@ namespace ICR{
 
 template<class T>
 inline
-typename ICR::EnsembleLearning::SubContext<T>::data_const_reference
-ICR::EnsembleLearning::SubContext<T>::Lookup(placeholder_parameter P) const
-{
-  return  m_context_data[P->id()];
-};
-
-
-template<class T>
-void
-ICR::EnsembleLearning::SubContext<T>::Assign(placeholder_parameter P, 
-				data_parameter V)
-{
-  typedef std::map<placeholder_t,data_t> DataContainer;
-  typedef std::pair<placeholder_t,data_t> Datum;
-      
-  typename DataContainer::iterator it;
-  std::pair<typename DataContainer::iterator,bool> ret;
-
-  //make sure not trying to assign to things at once.
-#pragma omp critical
-  {
-    if (P->id()<m_context_data.size())
-      m_context_data[P->id()] = V;
-    else
-      {
-	m_context_data.resize(P->id()+1);
-	m_context_data[P->id()] = V;
-      }
-    // ret = m_map.insert( Datum(P, V) );
-    // if (ret.second == false) //already exists
-    //   {
-    // 	ret.first->second = V;
-    //   }
-  }
-}
-
-
-template<class T>
-inline
-typename ICR::EnsembleLearning::SubContext<T>::reference
-ICR::EnsembleLearning::SubContext<T>::operator*=(parameter C)
-{
-  typedef std::map<placeholder_t,data_t> DataContainer;
-  typedef std::pair<placeholder_t,data_t> Datum;
-  typename DataContainer::iterator it;
-  
-  BOOST_ASSERT(m_context_data.size() == C.m_context_data.size());
-  for(size_t i=0;i<m_context_data.size();++i){
-    m_context_data[i]*=C.m_context_data[i];
-  }
-
-  return *this;
-}
-
-template<class T>
-inline
 typename ICR::EnsembleLearning::Context<T>::placeholder_t
 ICR::EnsembleLearning::Context<T>::Lookup(variable_parameter V) const
 {
@@ -437,19 +443,15 @@ ICR::EnsembleLearning::Context<T>::Lookup(variable_parameter V) const
 
 template<class T>
 void
-ICR::EnsembleLearning::Context<T>::Assign(placeholder_parameter P, 
+ICR::EnsembleLearning::Context<T>::Assign(size_t i, 
 			     variable_parameter  V )
 {
-  std::pair<typename DataContainer::iterator,bool> ret;
-
   //make sure not trying to assign to things at once.
 #pragma omp critical
   {
-    ret = m_map.insert( Datum ( V,P) );
-    if (ret.second == false) //already exists
-      {
-	ret.first->second = P;
-      }
+    if (m_map.size()<=i) 
+      m_map.resize(i+1);
+    m_map[i] = V;
   }
 }
 

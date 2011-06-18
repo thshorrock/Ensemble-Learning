@@ -105,7 +105,7 @@ namespace ICR{
 	  else
 	    {
 	      //parent node
-	      return Model<T>::CalcNP2Parent(v,m_child_node,m_context);
+	      return Model<T>::CalcNP2Parent<v::id::value>(m_expr,m_context,m_child_node);
 	    }
 	}
 	T

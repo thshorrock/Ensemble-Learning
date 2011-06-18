@@ -452,26 +452,16 @@ typename ICR::EnsembleLearning::Gaussian<T>::NP_t
 ICR::EnsembleLearning::Gaussian<T>::CalcNP2Parent(variable_parameter ParentA, 
 					  DeterministicNode<Gaussian<T>, T, List>* const Data, 
 					  context_parameter C)
+
 {
+
   //The moments forwarded from the Deterministic node.
   moments_const_reference FData = Data->GetForwardedMoments();
   const_data_t fprec = -1.0/(FData[0]*FData[0]-FData[1]);
   const_data_t fdata = FData[0];
   
   //Need to invert the expression based on the context.
-  const SubContext<T> C0 = C[0]; // The average means: < expr(x_i) >
-  const SubContext<T> C1 = C[1]; // The average of squares: < expr(x_i)^2 >
 
-  //Find the placeholder associated with the parent that the message is to be sent to.
-  const Placeholder<T>*  P= C.Lookup(ParentA);
-  
-  //Invert the expression around P.
-  const std::pair<T,T> inv_op_data0 = P->Invert(fdata, C0);
-  //The data returns in two components:
-  //  The subtraction of the all the sums from the forwarded Data.
-  const_data_t unsummed0 =inv_op_data0.first;  
-  //  And the product thereafter
-  const_data_t factor0   =inv_op_data0.second;
 
   /* Example:  Three parents: X,Y,Z, and forwarded data D,
    *           Expression XY + Z = D.
@@ -485,10 +475,27 @@ ICR::EnsembleLearning::Gaussian<T>::CalcNP2Parent(variable_parameter ParentA,
    *     but is in result of Miskin's thesis.
    *
    */
-  
-  //Now do the same thing for the average of the squares
-  const std::pair<T,T> inv_op_data1 = P->Invert(fdata, C1);
-  //const_data_t unsummed1 =inv_op_data1.first;
+
+
+  calculator_context<to_node> M0; // The average means (inverted): < expr^-1(x_i) >
+  calculator_context<to_node> M1; // The average of squares: < expr^-1(x_i)^2 >
+  calculator_context<0> result;   //The result node
+  for(size_t i=0;i<M.size();++i){
+    const Moments<T> tmp = M[i]->GetMoments();
+    const tmp0 = tmp[0];
+    M0.push_back(tmp[0]);
+    M1.push_back(tmp[1]);
+    result.push_back(tmp0);
+  }
+  const std::pair<T,T> result0      = proto::eval(Expr,result)
+  const std::pair<T,T> inv_op_data0 = proto::eval(Expr,M0)
+  const std::pair<T,T> inv_op_data1 = proto::eval(Expr,M1)
+
+  //The data returns in two components:
+  //  The subtraction of the all the sums from the forwarded Data.
+  const_data_t unsummed0 =result0-inv_op_data0.first;  
+  //  And the product thereafter
+  const_data_t factor0   =inv_op_data0.second;
   const_data_t factor1   =inv_op_data1.second;
 
   //The usual (mean*precision, -0.5*precision) (with a scale factor)
@@ -503,13 +510,25 @@ typename ICR::EnsembleLearning::Gaussian<T>::NP_t
 ICR::EnsembleLearning::Gaussian<T>::CalcNP2Deterministic(expression_parameter Expr,
 						 context_parameter M)
 {
-  //The context provides the Moments of every element in expression.
-  const SubContext<T> M0 = M[0];  //All the first moments  (the <x>'s of every element in expr)
-  const SubContext<T> M1 = M[1];  //The second moment (the <x^2> of every element of expression)
+  //zero is the results node.
+  calculator_context<0> M0; //All the first moments  (the <x>'s of every element in expr)
+  calculator_context<0> M0_squared; //All the first moments  (the <x>^2's of every element in expr)
+  calculator_context<0> M1;//The second moment (the <x^2> of every element of expression)
+  for(size_t i=0;i<M.size();++i){
+    const Moments<T> tmp = M[i]->GetMoments();
+    const tmp0 = tmp[0];
+    M0.push_back(tmp[0]);
+    M0_squared.push_back(tmp0*tmp0);
+    M1.push_back(tmp[1]);
+  }
+  
   //Precision is 1.0/ (<expr(x^2)> - <expr(x)>^2)
-  const_data_t prec = 1.0/(Expr->Evaluate(M1) - Expr->Evaluate(M0*M0) );
+  //The second value in the pair (the scale) is 1 for the results node.
+  const_data_t prec = 1.0/(proto::eval(Expr,M1).first - proto::eval(Expr,M0_squared).first);
+
   // NP = [<expr(x)> * prec, -0.5*prec]
-  return NP_t(  Expr->Evaluate(M0) *prec  , -0.5*prec);
+  return NP_t(  proto::eval(Expr,M0).first *prec  , -0.5*prec);
+  
 }
 
 #endif  // guard for GAUSSIAN_HPP

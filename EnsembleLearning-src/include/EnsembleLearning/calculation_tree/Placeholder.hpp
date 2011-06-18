@@ -28,16 +28,43 @@
 #pragma once
 #ifndef PLACEHOLDER_HPP
 #define PLACEHOLDER_HPP
+#include <boost/proto/proto.hpp>
+#include <iostream>
+#include <vector>
+#include <cmath>
+#include <cassert>
+
+#include <boost/type_traits.hpp>
+#include <boost/mpl/vector.hpp>
+#include <boost/mpl/range_c.hpp>
+#include <boost/mpl/if.hpp>
+#include <boost/mpl/bool.hpp>
+#include <boost/mpl/placeholders.hpp>
+#include <boost/mpl/transform.hpp>
+#include <boost/mpl/accumulate.hpp>
+#include <boost/mpl/vector_c.hpp>
+#include <boost/mpl/plus.hpp>
+#include <boost/mpl/times.hpp>
+#include <boost/bind.hpp>
+#include <algorithm>
+
+#include <boost/fusion/include/transform.hpp>
+#include <boost/fusion/include/for_each.hpp>
+// Create some namespace aliases
+namespace mpl = boost::mpl;
+namespace fusion = boost::fusion;
+namespace proto = boost::proto;
 
 
 
 #include "FunctionsIterator.hpp"
-#include "Context.hpp"
+//#include "Context.hpp"
 #include "Expression.hpp"
 
 #include <boost/assert.hpp>
 #include <boost/call_traits.hpp>
 
+#include <boost/mpl/int.hpp>
 namespace ICR{
 
   namespace EnsembleLearning{
@@ -79,120 +106,10 @@ namespace ICR{
      *
      *  @attention Not thread safe in initialisation.
      */
-    template<class T>
-    class Placeholder : public Expression<T>
-    {
+    template<int I>
+    struct placeholder :  mpl::int_<I>
+    {};
       
-      
-    public:
-      
-      /** Constructor */
-      Placeholder()
-	: Expression<T>(),
-	  m_parent(0),
-	  m_id(s_count)
-      {
-	++s_count;
-      }
-      
-      /** The id of the placeholder.
-       *  @return a unique id for the given placeholder.
-       */
-      size_t 
-      id() const {return m_id;}
-    private:
-      
-
-      typedef  detail::FunctionIterator<const Function<T> > const_iterator;
-      typedef  detail::FunctionIterator<Function<T> > iterator;
-      
-      
-      typedef typename boost::call_traits<Function<T>*>::param_type
-      function_parameter;
-      
-      typedef typename boost::call_traits<Function<T>*>::value_type
-      function_t;
-
-      typedef typename boost::call_traits<SubContext<T> >::param_type
-      subcontext_parameter;
-
-      typedef typename boost::call_traits<T>::value_type
-      data_t;
-
-      template<class> friend class Gaussian;
-      template<class> friend class RectifiedGaussian;
-
-      /** A forward iterator pointing to the first operator (one below this placeholder).
-       */
-      const_iterator
-      begin() const
-      {
-	return const_iterator(m_parent);
-      }
-      /** The iterator just beyond the root operator
-       */
-      const_iterator
-      end() const
-      {
-	return const_iterator();
-      }
-      
-      /** A forward iterator pointing to the first operator (one below this placeholder).
-       */
-      iterator
-      begin() 
-      {
-	return iterator(m_parent);
-      }
-      
-      /** The iterator just beyond the root operator
-       */
-      iterator
-      end() 
-      {
-	return iterator();
-      }
-      
-      /** Evaluate the expression.
-       *  @param c The subcontext (i.e <x> or <x^2> of the variables that you wish to build)
-       *  @see SubContext
-       */
-      data_t Evaluate(subcontext_parameter c) const
-      {
-	return c.Lookup(this);
-      }
-      
-      /** Set the parent function.  This is needed for inversion, so that we can iterate through tree.*/
-      void
-      SetParent(function_parameter p)
-      {m_parent = p;}
-      
-      /** Get the parent function.  This is needed for inversion, so that we can iterate through tree.*/
-      function_t
-      GetParent() const
-      {return m_parent;}
-      
-      /** Invert the expression.
-       *  The expression provided by the user is sufficient only to calclulate the messages from ParentNodes to ChildNodes.
-       *  To evaluate the Message from the Child to the Parent, the expression needs to be inverted.
-       *  This function inverts the expression.
-       *  @param rhs The right-hand-side of the expression to be inverted.
-       *  @param c The Subcontext of the expression to be inverted.
-       *  @return A pair of values.
-       *   The first is the rhs minus the summed terms.
-       *   The second is the multiplicative factor on the rest.
-       *   Both these numbers are required by the Models to invert the expression.
-       */
-      std::pair<T,T>
-      Invert(const T rhs, subcontext_parameter c) const;
-
-      function_t m_parent;
-      size_t m_id;
-      static size_t s_count;
-      friend class SubContext<T>;
-    };
-    
-
   }
 }
 
