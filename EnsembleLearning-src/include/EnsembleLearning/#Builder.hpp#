@@ -212,7 +212,8 @@ namespace ICR{
        * @param precision The value of the precision.
        * @return The GaussianNode that holds the inferred Gaussian Moments.
        */
-      GaussianNode
+      template<int id>
+      HiddenNode<Gaussian, T,id>
       gaussian(GaussianNode Mean, const T& precision);
 
       /** Create a Gaussian VariableNode.
@@ -222,7 +223,8 @@ namespace ICR{
        *  The model for the Precision node must be a Gamma.
        * @return The GaussianNode that holds the inferred Gaussian Moments.
        */
-      GaussianNode
+      template<int id>
+      HiddenNode<Gaussian, T,id>
       gaussian(const T& mean, GammaNode Precision);
 
       /** Create a Gaussian VariableNode.
@@ -230,7 +232,8 @@ namespace ICR{
        * @param precision The value of the precision.
        * @return The GaussianNode that holds the inferred Gaussian Moments.
        */
-      GaussianNode
+      template<int id>
+      HiddenNode<Gaussian, T,id>
       gaussian(const T& mean, const T& precision);
       
       ///@}
@@ -245,7 +248,8 @@ namespace ICR{
        *  The model for the Precision node must be a Gamma.
        * @return The GaussianNode that holds the inferred Rectified Gaussian Moments.
        */
-      RectifiedGaussianNode
+      template<int id>
+      HiddenNode<RectifiedGaussian, T,id>
       rectified_gaussian(Variable Mean,Variable  Precision);
 
       /** Create a RectifiedGaussian VariableNode.
@@ -254,7 +258,8 @@ namespace ICR{
        * @param precision The value of the precision.
        * @return The GaussianNode that holds the inferred Rectified Gaussian Moments.
        */
-      RectifiedGaussianNode
+      template<int id>
+      HiddenNode<RectifiedGaussian, T,id>
       rectified_gaussian(GaussianNode Mean, const T& precision);
        /** Create a RectifiedGaussian VariableNode.
        * @param mean The value of the mean.
@@ -263,7 +268,8 @@ namespace ICR{
        *  The model for the Precision node must be a Gamma.
        * @return The GaussianNode that holds the inferred Rectified Gaussian Moments.
        */
-      RectifiedGaussianNode
+      template<int id>
+      HiddenNode<RectifiedGaussian, T,id>
       rectified_gaussian(const T& mean, GammaNode Precision);
   
       /** Create a RectifiedGaussian VariableNode.
@@ -271,7 +277,8 @@ namespace ICR{
        * @param precision The value of the precision.
        * @return The GaussianNode that holds the inferred Rectified Gaussian Moments.
        */
-      RectifiedGaussianNode
+      template<int id>
+      HiddenNode<RectifiedGaussian, T,id>
       rectified_gaussian(const T& mean, const T& precision);
 
       ///@}
@@ -283,7 +290,8 @@ namespace ICR{
        *  @param iscale The value of the inverse scale of the GammaNode.
        *  @return The GammaNode that stores the inferred moments to the Gamma Distribution.
        */
-      GammaNode
+      template<int id>
+      HiddenNode<Gamma, T,id>
       gamma(const T& shape, const T& iscale);
       ///@}
 
@@ -300,7 +308,8 @@ namespace ICR{
        *  @param size The number of components in the mixture.
        * @return The WeightsNode that holds the inferred logarithm of the weights.
        */
-      WeightsNode
+      template<int id>
+      HiddenNode<Dirichlet, T,id>
       weights(const size_t size);
 
       /** Gaussian Mixture Model.
@@ -311,7 +320,8 @@ namespace ICR{
        *   and must be the same as the size of the Weights Node.
        * @return The GaussianNode that holds the inferred  Gaussian Moments.
        */
-      GaussianNode
+      template<int id>
+      HiddenNode<Gaussian, T,id>*
       gaussian_mixture( std::vector<Variable>& vMean, 
 		        std::vector<Variable>& vPrecision, 
 		       WeightsNode Weights);
@@ -326,7 +336,8 @@ namespace ICR{
        *   and must be the same as the size of the Weights Node.
        * @return The GaussianNode that holds the inferred Rectified Gaussian Moments.
        */
-      RectifiedGaussianNode
+      template<int id>
+      HiddenNode<RectifiedGaussian, T,id>*
       rectified_gaussian_mixture( std::vector<Variable>& vMean, 
 				  std::vector<Variable>& vPrecision,
 				 WeightsNode Weights);
@@ -499,8 +510,8 @@ namespace ICR{
        */
       void
       join( std::vector<Variable>& vMean, 
-	    GammaNode& Precision, 
-	    WeightsNode Weights,
+	    Variable& Precision, 
+	    Variable Weights,
 	    const T data );
 
       /** Join Gaussian Modelled data to a mixture model.
