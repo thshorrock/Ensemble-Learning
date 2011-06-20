@@ -41,10 +41,18 @@ namespace ICR{
     template<class T> class Moments;
     template<class T> class NaturalParameters;
     
-    //forward
-    template<class T>
-    class FactorNode;
+    // //forward
+    // template<class T, class NotThis>
+    // class FactorNode;
     
+
+    struct FactorNode_basic
+    {
+      virtual ~FactorNode_basic() = 0;
+    };
+    inline
+    FactorNode_basic::~FactorNode_basic(){};
+
     /** An interface for the Variable Nodes.
      * Every variable node derives from this interface.
      * @tparam T The data type used by the variable nodes in the model.
@@ -74,9 +82,9 @@ namespace ICR{
        *  a Gaussian Factor, whose parents in turn are variable nodes that store the mean and precision.
        *  @param f A pointer to the factor node that is the sole parent
        */
-      virtual
-      void
-      SetParentFactor(FactorNode<T>* f) = 0;
+      // virtual
+      // void
+      // SetParentFactor(FactorNode_basic* f) = 0;
       
       /** Add a child factor to a node.
        *  Every variable can have many child factors
@@ -86,9 +94,9 @@ namespace ICR{
        *  added with this function.
        *  @param f A pointer to the factor node that is a child.
        */
-      virtual
-      void
-      AddChildFactor(FactorNode<T>* f) = 0;
+      // virtual
+      // void
+      // AddChildFactor(FactorNode_basic* f) = 0;
       
       /** Collect a vector of means from the node.
        *  @return A vector containing all the means of the node.
@@ -138,17 +146,17 @@ namespace ICR{
      *  Every factor node derives from this.
      * @tparam T The data type used by all the factor nodes, either double or float.
      */
-    template<class T>
-    class FactorNode 
+    template<class T, class NotThis>
+    class FactorNode //: public FactorNode_basic
     {
     public:
       
       /** @name Useful typdefs for types that are exposed to the user.
        */
       ///@{
-      typedef typename boost::call_traits< VariableNode<T>* const>::param_type
+      typedef typename boost::call_traits< NotThis* const>::param_type
       variable_parameter;
-      typedef typename boost::call_traits< VariableNode<T>* const>::value_type
+      typedef typename boost::call_traits< NotThis* const>::value_type
       variable_t;
 
       ///@}
@@ -158,10 +166,13 @@ namespace ICR{
        *  The message is calculated from the moments of every node adjacent to the factor withe exception of v.
        * @return The natural parameter calculated for v.
        */
+      // virtual
+      // NaturalParameters<T>
+      // GetNaturalNot(variable_parameter v) const = 0;
+ 
       virtual
       NaturalParameters<T>
-      GetNaturalNot( variable_parameter v) const = 0;
- 
+      GetNaturalNot(const NotThis*) const = 0;
       /** Calculate natural logarithm of the Models nomalisation constant required by the child node to evaluate the model's cost.
        * @return The natural logarithm of the Models nomalisation constant.
        */

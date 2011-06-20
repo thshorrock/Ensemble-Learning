@@ -32,6 +32,9 @@
 #include "EnsembleLearning/node/variable/Observed.hpp"
 #include "EnsembleLearning/node/variable/Calculation.hpp"
 
+#include "EnsembleLearning/node/factor/Factor.hpp"
+
+
 
 #include <boost/shared_ptr.hpp>
 #include <vector>
@@ -50,13 +53,17 @@ namespace ICR{
     
     //forward declaration of Interfaces
     template<class T> class VariableNode;
-    template<class T> class FactorNode;
+    //template<class T> class FactorNode;
     
 
     //Forward declarations of Factors
     namespace detail{
-      template<template<class> class Model, class T> class Factor;
-      template<class Model, class T> class Mixture;
+      // template<template<class> class Model, class T,
+      // 	        class parent1_t, class parent2_t, class child_t> class 
+      // Factor;
+      
+      template<class Model, class T,
+	        class parent1_t, class parent2_t, class child_t> class Mixture;
       template<template<class> class Model, class T> class Deterministic;
     }
 
@@ -131,13 +138,13 @@ namespace ICR{
     class Builder
     {
 
-      typedef detail::Factor<RectifiedGaussian, T >      RectifiedGaussianFactor;
-      typedef detail::Factor<Gaussian, T >      GaussianFactor;
-      typedef detail::Factor<Gamma, T >         GammaFactor;
-      typedef detail::Factor<Dirichlet, T >     DirichletFactor;
-      typedef detail::Factor<Discrete, T >      DiscreteFactor;
-      typedef detail::Mixture<RectifiedGaussian<T>, T >     RectifiedGaussianMixtureFactor;
-      typedef detail::Mixture<Gaussian<T>, T >     GaussianMixtureFactor;
+      // typedef detail::Factor<RectifiedGaussian, T >      RectifiedGaussianFactor;
+      // typedef detail::Factor<Gaussian, T >      GaussianFactor;
+      // typedef detail::Factor<Gamma, T >         GammaFactor;
+      // typedef detail::Factor<Dirichlet, T >     DirichletFactor;
+      // typedef detail::Factor<Discrete, T >      DiscreteFactor;
+      //typedef detail::Mixture<RectifiedGaussian<T>, T >     RectifiedGaussianMixtureFactor;
+      //typedef detail::Mixture<Gaussian<T>, T >     GaussianMixtureFactor;
 
       typedef detail::Deterministic<Gaussian, T >  DeterministicFactor;
 
@@ -145,12 +152,12 @@ namespace ICR{
       typedef HiddenNode<RectifiedGaussian, T >      RectifiedGaussianType;
       typedef HiddenNode<Gamma, T >         GammaType;
       typedef HiddenNode<Dirichlet, T >     DirichletType;
-      typedef ObservedNode<Gaussian, T >     GaussianDataType;
-      typedef ObservedNode<Gamma, T >        GammaDataType;
-      typedef ObservedNode<Gaussian, T > GaussianConstType;
-      typedef ObservedNode<Gamma, T>    GammaConstType;
-      typedef ObservedNode<Gaussian, T >   NormalConstType;
-      typedef ObservedNode<Dirichlet, T >  DirichletConstType;
+      typedef ObservedNode<Gaussian, T, detail::TypeList<void> >     GaussianDataType;
+      typedef ObservedNode<Gamma, T, detail::TypeList<void> >        GammaDataType;
+      typedef ObservedNode<Gaussian, T, detail::TypeList<void> > GaussianConstType;
+      typedef ObservedNode<Gamma, T, detail::TypeList<void> >    GammaConstType;
+      typedef ObservedNode<Gaussian, T, detail::TypeList<void> >   NormalConstType;
+      typedef ObservedNode<Dirichlet, T, detail::TypeList<void> >  DirichletConstType;
       typedef DeterministicNode<Gaussian<T>, T>    GaussianResultType;
 
       
@@ -165,10 +172,10 @@ namespace ICR{
       typedef HiddenNode<RectifiedGaussian, T >*      RectifiedGaussianNode;
       typedef HiddenNode<Gaussian, T >*      GaussianNode;
       typedef HiddenNode<Gamma, T >*         GammaNode;
-      typedef ObservedNode<Gaussian, T >*     GaussianDataNode;
-      typedef ObservedNode<Gamma, T >*        GammaDataNode;
-      typedef ObservedNode<Gaussian, T >* GaussianConstNode;
-      typedef ObservedNode<Gamma, T >*    GammaConstNode;
+      typedef ObservedNode<Gaussian, T, detail::TypeList<void> >*     GaussianDataNode;
+      typedef ObservedNode<Gamma, T, detail::TypeList<void> >*        GammaDataNode;
+      typedef ObservedNode<Gaussian, T, detail::TypeList<void> >* GaussianConstNode;
+      typedef ObservedNode<Gamma, T, detail::TypeList<void> >*    GammaConstNode;
       typedef DeterministicNode<Gaussian<T>, T>*    GaussianResultNode;
       
       typedef HiddenNode<Dirichlet, T >*      WeightsNode;
@@ -202,9 +209,9 @@ namespace ICR{
        *  The model for the Precision node must be a Gamma.
        * @return The GaussianNode that holds the inferred Gaussian Moments.
        */
-      template<int id>
-      HiddenNode<Gaussian, T,id>
-      gaussian(Variable Mean, Variable Precision);
+      template<class p0_t, class p1_t>
+      HiddenNode<Gaussian, T, detail::TypeList<p0_t> >*
+      gaussian(p0_t* Mean, p1_t* Precision);
 
       /** Create a Gaussian VariableNode.
        * @param Mean The node that stores the Momets for the Mean.
@@ -212,8 +219,10 @@ namespace ICR{
        * @param precision The value of the precision.
        * @return The GaussianNode that holds the inferred Gaussian Moments.
        */
-      GaussianNode
-      gaussian(GaussianNode Mean, const T& precision);
+      
+      template<class p0_t>
+      HiddenNode<Gaussian, T, detail::TypeList<p0_t> >*
+      gaussian(p0_t* Mean, const T& precision);
 
       /** Create a Gaussian VariableNode.
        * @param mean The value of the mean.
@@ -222,15 +231,16 @@ namespace ICR{
        *  The model for the Precision node must be a Gamma.
        * @return The GaussianNode that holds the inferred Gaussian Moments.
        */
-      GaussianNode
-      gaussian(const T& mean, GammaNode Precision);
+      template<class p1_t>
+      HiddenNode<Gaussian,T,detail::TypeList<ObservedNode<Gaussian, T,detail::TypeList<void> > > >*
+      gaussian(const T& mean, p1_t* Precision);
 
       /** Create a Gaussian VariableNode.
        * @param mean The value of the mean.
        * @param precision The value of the precision.
        * @return The GaussianNode that holds the inferred Gaussian Moments.
        */
-      GaussianNode
+      HiddenNode<Gaussian,T,detail::TypeList<ObservedNode<Gaussian, T,detail::TypeList<void> > > >*
       gaussian(const T& mean, const T& precision);
       
       ///@}
@@ -245,8 +255,10 @@ namespace ICR{
        *  The model for the Precision node must be a Gamma.
        * @return The GaussianNode that holds the inferred Rectified Gaussian Moments.
        */
-      RectifiedGaussianNode
-      rectified_gaussian(Variable Mean,Variable  Precision);
+      
+      template<class p0_t, class p1_t>
+      HiddenNode<RectifiedGaussian, T, detail::TypeList<p0_t> >*
+      rectified_gaussian(p0_t* Mean, p1_t* Precision);
 
       /** Create a RectifiedGaussian VariableNode.
        * @param Mean The node that stores the Momets for the Mean.
@@ -254,8 +266,10 @@ namespace ICR{
        * @param precision The value of the precision.
        * @return The GaussianNode that holds the inferred Rectified Gaussian Moments.
        */
-      RectifiedGaussianNode
-      rectified_gaussian(GaussianNode Mean, const T& precision);
+      
+      template<class p0_t>
+      HiddenNode<RectifiedGaussian, T, detail::TypeList<p0_t> >*
+      rectified_gaussian(p0_t* Mean, const T& precision);
        /** Create a RectifiedGaussian VariableNode.
        * @param mean The value of the mean.
        *  The model for the Mean node must be a Gaussian or Rectified Gaussian.
@@ -263,15 +277,18 @@ namespace ICR{
        *  The model for the Precision node must be a Gamma.
        * @return The GaussianNode that holds the inferred Rectified Gaussian Moments.
        */
-      RectifiedGaussianNode
-      rectified_gaussian(const T& mean, GammaNode Precision);
+      
+      template<class p1_t>
+      HiddenNode<RectifiedGaussian,T,detail::TypeList<ObservedNode<RectifiedGaussian, T,detail::TypeList<void> >  > >*
+      rectified_gaussian(const T& mean,p1_t*  Precision);
   
       /** Create a RectifiedGaussian VariableNode.
        * @param mean The value of the mean.
        * @param precision The value of the precision.
        * @return The GaussianNode that holds the inferred Rectified Gaussian Moments.
        */
-      RectifiedGaussianNode
+      
+      HiddenNode<RectifiedGaussian,T,detail::TypeList<ObservedNode<RectifiedGaussian, T,detail::TypeList<void> >  > >*
       rectified_gaussian(const T& mean, const T& precision);
 
       ///@}
@@ -463,32 +480,37 @@ namespace ICR{
        *  @param precision The value of the precision
        *  @param Data The GaussianDataNode that holds the data.
        */
+         
+      template<class p0_t>
       void 
-      join(Variable Mean, T& precision, GaussianDataNode Data  );
+      join(p0_t* Mean, T& precision, GaussianDataNode Data  );
       
       /** Join Gaussian Data with the mean and precision.
        *  @param mean The value of the mean.
        *  @param Precision The VariableNode that models the Precision.
        *  @param Data The GaussianDataNode that holds the data.
        */
+      template<class p1_t>  
       void 
-      join(T& mean, GammaNode Precision, GaussianDataNode Data  );
+      join(T& mean, p1_t* Precision, GaussianDataNode Data  );
       
       /** Join Gaussian Data with the mean and precision.
        *  @param Mean The VariableNode that models the mean.
        *  @param Precision The VariableNode that models the Precision.
        *  @param Data The GaussianDataNode that holds the data.
        */
+      template<class p0_t, class p1_t>    
       void 
-      join(Variable Mean, GammaNode& Precision, GaussianDataNode& Data  );
+      join(p0_t* Mean, p1_t* Precision, GaussianDataNode& Data  );
  
       /** Join Gaussian Data with the mean and precision.
        *  @param Mean The VariableNode that models the mean.
        *  @param Precision The VariableNode that models the Precision.
        *  @param data The value of the data.
        */
+      template<class p0_t, class p1_t>   
       void 
-      join(Variable Mean, GammaNode Precision, const T data );
+      join(p0_t* Mean, p1_t* Precision, const T data );
 
 
       /** Join Gaussian Modelled data to a mixture model.
@@ -590,7 +612,7 @@ namespace ICR{
       
 
       T m_PrevCost;
-      std::vector<boost::shared_ptr<FactorNode<T> > > m_Factors;
+      std::vector<boost::shared_ptr<FactorNode_basic> > m_Factors;
       std::vector<boost::shared_ptr<VariableNode<T> > > m_Nodes;
       bool m_initialised;
       size_t m_data_nodes;
@@ -607,6 +629,214 @@ namespace ICR{
  ********************************************************
  ********************************************************/
 
+template<class T>
+template<class p0_t, class p1_t>
+ICR::EnsembleLearning::HiddenNode<ICR::EnsembleLearning::Gaussian,
+				  T, 
+				  ICR::EnsembleLearning::detail::TypeList<p0_t> >*
+ICR::EnsembleLearning::Builder<T>::gaussian(p0_t* Mean, p1_t* Precision)
+{
+  typedef HiddenNode<Gaussian, T, detail::TypeList<p0_t> > c_t;
+  typedef detail::Factor<Gaussian,T,p0_t,p1_t,c_t> Factor_t;
+  
+  boost::shared_ptr<c_t > GaussianN(new c_t());
+  boost::shared_ptr<Factor_t > GaussianF(new Factor_t(Mean, Precision, GaussianN.get()));
+	
+  m_Factors.push_back(GaussianF);
+  m_Nodes.push_back(GaussianN);
+	
+  return GaussianN.get();
+}
+
+
+
+template<class T>
+template<class p0_t>
+ICR::EnsembleLearning::HiddenNode<ICR::EnsembleLearning::Gaussian,
+				  T, 
+				  ICR::EnsembleLearning::detail::TypeList<p0_t> >*
+ICR::EnsembleLearning::Builder<T>::gaussian(p0_t* Mean, const T& precision)
+{
+  typedef ObservedNode<Gamma, T, ICR::EnsembleLearning::detail::TypeList<void> >   p1_t;
+  boost::shared_ptr<p1_t > Precision(new p1_t(precision));
+  m_Nodes.push_back(Precision);
+  return gaussian(Mean,Precision.get());
+}
+    
+template<class T>  
+template<class p1_t>
+ICR::EnsembleLearning::HiddenNode<ICR::EnsembleLearning::Gaussian,
+				  T, 
+				  ICR::EnsembleLearning::detail::TypeList<
+				    ICR::EnsembleLearning::ObservedNode<ICR::EnsembleLearning::Gaussian, T,ICR::EnsembleLearning::detail::TypeList<void> >
+									  //typename ICR::EnsembleLearning::Builder<T>::GaussianType
+				    > >*
+ICR::EnsembleLearning::Builder<T>::gaussian(const T& mean, p1_t* Precision)
+{
+	
+  typedef ObservedNode<Gaussian, T, ICR::EnsembleLearning::detail::TypeList<void> > p0_t;
+
+  boost::shared_ptr<p0_t> Mean(new p0_t(mean));
+  m_Nodes.push_back(Mean);
+  return gaussian(Mean.get(),Precision);
+}
+  
+template<class T>
+ICR::EnsembleLearning::HiddenNode<ICR::EnsembleLearning::Gaussian,
+				  T, 
+				  ICR::EnsembleLearning::detail::TypeList<
+				    //typename ICR::EnsembleLearning::Builder<T>::GaussianType
+				    ICR::EnsembleLearning::ObservedNode<ICR::EnsembleLearning::Gaussian, T, ICR::EnsembleLearning::detail::TypeList<void> >
+				    > >*
+ICR::EnsembleLearning::Builder<T>::gaussian(const T& mean, const T& precision)
+{
+	
+  typedef ObservedNode<Gaussian, T, ICR::EnsembleLearning::detail::TypeList<void> > p0_t;
+  typedef ObservedNode<Gamma, T, ICR::EnsembleLearning::detail::TypeList<void> >    p1_t;
+  boost::shared_ptr<p0_t> Mean(new p0_t(mean));
+  boost::shared_ptr<p1_t > Precision(new p1_t(precision));
+	
+  m_Nodes.push_back(Mean);
+  m_Nodes.push_back(Precision);
+	
+  return gaussian(Mean.get(),Precision.get());
+}
+      
+
+//Rectified Gaussian
+
+template<class T>
+template<class p0_t, class p1_t>
+ICR::EnsembleLearning::HiddenNode<ICR::EnsembleLearning::RectifiedGaussian,
+				  T, 
+				  ICR::EnsembleLearning::detail::TypeList<p0_t> >*
+ICR::EnsembleLearning::Builder<T>::rectified_gaussian(p0_t* Mean, p1_t* Precision)
+{
+  typedef HiddenNode<RectifiedGaussian, T, detail::TypeList<p0_t> > c_t;
+  typedef detail::Factor<RectifiedGaussian,T,p0_t,p1_t,c_t> Factor_t;
+  
+  boost::shared_ptr<c_t > RectifiedGaussianN(new c_t());
+  boost::shared_ptr<Factor_t > RectifiedGaussianF(new Factor_t(Mean, Precision, RectifiedGaussianN.get()));
+	
+  m_Factors.push_back(RectifiedGaussianF);
+  m_Nodes.push_back(RectifiedGaussianN);
+	
+  return RectifiedGaussianN.get();
+}
+
+
+
+template<class T>
+template<class p0_t>
+ICR::EnsembleLearning::HiddenNode<ICR::EnsembleLearning::RectifiedGaussian,
+				  T, 
+				  ICR::EnsembleLearning::detail::TypeList<p0_t> >*
+ICR::EnsembleLearning::Builder<T>::rectified_gaussian(p0_t* Mean, const T& precision)
+{
+  typedef ObservedNode<Gamma, T, ICR::EnsembleLearning::detail::TypeList<void> >   p1_t;
+  boost::shared_ptr<p1_t > Precision(new p1_t(precision));
+  m_Nodes.push_back(Precision);
+  return rectified_gaussian(Mean,Precision.get());
+}
+    
+template<class T>  
+template<class p1_t>
+ICR::EnsembleLearning::HiddenNode<ICR::EnsembleLearning::RectifiedGaussian,
+				  T, 
+				  ICR::EnsembleLearning::detail::TypeList<  ICR::EnsembleLearning::ObservedNode<ICR::EnsembleLearning::RectifiedGaussian, T, ICR::EnsembleLearning::detail::TypeList<void> >
+				     > >*
+ICR::EnsembleLearning::Builder<T>::rectified_gaussian(const T& mean, p1_t* Precision)
+{
+	
+  typedef ObservedNode<RectifiedGaussian, T, ICR::EnsembleLearning::detail::TypeList<void> > p0_t;
+
+  boost::shared_ptr<p0_t> Mean(new p0_t(mean));
+  m_Nodes.push_back(Mean);
+  return rectified_gaussian(Mean.get(),Precision);
+}
+  
+template<class T>
+ICR::EnsembleLearning::HiddenNode<ICR::EnsembleLearning::RectifiedGaussian,
+				  T, 
+				  ICR::EnsembleLearning::detail::TypeList<
+				    ICR::EnsembleLearning::ObservedNode<ICR::EnsembleLearning::RectifiedGaussian, T, ICR::EnsembleLearning::detail::TypeList<void> >
+				    > >*
+ICR::EnsembleLearning::Builder<T>::rectified_gaussian(const T& mean, const T& precision)
+{
+	
+  typedef ObservedNode<RectifiedGaussian, T, ICR::EnsembleLearning::detail::TypeList<void> > p0_t;
+  typedef ObservedNode<Gamma, T, ICR::EnsembleLearning::detail::TypeList<void> >    p1_t;
+  boost::shared_ptr<p0_t> Mean(new p0_t(mean));
+  boost::shared_ptr<p1_t > Precision(new p1_t(precision));
+	
+  m_Nodes.push_back(Mean);
+  m_Nodes.push_back(Precision);
+	
+  return rectified_gaussian(Mean.get(),Precision.get());
+}
+
+
+//Join Gaussian
+
+
+template<class T>   
+template<class p0_t>
+void 
+ICR::EnsembleLearning::Builder<T>::join(p0_t* Mean, T& precision, GaussianDataNode Data  )
+{
+  typedef detail::Factor<Gaussian,T,p0_t,GammaConstType,GaussianDataType> Factor_t;
+  
+  boost::shared_ptr<GaussianConstType > Precision(new GaussianConstType(precision));
+  boost::shared_ptr<Factor_t > GaussianF(new Factor_t (Mean, Precision.get(), Data));
+	
+  m_Factors.push_back(GaussianF);
+  m_Nodes.push_back(Precision);
+}
+  
+template<class T> 
+template<class p1_t>   
+void 
+ICR::EnsembleLearning::Builder<T>::join(T& mean, p1_t* Precision, GaussianDataNode Data  )
+{
+
+  typedef detail::Factor<Gaussian,T,GaussianConstType,p1_t,GaussianDataType> Factor_t;
+
+  boost::shared_ptr<GaussianConstType > Mean(new GaussianConstType(mean));
+  boost::shared_ptr<Factor_t > GaussianF(new Factor_t(Mean.get(), Precision, Data));
+	
+  m_Factors.push_back(GaussianF);
+  m_Nodes.push_back(Mean);
+}
+      
+  
+template<class T>   
+template<class p0_t, class p1_t>    
+void 
+ICR::EnsembleLearning::Builder<T>::join(p0_t* Mean,p1_t* Precision, GaussianDataNode& Data  )
+{
+  typedef detail::Factor<Gaussian,T,p0_t,p1_t,GaussianDataType> Factor_t;
+
+  boost::shared_ptr<Factor_t> GaussianF(new Factor_t(Mean,Precision,Data));
+  m_Factors.push_back(GaussianF);
+}
+
+template<class T>
+template<class p0_t, class p1_t>    
+void 
+ICR::EnsembleLearning::Builder<T>::join(p0_t* Mean,p1_t* Precision, const T data )
+{
+	
+  typedef detail::Factor<Gaussian,T,p0_t,p1_t,GaussianDataType> Factor_t;
+
+  boost::shared_ptr<GaussianDataType > Data(new GaussianDataType(data));
+  ++m_data_nodes;
+  boost::shared_ptr<Factor_t> GaussianF(new Factor_t(Mean,Precision,Data.get()));
+  m_Factors.push_back(GaussianF);
+  m_Nodes.push_back(Data);
+}
+
+
+//Mixture
 
 
 

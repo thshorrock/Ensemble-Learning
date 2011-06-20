@@ -70,8 +70,8 @@ namespace ICR{
       typedef typename boost::call_traits< Moments<T> >::value_type
       moments_t;
       
-      typedef typename boost::call_traits< DeterministicNode<Gaussian<T>, T>* >::param_type
-      deterministic_parameter;
+      // typedef typename boost::call_traits< DeterministicNode<Gaussian<T>, T>* >::param_type
+      // deterministic_parameter;
       typedef typename boost::call_traits< Expression<T>* >::param_type
       expression_parameter;
       
@@ -243,10 +243,11 @@ namespace ICR{
        *  @param C The context (the parent variables are obtainable from this)
        *  @return The calculated NaturalParameters.  
        */
+      template<class List>
       static
       NP_t
       CalcNP2Parent( variable_parameter  Parent, 
-		     deterministic_parameter Data, 
+		     DeterministicNode<Gaussian<T>, T, List>* const Data, 
 		     context_parameter C);
 
 
@@ -442,10 +443,11 @@ ICR::EnsembleLearning::Gaussian<T>::CalcNP2Data(moments_parameter Mean,
 //Deterministic to Stock
 
 template<class T> 
+template<class List>
 inline
 typename ICR::EnsembleLearning::Gaussian<T>::NP_t
 ICR::EnsembleLearning::Gaussian<T>::CalcNP2Parent(variable_parameter ParentA, 
-					  deterministic_parameter Data, 
+					  DeterministicNode<Gaussian<T>, T, List>* const Data, 
 					  context_parameter C)
 {
   //The moments forwarded from the Deterministic node.

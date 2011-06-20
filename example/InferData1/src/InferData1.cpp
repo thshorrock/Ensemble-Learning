@@ -2,6 +2,7 @@
 #include "EnsembleLearning.hpp"
 #include <vector>
 #include <iostream>
+#include <boost/typeof/typeof.hpp>
 using namespace ICR::EnsembleLearning;
 
 int
@@ -26,8 +27,9 @@ main  (int ac, char **av)
   typedef Builder<double>::GammaNode GammaNode; 
  
   //Nodes to hold the learnt mean and precision
-  GaussianNode mean = build.gaussian(0.00,0.001); //Broad priors on the Gaussian.
-  GammaNode    prec = build.gamma(1.0,0.01);     //Broad priors on the Gamma model.
+  BOOST_AUTO( mean, build.gaussian(0.00,0.001) ); //Broad priors on the Gaussian.
+  BOOST_AUTO( prec, build.gamma   (1.00,0.001) ); //Broad priors on the Gamma.
+
  
   //Model The data as Gaussian distributed with the mean an precision determined from the above nodes.
   //  Each data point is modelled indepenantly.

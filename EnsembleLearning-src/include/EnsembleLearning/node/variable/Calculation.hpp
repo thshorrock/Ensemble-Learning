@@ -33,6 +33,7 @@
 #include "EnsembleLearning/message/NaturalParameters.hpp"
 #include "EnsembleLearning/detail/Mutex.hpp"
 #include "EnsembleLearning/detail/parallel_algorithms.hpp"
+#include "EnsembleLearning/detail/TypeList.hpp"
 
 #include <boost/assert.hpp> 
 #include <boost/bind.hpp>
@@ -49,8 +50,8 @@ namespace ICR{
      *  @tparam Model  The model to use for the inferred data.
      *  @tparam T The data type (float or double)
      */
-    template <class Model, class T>
-    class DeterministicNode : public VariableNode<T>
+    template <class Model, class T, class List=detail::TypeList<void> >
+    class DeterministicNode : public VariableNode<T>, public List
     {
     public:
       //mostly two, but variable for Discrete model
@@ -61,10 +62,10 @@ namespace ICR{
       DeterministicNode(const size_t moment_size = 2); 
 
       void
-      SetParentFactor(FactorNode<T>* f);
+      SetParentFactor(FactorNode<T,DeterministicNode>* f);
       
       void
-      AddChildFactor(FactorNode<T>* f);
+      AddChildFactor(FactorNode<T,DeterministicNode>* f);
 
       void 
       Iterate(Coster& C);
@@ -99,8 +100,8 @@ namespace ICR{
       
     private:
       
-      FactorNode<T>* m_parent;
-      std::vector<FactorNode<T>*> m_children;
+      FactorNode<T,DeterministicNode>* m_parent;
+      std::vector<FactorNode<T,DeterministicNode>*> m_children;
       mutable Moments<T> m_Moments;
       mutable Mutex m_mutex;
     };
@@ -109,17 +110,17 @@ namespace ICR{
 }
 
 
-template<class Model,class T>
-ICR::EnsembleLearning::DeterministicNode<Model,T>::DeterministicNode(const size_t moment_size) 
+template<class Model,class T,class List>
+ICR::EnsembleLearning::DeterministicNode<Model,T,List>::DeterministicNode(const size_t moment_size) 
   :   m_parent(0), m_children(), m_Moments(moment_size) //, m_ForwardedMoments(moment_size)
 {
 }
 
 
-template<class Model,class T>
+template<class Model,class T,class List>
 inline 
 void
-ICR::EnsembleLearning::DeterministicNode<Model,T>::SetParentFactor(FactorNode<T>* f)
+ICR::EnsembleLearning::DeterministicNode<Model,T,List>::SetParentFactor(FactorNode<T,DeterministicNode>* f)
 {
   //This should only be called once, so should get no collisions here
   m_parent=f;
@@ -127,10 +128,10 @@ ICR::EnsembleLearning::DeterministicNode<Model,T>::SetParentFactor(FactorNode<T>
   InitialiseMoments();
 }
    
-template<class Model,class T>
+template<class Model,class T,class List>
 inline
 void
-ICR::EnsembleLearning::DeterministicNode<Model,T>::AddChildFactor(FactorNode<T>* f)
+ICR::EnsembleLearning::DeterministicNode<Model,T,List>::AddChildFactor(FactorNode<T,DeterministicNode>* f)
 { 
   //Could be many factors, potentially added with many threads,
   //therefore make the following critical
@@ -140,10 +141,10 @@ ICR::EnsembleLearning::DeterministicNode<Model,T>::AddChildFactor(FactorNode<T>*
   }
 }
 
-template<class Model,class T>
+template<class Model,class T,class List>
 inline
 const ICR::EnsembleLearning::Moments<T>&
-ICR::EnsembleLearning::DeterministicNode<Model,T>::GetMoments() 
+ICR::EnsembleLearning::DeterministicNode<Model,T,List>::GetMoments() 
 {
 
   /*This value is update in Iterate and called to evaluate other Hidden Nodes
@@ -158,10 +159,10 @@ ICR::EnsembleLearning::DeterministicNode<Model,T>::GetMoments()
 }
    
 
-template<class Model,class T>
+template<class Model,class T,class List>
 inline
 const ICR::EnsembleLearning::Moments<T>
-ICR::EnsembleLearning::DeterministicNode<Model,T>::GetForwardedMoments() 
+ICR::EnsembleLearning::DeterministicNode<Model,T,List>::GetForwardedMoments() 
 {
   /* No stored value updated here so thread safe.
    */
@@ -173,7 +174,7 @@ ICR::EnsembleLearning::DeterministicNode<Model,T>::GetForwardedMoments()
 
   PARALLEL_TRANSFORM(m_children.begin(), m_children.end(), 
   		     vChildrenNP.begin(), 
-		     boost::bind(&FactorNode<T>::GetNaturalNot, _1, this)
+		     boost::bind(&FactorNode<T,DeterministicNode>::GetNaturalNot, _1, this)
   		     ); 
 
   BOOST_ASSERT(vChildrenNP.size() >0);
@@ -186,27 +187,27 @@ ICR::EnsembleLearning::DeterministicNode<Model,T>::GetForwardedMoments()
  
   
 
-template<class Model,class T>
+template<class Model,class T,class List>
 inline
 const std::vector<T>
-ICR::EnsembleLearning::DeterministicNode<Model,T>::GetMean() 
+ICR::EnsembleLearning::DeterministicNode<Model,T,List>::GetMean() 
 {
   std::vector<T> Mean(1, m_Moments[0]);
   return Mean;
 }
    
-template<class Model,class T>
+template<class Model,class T,class List>
 inline
 const std::vector<T>
-ICR::EnsembleLearning::DeterministicNode<Model,T>::GetVariance() 
+ICR::EnsembleLearning::DeterministicNode<Model,T,List>::GetVariance() 
 {
   std::vector<T> Var(1,0.0);
   return Var;
 }
    
-template<class Model,class T>
+template<class Model,class T,class List>
 void 
-ICR::EnsembleLearning::DeterministicNode<Model,T>::Iterate(Coster& C)
+ICR::EnsembleLearning::DeterministicNode<Model,T,List>::Iterate(Coster& C)
 {}
 
 #endif  // guard for VARIABLE_CALCULATION_HPP

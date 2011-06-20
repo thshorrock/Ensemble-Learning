@@ -36,6 +36,7 @@
 #include "EnsembleLearning/exponential_model/Gamma.hpp"
 #include "EnsembleLearning/exponential_model/Discrete.hpp"
 #include "EnsembleLearning/exponential_model/Dirichlet.hpp"
+#include "EnsembleLearning/detail/TypeList.hpp"
 
 
 
@@ -55,23 +56,23 @@ namespace ICR{
        * @tparam Model The Model to check
        * @tparam T the data type (double or float).
        */
-    template<template<class> class Model,class T>
-    struct is_observable
-      : boost::mpl::or_<boost::is_same<Model<T>,Dirichlet<T> >,
-			boost::is_same<Model<T>,Gamma<T> >,
-			boost::is_same<Model<T>,RectifiedGaussian<T> >,
-			boost::is_same<Model<T>,Gaussian<T> >
-			>
-    {};
+      template<template<class> class Model,class T>
+      struct is_observable
+	: boost::mpl::or_<boost::is_same<Model<T>,Dirichlet<T> >,
+			  boost::is_same<Model<T>,Gamma<T> >,
+			  boost::is_same<Model<T>,RectifiedGaussian<T> >,
+			  boost::is_same<Model<T>,Gaussian<T> >
+			  >
+      {};
       
     //forward declare
-    template<template<class> class Model, class T>
+    template<template<class> class Model, class T,class List>
     struct GetMean_impl;
 
-    template<template<class> class Model, class T>
+    template<template<class> class Model, class T,class List>
     struct GetVariance_impl;
     
-    }
+  }
 
     /** An observed node.
      *  A node that contains data that is a known constant.
@@ -84,7 +85,10 @@ namespace ICR{
      *  @tparam T The data type used in calculations - either float or double.
      *  @tparam Enable Enable the Observed node. This is where the compile time checking of the model occurs.
      */
-    template<template<class> class Model, class T, class Enable = void>
+    template<template<class> class Model,
+	     class T,class List
+	     ,class Enable = void
+	     >
     class ObservedNode ; //uninitialised
     
     /** An observed node.
@@ -97,12 +101,14 @@ namespace ICR{
      *    Attempting to call any other class will not compile.
      *  @tparam T The data type used in calculations - either float or double.
      */
-    template<template<class> class Model, class T>
-    class ObservedNode<Model,T,
-		       typename boost::enable_if<detail::is_observable<Model,T> >::type>
-	: public VariableNode<T>
+    template<template<class> class Model, class T,class List>
+    class ObservedNode<Model,T,List
+		       ,typename boost::enable_if<detail::is_observable<Model,T> >::type
+		       > 
+      :  public detail::TypeList<void>,public VariableNode<T>
     {
     public:
+      using detail::TypeList<void>::id;
       /** A Constructor.
        *  @param value The observed value of the node.
        *  This constructor is the default. 
@@ -129,10 +135,10 @@ namespace ICR{
       
       
       void
-      SetParentFactor(FactorNode<T>* f);
+      SetParentFactor(FactorNode<T,ObservedNode>* f);
 
       void
-      AddChildFactor(FactorNode<T>* f);
+      AddChildFactor(FactorNode<T,ObservedNode>* f);
       
       void
       InitialiseMoments(){};
@@ -150,8 +156,8 @@ namespace ICR{
       Iterate(Coster& C);
       
     private:
-      friend struct detail::GetMean_impl<Model,T>;
-      friend struct detail::GetVariance_impl< Model,T >;
+      friend struct detail::GetMean_impl<Model,T, List>;
+      friend struct detail::GetVariance_impl< Model,T, List >;
       
       Moments<T>
       make_Moments(const T& d, const Gaussian<T> )
@@ -174,8 +180,8 @@ namespace ICR{
 	return Moments<T>(std::vector<T>(s,d));
       }
       const Moments<T> m_Moments;
-      FactorNode<T>* m_parent;
-      std::vector<FactorNode<T>*> m_children;
+      FactorNode<T,ObservedNode>* m_parent;
+      std::vector<FactorNode<T,ObservedNode>*> m_children;
     };
     
     namespace detail{
@@ -184,7 +190,7 @@ namespace ICR{
        *  @tparam Model The model.
        *  @tparam T The data type (float or double)
        */
-      template<template<class> class Model, class T>
+      template<template<class> class Model, class T,class List>
       struct GetMean_impl
       {
 	/** Get the mean.
@@ -192,7 +198,7 @@ namespace ICR{
 	 *  @return The vector of means (size of 1)
 	 */
 	static const std::vector<T>
-	GetMean(ObservedNode<Model,T>& t){
+	GetMean(ObservedNode<Model,T,List>& t){
 	  return std::vector<T>(1, t.m_Moments[0]);
 	}
       };
@@ -201,8 +207,8 @@ namespace ICR{
        *  @tparam Model The model.
        *  @tparam T The data type (float or double)
        */
-      template<class T>
-      struct GetMean_impl<Dirichlet,T>
+      template<class T,class List>
+      struct GetMean_impl<Dirichlet,T,List>
       {
 	/** Get the mean.
 	 *  @param t The Dirichlet node for which to obtain the mean
@@ -210,7 +216,7 @@ namespace ICR{
 	 */
 	static
 	const std::vector<T>
-	GetMean(ObservedNode<Dirichlet,T>& t){
+	GetMean(ObservedNode<Dirichlet,T,List>& t){
 	  return std::vector<T>(t.m_Moments.size(), t.m_Moments[0]);
 	}
       };
@@ -219,7 +225,7 @@ namespace ICR{
        *  @tparam Model The model.
        *  @tparam T The data type (float or double)
        */
-      template<template<class> class Model, class T>
+      template<template<class> class Model, class T,class List>
       struct GetVariance_impl
       {
 	/** Get the variance.
@@ -228,7 +234,7 @@ namespace ICR{
 	 */
 	static  
 	const std::vector<T>
-	GetVariance(ObservedNode<Model,T>& t){
+	GetVariance(ObservedNode<Model,T,List>& t){
 	  return std::vector<T>(1, 0);
 	}
       };
@@ -237,8 +243,8 @@ namespace ICR{
        *  @tparam Model The model.
        *  @tparam T The data type (float or double)
        */
-      template<class T>
-      struct GetVariance_impl<Dirichlet,T>
+      template<class T,class List>
+      struct GetVariance_impl<Dirichlet,T,List>
       {
 	/** Get the variance.
 	 *  @param t The Dirichlet node for which to obtain the variance
@@ -246,7 +252,7 @@ namespace ICR{
 	 */
 	static 
 	const std::vector<T>
-	GetVariance(ObservedNode<Dirichlet,T>& t){
+	GetVariance(ObservedNode<Dirichlet,T,List>& t){
 	  return  std::vector<T>(t.m_Moments.size(), 0);
 	}
       };
@@ -257,23 +263,25 @@ namespace ICR{
   } 
 }
 
-template<template<class> class Model,class T>
+template<template<class> class Model,class T,class List>
 inline
 const ICR::EnsembleLearning::Moments<T>&
-ICR::EnsembleLearning::ObservedNode<Model,T,
-		       typename boost::enable_if<ICR::EnsembleLearning::detail::is_observable<Model,T> >::type>
+ICR::EnsembleLearning::ObservedNode<Model,T,List 
+				    ,typename boost::enable_if<ICR::EnsembleLearning::detail::is_observable<Model,T> >::type
+				    >
 ::GetMoments() 
 {
   //Obvserved moments are not modified and so this is thead safe.
   return m_Moments;
 }
 
-template<template<class> class Model,class T>
+template<template<class> class Model,class T,class List>
 inline
 void
-ICR::EnsembleLearning::ObservedNode<Model,T,
-		       typename boost::enable_if<ICR::EnsembleLearning::detail::is_observable<Model,T> >::type>
-::AddChildFactor(FactorNode<T>* f)
+ICR::EnsembleLearning::ObservedNode<Model,T,List
+				    ,typename boost::enable_if<ICR::EnsembleLearning::detail::is_observable<Model,T> >::type
+				    >
+::AddChildFactor(FactorNode<T,ObservedNode>* f)
 {
   //Could be many factors, potentially added with many threads,
   //therefore make the following critical
@@ -284,43 +292,47 @@ ICR::EnsembleLearning::ObservedNode<Model,T,
 }
 
 
-template<template<class> class Model, class T>
+template<template<class> class Model, class T,class List>
 inline
 void
-ICR::EnsembleLearning::ObservedNode<Model,T,
-		       typename boost::enable_if<ICR::EnsembleLearning::detail::is_observable<Model,T> >::type>
-::SetParentFactor(FactorNode<T>* f)
+ICR::EnsembleLearning::ObservedNode<Model,T,List
+				    ,typename boost::enable_if<ICR::EnsembleLearning::detail::is_observable<Model,T> >::type
+				    >
+::SetParentFactor(FactorNode<T,ObservedNode>* f)
 {
   //Only one factor: this should be called once (therefore thread safe)
   m_parent = f;
 }
   
 
-template<template<class> class Model,class T>
+template<template<class> class Model,class T,class List>
 inline
 const std::vector<T>
-ICR::EnsembleLearning::ObservedNode<Model,T,
-		       typename boost::enable_if<ICR::EnsembleLearning::detail::is_observable<Model,T> >::type>
+ICR::EnsembleLearning::ObservedNode<Model,T,List
+				    ,typename boost::enable_if<ICR::EnsembleLearning::detail::is_observable<Model,T> >::type
+				    >
 ::GetMean() 
 {
-  return detail::GetMean_impl<Model,T>::GetMean(*this);
+  return detail::GetMean_impl<Model,T,List>::GetMean(*this);
 }
    
-template<template<class> class Model,class T>
+template<template<class> class Model,class T,class List>
 inline
 const std::vector<T>
-ICR::EnsembleLearning::ObservedNode<Model,T,
-		       typename boost::enable_if<ICR::EnsembleLearning::detail::is_observable<Model,T> >::type>
+ICR::EnsembleLearning::ObservedNode<Model,T,List
+				    ,typename boost::enable_if<ICR::EnsembleLearning::detail::is_observable<Model,T> >::type
+				    >
 ::GetVariance() 
 {
-  return detail::GetVariance_impl<Model,T>::GetVariance(*this);
+  return detail::GetVariance_impl<Model,T,List>::GetVariance(*this);
 }
 
-template<template<class> class Model, class T>
+template<template<class> class Model, class T,class List>
 inline
 void
-ICR::EnsembleLearning::ObservedNode<Model,T,
-		       typename boost::enable_if<ICR::EnsembleLearning::detail::is_observable<Model,T> >::type>
+ICR::EnsembleLearning::ObservedNode<Model,T,List
+				     ,typename boost::enable_if<ICR::EnsembleLearning::detail::is_observable<Model,T> >::type
+				    >
 ::Iterate(Coster& Total)
 {
   //Constant nodes have no parents (and contribute nothing to the cost)

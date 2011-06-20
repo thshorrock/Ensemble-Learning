@@ -39,7 +39,7 @@ namespace ICR{
     template<class T> class Moments;
     template<class T> class NaturalParameters;
     template<class T> class Expression; //only used as a pointer here
-    template <class Model, class T> class DeterministicNode; //only used as a pointer here
+    template <class Model, class T,class List> class DeterministicNode; //only used as a pointer here
     
     namespace detail{
       
@@ -50,7 +50,7 @@ namespace ICR{
        *  @tparam T The data type (float or double)
        */
       template<template<class> class Model,  class T>
-      class Deterministic : public FactorNode<T>
+      class Deterministic : public FactorNode_basic
       {
       public:
       

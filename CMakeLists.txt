@@ -180,9 +180,9 @@ IF( BUILD_EXAMPLES )
 
 
   add_subdirectory(example/InferData1)
-  add_subdirectory(example/InferMixtureData1)
-  add_subdirectory(example/InferScaledData1)
-  add_subdirectory(example/ICA/build)
+  #add_subdirectory(example/InferMixtureData1)
+  #add_subdirectory(example/InferScaledData1)
+  #add_subdirectory(example/ICA/build)
   
 
 ENDIF( BUILD_EXAMPLES )

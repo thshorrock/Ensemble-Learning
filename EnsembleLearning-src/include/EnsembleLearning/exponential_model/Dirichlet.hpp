@@ -151,6 +151,11 @@ namespace ICR{
       CalcNP2Data(moments_parameter Us);
 
 
+      static
+      NaturalParameters<T>
+      CalcNP2Prior(const Moments<T>& Us) {return NaturalParameters<T>();};
+
+
     private:
 
       struct take_log
