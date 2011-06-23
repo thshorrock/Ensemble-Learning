@@ -100,7 +100,7 @@
 #endif
 
 #ifdef __GNUC__
-#define  PARALLEL_TRANSFORM __gnu_parallel::transform //std::transform
+#define  PARALLEL_TRANSFORM std::transform //std::transform
 //#define  PARALLEL_TRANSFORM  std::transform
 #elif _MSC_VER
 #define  PARALLEL_TRANSFORM parallel_transform

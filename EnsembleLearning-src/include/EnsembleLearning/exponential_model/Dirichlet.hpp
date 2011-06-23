@@ -229,6 +229,7 @@ ICR::EnsembleLearning::Dirichlet<T>::CalcLogNorm(vector_data_parameter u)
     
   //calculate Gamma(m_value[i]) for each i
   std::vector<T> Gamma_u(u.size());
+
   PARALLEL_TRANSFORM(u.begin(), u.end(), Gamma_u.begin(), gsl_sf_lngamma);
     
   const data_t SumLnGamma_u = PARALLEL_ACCUMULATE(Gamma_u.begin(), Gamma_u.end(), 0.0);

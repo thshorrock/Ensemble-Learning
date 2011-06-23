@@ -50,8 +50,8 @@ namespace ICR{
      *  @tparam Model  The model to use for the inferred data.
      *  @tparam T The data type (float or double)
      */
-    template <class Model, class T, class List=detail::TypeList<void> >
-    class DeterministicNode : public VariableNode<T>, public List
+    template <class Model, class T, class List=detail::TypeList::zeros >
+    class DeterministicNode : public VariableNode<T>//, public List
     {
     public:
       //mostly two, but variable for Discrete model

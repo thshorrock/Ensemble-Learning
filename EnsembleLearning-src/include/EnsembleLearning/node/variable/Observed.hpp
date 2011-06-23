@@ -105,10 +105,10 @@ namespace ICR{
     class ObservedNode<Model,T,List
 		       ,typename boost::enable_if<detail::is_observable<Model,T> >::type
 		       > 
-      :  public detail::TypeList<void>,public VariableNode<T>
+      :  public VariableNode<T> //public detail::TypeList::zeros,
     {
     public:
-      using detail::TypeList<void>::id;
+      //using detail::TypeList<void>::id;
       /** A Constructor.
        *  @param value The observed value of the node.
        *  This constructor is the default. 

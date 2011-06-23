@@ -22,69 +22,15 @@
  ***********************************************************************************
  ***********************************************************************************/
 
+#include <boost/preprocessor/cat.hpp>
 
-#pragma once
-#ifndef OUTPUT_HPP
-#define OUTPUT_HPP
+#define n BOOST_PP_ITERATION()
 
+boost::shared_ptr<p0_t> BOOST_PP_CAT(shared_p0_,n)(new p0_t(v1[n]));
+boost::shared_ptr<p1_t> BOOST_PP_CAT(shared_p1_,n)(new p1_t(v2[n]));
+p0_t* BOOST_PP_CAT(p0_,n) = BOOST_PP_CAT(shared_p0_,n).get();
+p1_t* BOOST_PP_CAT(p1_,n) = BOOST_PP_CAT(shared_p1_,n).get();
 
-#include "EnsembleLearning/node/Node.hpp"
-#include "EnsembleLearning/detail/MixtureVector.hpp"
-#include <boost/fusion/include/for_each.hpp>
-
-
-#include <cmath>  
-namespace ICR{
-  namespace EnsembleLearning{
-    
-    /** Evaluate the mean of a variable node. 
-     * @param node A pointer to the VariableNode to evaluate.
-     * @param index The index of the mean to return.
-     *   Typically there is only one mean in the node (the index defaults to zero),
-     *   however, Dirichlet models contain a mean for every component of the mixture.
-     * @return The mean for the given node and index.
-     * @ingroup UserInterface
-     */
-    template<class T>
-    T
-    Mean(VariableNode<T>* node, size_t index = 0)
-    {
-      return node->GetMean()[index];
-    }
-
-    
-
-    template<template<class> class Model, class T>
-    std::vector<VariableNode<T>* >
-    Mixture2Vector(MixtureVector<Model,T> v)
-    {
-      std::vector<VariableNode<T>* > ret;
-  
-      boost::fusion::for_each(v.data(), 
-			      boost::bind(&std::vector<VariableNode<T>* >::push_back,
-					  boost::ref(ret),
-					  (_1) 
-					  ));
-      return ret;
-			  
-    }
-    /** Evaluate the standard deviation of a variable node. 
-     * @param node A pointer to the VariableNode to evaluate.
-     * @param index The index of the mean to return.
-     *   Typically there is only one mean in the node (the index defaults to zero),
-     *   however, Dirichlet models contain a mean for every component of the mixture.
-     * @return The variance for the given node and index.
-     * @ingroup UserInterface
-     */
-    template<class T>
-    T
-    StandardDeviation(VariableNode<T>* node, size_t index = 0)
-    {
-      return std::sqrt(node->GetVariance()[index]);
-    }
-    
-  }
-}
-
-
-#endif //OUTPUT_HPP guard
+//MV.template get<n>() = new typename MV_t::template get_t<n>(v1[n],v2[n]);
+//m_Nodes.push_back(MV.template get<n>() );
+#undef n

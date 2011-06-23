@@ -918,7 +918,7 @@ BOOST_AUTO_TEST_SUITE( Observed_Node_test )
 
 BOOST_AUTO_TEST_CASE( Observed_Gaussian_test  )
 {
-  ObservedNode<Gaussian,double, detail::TypeList<void> > obs2(2.0); //2 elements value 2.0
+  ObservedNode<Gaussian,double, detail::TypeList::zeros > obs2(2.0); //2 elements value 2.0
   
   Moments<double> M2 = obs2.GetMoments();
   BOOST_CHECK_EQUAL(M2.size(), size_t(2));
@@ -943,7 +943,7 @@ BOOST_AUTO_TEST_CASE( Observed_Gaussian_test  )
 }
 BOOST_AUTO_TEST_CASE( Observed_RGaussian_test  )
 {
-  ObservedNode<RectifiedGaussian,double, detail::TypeList<void> > obs2(2.0); //2 elements value 2.0
+  ObservedNode<RectifiedGaussian,double, detail::TypeList::zeros > obs2(2.0); //2 elements value 2.0
   
   Moments<double> M2 = obs2.GetMoments();
   BOOST_CHECK_EQUAL(M2.size(), size_t(2));
@@ -968,7 +968,7 @@ BOOST_AUTO_TEST_CASE( Observed_RGaussian_test  )
 }
 BOOST_AUTO_TEST_CASE( Observed_Gamma_test  )
 {
-  ObservedNode<Gamma,double, detail::TypeList<void> > obs2(2.0); //2 elements value 2.0
+  ObservedNode<Gamma,double, detail::TypeList::zeros > obs2(2.0); //2 elements value 2.0
   
   Moments<double> M2 = obs2.GetMoments();
   BOOST_CHECK_EQUAL(M2.size(), size_t(2));
@@ -994,7 +994,7 @@ BOOST_AUTO_TEST_CASE( Observed_Gamma_test  )
 
 BOOST_AUTO_TEST_CASE( Observed_Dirichlet_test  )
 {
-  ObservedNode<Dirichlet,double, detail::TypeList<void> > obs3(3,2.0); //3 elements value 2.0
+  ObservedNode<Dirichlet,double, detail::TypeList::zeros > obs3(3,2.0); //3 elements value 2.0
   
   Moments<double> M3 = obs3.GetMoments();
   BOOST_CHECK_EQUAL(M3.size(), size_t(3));
@@ -1039,9 +1039,9 @@ BOOST_AUTO_TEST_SUITE( Factor_Node_test )
 BOOST_AUTO_TEST_CASE( Factor_Gaussian_test  )
 {
 
-  typedef ObservedNode<Gaussian,double, detail::TypeList<void> > p0_t;
-  typedef ObservedNode<Gamma,double, detail::TypeList<void> > p1_t;
-  typedef ObservedNode<Gaussian,double, detail::TypeList<p0_t> >  c_t;
+  typedef ObservedNode<Gaussian,double, detail::TypeList::zeros > p0_t;
+  typedef ObservedNode<Gamma,double, detail::TypeList::zeros > p1_t;
+  typedef ObservedNode<Gaussian,double, detail::TypeList::incr_id< detail::TypeList::zeros>::type >  c_t;
   
   typedef detail::Factor<Gaussian,double,p0_t,p1_t,c_t> Factor_t;
 
@@ -1086,9 +1086,9 @@ BOOST_AUTO_TEST_CASE( Factor_Gaussian_test  )
 BOOST_AUTO_TEST_CASE( Factor_Dirichlet_test  )
 {
 
-  typedef ObservedNode<Dirichlet,double, detail::TypeList<void> > p0_t;
+  typedef ObservedNode<Dirichlet,double, detail::TypeList::zeros > p0_t;
   typedef NoSecondParent p1_t;
-  typedef ObservedNode<Gaussian,double, detail::TypeList<void> >  c_t;
+  typedef ObservedNode<Gaussian,double, detail::TypeList::zeros >  c_t;
   
   typedef detail::Factor<Dirichlet,double,p0_t,p1_t,c_t> Factor_t;
   
@@ -1132,9 +1132,9 @@ BOOST_AUTO_TEST_CASE( Factor_Discrete_test  )
 {
 
 
-  typedef ObservedNode<Dirichlet,double, detail::TypeList<void> > p0_t;
+  typedef ObservedNode<Dirichlet,double, detail::TypeList::zeros > p0_t;
   typedef NoSecondParent p1_t;
-  typedef ObservedNode<Dirichlet,double, detail::TypeList<p0_t> >  c_t;
+  typedef ObservedNode<Dirichlet,double, detail::TypeList::incr_id<detail::TypeList::zeros>::type >  c_t;
   
   typedef detail::Factor<Dirichlet,double,p0_t,p1_t,c_t> Factor_t;
   
@@ -1194,8 +1194,8 @@ BOOST_AUTO_TEST_CASE( Hidden_Gaussian_test  )
   BOOST_CHECK_CLOSE(M2[0], 0.0, 0.0001);
   BOOST_CHECK_CLOSE(M2[1], 0.0, 0.0001);
 
-  typedef ObservedNode<Gaussian,double, detail::TypeList<void> > p0_t;
-  typedef ObservedNode<Gamma,double, detail::TypeList<void> >    p1_t;
+  typedef ObservedNode<Gaussian,double, detail::TypeList::zeros > p0_t;
+  typedef ObservedNode<Gamma,double, detail::TypeList::zeros >    p1_t;
   p0_t obsGaussian(2.0);
   p1_t obsGamma(3.0); 
   typedef HiddenNode<Gaussian,double>  c_t;
@@ -1231,8 +1231,8 @@ BOOST_AUTO_TEST_CASE( Hidden_Gaussian_test  )
 
   //Next 
 
-  //ObservedNode<Gaussian,double, detail::TypeList<void> > obsData1(4.0); 
-  typedef HiddenNode<Gaussian,double, detail::TypeList<c_t> >  c_t2;
+  //ObservedNode<Gaussian,double, detail::TypeList::zeros > obsData1(4.0); 
+  typedef HiddenNode<Gaussian,double, detail::TypeList::incr_id<detail::TypeList::zeros>::type >  c_t2;
   c_t2 obsData1(4.0);
   typedef detail::Factor<Gaussian,double,c_t,p1_t,c_t2> Factor_t2;
   Factor_t2 GF2(&G, &obsGamma, &obsData1);

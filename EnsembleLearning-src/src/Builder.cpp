@@ -154,33 +154,6 @@ ICR::EnsembleLearning::Builder<T>::weights(const size_t size)
       
 	
 
-template<class T>
-typename ICR::EnsembleLearning::Builder<T>::GaussianNode
-ICR::EnsembleLearning::Builder<T>::gaussian_mixture(std::vector<Variable>& vMean, std::vector<Variable>& vPrecision, WeightsNode Weights)
-{
-  
-  typedef HiddenNode<Dirichlet, T > prior_t;
-  typedef ICR::EnsembleLearning::NoSecondParent blank;
-  typedef CatagoryType child_t;
-  typedef detail::Factor<Discrete,T,prior_t,blank,child_t> Factor_t;
-
-  const size_t number = Weights->size();
-	
-  boost::shared_ptr<CatagoryType>         Catagory(new CatagoryType(number));
-  boost::shared_ptr<Factor_t >      CatagoryF(new Factor_t(Weights, Catagory.get()));
-  m_Nodes.push_back(Catagory);
-  m_Factors.push_back(CatagoryF);
-	
-
-  boost::shared_ptr<GaussianType> Child(new GaussianType());
-
-  m_Nodes.push_back(Child);
-	
-  // boost::shared_ptr<GaussianMixtureFactor> MixtureF(new GaussianMixtureFactor(vMean, vPrecision, Catagory.get() , Child.get()));
-	
-  // m_Factors.push_back(MixtureF);
-  return Child.get();
-}
 
 template<class T>	
 typename ICR::EnsembleLearning::Builder<T>::RectifiedGaussianNode
@@ -329,7 +302,7 @@ void
 ICR::EnsembleLearning::Builder<T>::join(T& shape, T& iscale, GammaDataNode Data  )
 {
 
-  typedef ObservedNode<Gamma, T, detail::TypeList<GammaDataNode> >    GammaConstType;
+  typedef ObservedNode<Gamma, T, detail::TypeList::id >    GammaConstType;
   boost::shared_ptr<NormalConstType > Shape(new NormalConstType(shape));
   boost::shared_ptr<GammaConstType > IScale(new GammaConstType(iscale));
   typedef detail::Factor<Gamma,T,NormalConstType,GammaConstType,GammaDataType> Factor_t;
@@ -360,7 +333,7 @@ void
 ICR::EnsembleLearning::Builder<T>::join(T& mean, T& precision, GaussianDataNode Data  )
 {
 
-  typedef ObservedNode<Gaussian, T, detail::TypeList<GaussianDataNode> > GaussianConstType   ;
+  typedef ObservedNode<Gaussian, T, detail::TypeList::id > GaussianConstType   ;
   boost::shared_ptr<GaussianConstType > Mean(new GaussianConstType(mean));
   boost::shared_ptr<GammaConstType > Precision(new GammaConstType(precision));
 	
@@ -391,68 +364,7 @@ ICR::EnsembleLearning::Builder<T>::join(T& mean, T& precision, GaussianDataNode 
 // }
 
       
-   
-template<class T>   
-void
-ICR::EnsembleLearning::Builder<T>::join( std::vector<Variable>& vMean, GammaNode& Precision, WeightsNode Weights,const T data )
-{
-  
-  typedef ICR::EnsembleLearning::NoSecondParent blank;
-  typedef DirichletType p0_t;
-  typedef CatagoryType c_t;
-  typedef detail::Factor<Discrete,T,p0_t,blank,c_t> Factor_t;
-  
 
-  boost::shared_ptr<GaussianDataType > Data(new GaussianDataType(data));
-  ++m_data_nodes;
-
-
-  const size_t number = Weights->size();
-  std::vector<Variable> vPrecision(number);
-	
-  boost::shared_ptr<CatagoryType>         Catagory(new CatagoryType(number));
-  boost::shared_ptr<Factor_t >      CatagoryF(new Factor_t(Weights, Catagory.get()));
-  m_Nodes.push_back(Catagory);
-  m_Factors.push_back(CatagoryF);
-  //make the vector of precision nodes and CatagoryNodes
-  for(size_t i=0;i<number;++i){
-    vPrecision[i] = Precision;
-  }
-	
-  m_Nodes.push_back(Data);
-	
-  // boost::shared_ptr<GaussianMixtureFactor> MixtureF(new GaussianMixtureFactor(vMean, vPrecision, Catagory.get() , Data.get()));
-	
-  // m_Factors.push_back(MixtureF);
-}
-
-template<class T>	
-void
-ICR::EnsembleLearning::Builder<T>::join( std::vector<Variable>& vMean, std::vector<Variable>& vPrecision, WeightsNode Weights,const T data )
-{
-  typedef ICR::EnsembleLearning::NoSecondParent blank;
-  typedef DirichletType p0_t;
-  typedef CatagoryType c_t;
-  typedef detail::Factor<Discrete,T,p0_t,blank,c_t> Factor_t;
-
-  boost::shared_ptr<GaussianDataType > Data(new GaussianDataType(data));
-  ++m_data_nodes;
-
-  const size_t number = Weights->size();
-	
-  boost::shared_ptr<CatagoryType>         Catagory(new CatagoryType(number));
-  boost::shared_ptr< Factor_t>      CatagoryF(new Factor_t(Weights, Catagory.get()));
-  m_Nodes.push_back(Catagory);
-  m_Factors.push_back(CatagoryF);
-  //make the vector of precision nodes and CatagoryNodes
-	
-  m_Nodes.push_back(Data);
-	
-  // boost::shared_ptr<GaussianMixtureFactor> MixtureF(new GaussianMixtureFactor(vMean, vPrecision, Catagory.get() , Data.get()));
-	
-  // m_Factors.push_back(MixtureF);
-}
-	
 
 template<class T>
 size_t

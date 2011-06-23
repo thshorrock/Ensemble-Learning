@@ -209,7 +209,7 @@ namespace ICR{
       //parent2_t != NoSecondParent
       template<class NoSecondParent_t>
       NaturalParameters<T>
-      GetNaturalNot(const parent1_t* v,
+      GetNaturalNot(parent1_t* const,
 		    typename boost::disable_if<boost::is_same<parent2_t, NoSecondParent_t>, enabler >::type = enabler()) const
       {
 	Moments<T> parent2 = m_parent2_node->GetMoments();
@@ -220,7 +220,7 @@ namespace ICR{
       //Request From the Parent1 Node
       template<class  NoSecondParent_t>
       NaturalParameters<T>
-      GetNaturalNot(const parent1_t* v,
+      GetNaturalNot(parent1_t* const,
 		    typename boost::enable_if<boost::is_same<parent2_t, NoSecondParent_t>, enabler >::type = enabler()
 		    ) const
       {
@@ -230,7 +230,7 @@ namespace ICR{
 
       //Request From the Parent1 Node
       NaturalParameters<T>
-      GetNaturalNot(const parent1_t* v) const
+      GetNaturalNot( parent1_t* const v) const
       {
 	return GetNaturalNot<NoSecondParent>(v);
       }
@@ -239,7 +239,7 @@ namespace ICR{
        */
       template<class NoSecondParent_t>
       NaturalParameters<T>
-      GetNaturalNot(const parent2_t* v,
+      GetNaturalNot( parent2_t* const v,
 		    typename boost::disable_if<boost::is_same<parent2_t, NoSecondParent_t>, enabler >::type = enabler()
 		    ) const
       {
@@ -252,7 +252,7 @@ namespace ICR{
        */
       template<class NoSecondParent_t>
       NaturalParameters<T>
-      GetNaturalNot(const parent2_t* v,
+      GetNaturalNot( parent2_t* const v,
 		    typename boost::enable_if<boost::is_same<parent2_t, NoSecondParent_t>, enabler >::type = enabler()
 		    ) const
       {
@@ -261,7 +261,7 @@ namespace ICR{
       }
       
       NaturalParameters<T>
-      GetNaturalNot(const parent2_t* v) const
+      GetNaturalNot( parent2_t* const  v) const
       {
 	return GetNaturalNot<NoSecondParent>(v);
       }
@@ -270,7 +270,7 @@ namespace ICR{
       //parent2_t != NoSecondParent
       template<class NoSecondParent_t>
       NaturalParameters<T>
-      GetNaturalNot(const child_t* v,
+      GetNaturalNot( typename boost::call_traits< child_t* const>::param_type const v,
 		    typename boost::disable_if<boost::is_same<parent2_t, NoSecondParent_t>, enabler >::type = enabler()
 		    ) const
       {
@@ -284,7 +284,7 @@ namespace ICR{
       //parent2_t == NoSecondParent
       template<class NoSecondParent_t>
       NaturalParameters<T>
-      GetNaturalNot(const child_t* v,
+      GetNaturalNot( typename boost::call_traits< child_t* const>::param_type v,
 		    typename boost::enable_if<boost::is_same<parent2_t, NoSecondParent_t>, enabler >::type = enabler()
 		    ) const
       {
@@ -295,15 +295,15 @@ namespace ICR{
 
       //Request From the Child Node
       NaturalParameters<T>
-      GetNaturalNot(const child_t* v) const
+      GetNaturalNot( typename boost::call_traits< child_t* const>::param_type const v) const
       {
 	return GetNaturalNot<NoSecondParent>(v);
       }
 
-      // /** Calculate the Natural Paramter to one of the connected VariableNodes.
-      //  *  @param v The VaiableNode where the NaturalParameter is sent.
-      //  *  @return The NaturalParameter.
-      //  */
+      /** Calculate the Natural Paramter to one of the connected VariableNodes.
+       *  @param v The VaiableNode where the NaturalParameter is sent.
+       *  @return The NaturalParameter.
+       */
       // template<class type>
       // NP_t
       // GetNaturalNot( typename boost::call_traits< type* const>::param_type v) const

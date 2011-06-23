@@ -45,14 +45,6 @@ namespace ICR{
     // template<class T, class NotThis>
     // class FactorNode;
     
-
-    struct FactorNode_basic
-    {
-      virtual ~FactorNode_basic() = 0;
-    };
-    inline
-    FactorNode_basic::~FactorNode_basic(){};
-
     /** An interface for the Variable Nodes.
      * Every variable node derives from this interface.
      * @tparam T The data type used by the variable nodes in the model.
@@ -142,6 +134,14 @@ namespace ICR{
       return out;
     }
 
+    struct FactorNode_basic
+    {
+      virtual ~FactorNode_basic() = 0;
+    };
+    inline
+    FactorNode_basic::~FactorNode_basic(){};
+
+
     /** The interface to the factor nodes.
      *  Every factor node derives from this.
      * @tparam T The data type used by all the factor nodes, either double or float.
@@ -166,13 +166,13 @@ namespace ICR{
        *  The message is calculated from the moments of every node adjacent to the factor withe exception of v.
        * @return The natural parameter calculated for v.
        */
-      // virtual
-      // NaturalParameters<T>
-      // GetNaturalNot(variable_parameter v) const = 0;
- 
       virtual
       NaturalParameters<T>
-      GetNaturalNot(const NotThis*) const = 0;
+      GetNaturalNot(variable_parameter v) const = 0;
+ 
+      // virtual
+      // NaturalParameters<T>
+      // GetNaturalNot(const NotThis*) const = 0;
       /** Calculate natural logarithm of the Models nomalisation constant required by the child node to evaluate the model's cost.
        * @return The natural logarithm of the Models nomalisation constant.
        */

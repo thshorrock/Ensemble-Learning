@@ -47,6 +47,7 @@ build-debug
 *.dat
 *.txt
 *.out
+*.hpp.gch 
 #except CMakeLists.txt
 !CMakeLists.txt
 

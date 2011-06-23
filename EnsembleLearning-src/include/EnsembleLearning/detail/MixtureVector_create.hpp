@@ -21,70 +21,35 @@
  **                                                                               **
  ***********************************************************************************
  ***********************************************************************************/
-
-
-#pragma once
-#ifndef OUTPUT_HPP
-#define OUTPUT_HPP
-
-
-#include "EnsembleLearning/node/Node.hpp"
-#include "EnsembleLearning/detail/MixtureVector.hpp"
-#include <boost/fusion/include/for_each.hpp>
-
-
-#include <cmath>  
-namespace ICR{
-  namespace EnsembleLearning{
-    
-    /** Evaluate the mean of a variable node. 
-     * @param node A pointer to the VariableNode to evaluate.
-     * @param index The index of the mean to return.
-     *   Typically there is only one mean in the node (the index defaults to zero),
-     *   however, Dirichlet models contain a mean for every component of the mixture.
-     * @return The mean for the given node and index.
-     * @ingroup UserInterface
-     */
-    template<class T>
-    T
-    Mean(VariableNode<T>* node, size_t index = 0)
-    {
-      return node->GetMean()[index];
-    }
-
-    
-
-    template<template<class> class Model, class T>
-    std::vector<VariableNode<T>* >
-    Mixture2Vector(MixtureVector<Model,T> v)
-    {
-      std::vector<VariableNode<T>* > ret;
+#include <boost/type_traits/remove_reference.hpp>
+#include <boost/type_traits/remove_pointer.hpp>
+#define n BOOST_PP_ITERATION()
+{
   
-      boost::fusion::for_each(v.data(), 
-			      boost::bind(&std::vector<VariableNode<T>* >::push_back,
-					  boost::ref(ret),
-					  (_1) 
-					  ));
-      return ret;
-			  
-    }
-    /** Evaluate the standard deviation of a variable node. 
-     * @param node A pointer to the VariableNode to evaluate.
-     * @param index The index of the mean to return.
-     *   Typically there is only one mean in the node (the index defaults to zero),
-     *   however, Dirichlet models contain a mean for every component of the mixture.
-     * @return The variance for the given node and index.
-     * @ingroup UserInterface
-     */
-    template<class T>
-    T
-    StandardDeviation(VariableNode<T>* node, size_t index = 0)
-    {
-      return std::sqrt(node->GetVariance()[index]);
-    }
-    
-  }
+  // typedef ObservedNode<Model, T, ICR::EnsembleLearning::detail::TypeList_Exact<n,0,n> > p0_t;
+  // typedef ObservedNode<Gamma, T, ICR::EnsembleLearning::detail::TypeList_Exact<n,0,n> >    p1_t;
+  // boost::shared_ptr<p0_t> P0(new p0_t(v1[n]));
+  // boost::shared_ptr<p1_t> P1(new p1_t(v2[n]));
+  
+  // m_Nodes.push_back(P0);
+  // m_Nodes.push_back(P1);
+
+  typedef typename boost::remove_pointer<typename boost::remove_reference<typename boost::fusion::result_of::at_c<p0_t,n>::type>::type>::type p0n_t;
+  typedef typename boost::remove_pointer<typename boost::remove_reference<typename boost::fusion::result_of::at_c<p1_t,n>::type>::type>::type p1n_t;
+ 
+  typedef  typename MV_t::template get_t<n>::type child_t;
+
+  boost::shared_ptr<child_t> child( new child_t() );
+  
+  typedef detail::Factor<Model,T,p0n_t,p1n_t,child_t> Factor_t;
+  boost::shared_ptr<Factor_t > F(new Factor_t(boost::fusion::at_c<n>(v0), 
+					      boost::fusion::at_c<n>(v1), //v1.get(), 
+					      child.get()));
+
+  m_Factors.push_back(F);
+  m_Nodes.push_back(child);
+  MV.template get<n>()  = child.get();
 }
-
-
-#endif //OUTPUT_HPP guard
+//MV.template get<n>() = new typename MV_t::template get_t<n>(v1[n],v2[n]);
+//m_Nodes.push_back(MV.template get<n>() );
+#undef n
