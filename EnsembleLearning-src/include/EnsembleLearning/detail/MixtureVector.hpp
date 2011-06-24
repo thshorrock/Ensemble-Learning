@@ -44,10 +44,11 @@
 #include <boost/fusion/adapted/mpl.hpp>
 #include <boost/fusion/include/mpl.hpp>
 
-#ifndef ENSEMBLE_LEARNING_COMPONENTS
-#define   ENSEMBLE_LEARNING_COMPONENTS 5
+//The maximum number of components is given by FUSION_MAX_VECTOR_SIZE (default is 20)
+//If we want to increase the number of componets beyond this, then need to increase this size.
+#ifdef ENSEMBLE_LEARNING_MAX_COMPONENTS
+#  define FUSION_MAX_VECTOR_SIZE ENSEMBLE_LEARNING_MAX_COMPONENTS
 #endif
-#define ENSEMBLE_LEARNING_COMPONENTS_MINUS_1 BOOST_PP_SUB(ENSEMBLE_LEARNING_COMPONENTS,1)
 
 namespace ICR{
   namespace EnsembleLearning{

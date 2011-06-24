@@ -59,7 +59,6 @@
 #include <string>
 
 
-#define ENSEMBLE_LEARNING_MAX_COMPONENTS 10
 
 
 namespace ICR{
