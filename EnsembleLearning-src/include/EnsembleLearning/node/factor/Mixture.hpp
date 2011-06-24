@@ -38,6 +38,7 @@
 #include <boost/mpl/inherit_linearly.hpp>
 #include <boost/mpl/inherit.hpp>
 #include <boost/mpl/size.hpp>
+#include <boost/fusion/include/for_each.hpp>
 #include <vector>
 
 
@@ -54,7 +55,7 @@ namespace ICR{
     class HiddenNode; //only used as pointer here.
     
     namespace detail{
-
+      
       /******************************************************************************
        * Default Specialisation
        ******************************************************************************/
@@ -138,24 +139,12 @@ namespace ICR{
 	     m_child_node(child),
 	     m_LogNorm(0)
 	{
-	  //Need to be as many parents to both.
-	  // BOOST_MPL_ASSERT_RELATION( mpl::size<p1_parameter::result_t::type>::value, ==,mpl::size<p2_parameter::result_t::type>::value  );
-	  //Parent1.size() == Parent2.size());
-	
+	  //Attach to the child
 	  child->SetParentFactor(this);
-	  //boost::fusion::for_each(p1, boost::bin
-	    
-
-	//Add this factor to each parent
-	//(Iterate with the preprocessor)
-#       include <boost/preprocessor/iteration/iterate.hpp>
-#       define BOOST_PP_ITERATION_LIMITS (0, ENSEMBLE_LEARNING_COMPONENTS - 1  )
-#       define BOOST_PP_FILENAME_1       "EnsembleLearning/node/factor/Mixture_AddChildFactor.hpp"
-#       include BOOST_PP_ITERATE()
-
-
-	    
-
+	  //Add this factor to each parent
+	  boost::fusion::for_each(m_parent1_nodes.data(), AttachToChildFactor(this));
+	  boost::fusion::for_each(m_parent2_nodes.data(), AttachToChildFactor(this));
+	  //And the Weights too
 	  Weights->AddChildFactor(this);
 	};
       
@@ -163,16 +152,18 @@ namespace ICR{
 	Moments<T>
 	InitialiseMoments() const
 	{
+	  const size_t size = boost::mpl::size<typename parent2_t::type>::value;
+	  std::vector<moments_t > moments1, moments2;
+	  //reserve the space so that push_back is not expensive
+	  moments1.reserve(size);
+	  moments2.reserve(size);
 
-	  std::vector<moments_t > moments1(boost::mpl::size<typename parent1_t::type>::value);
-	  std::vector<moments_t > moments2(boost::mpl::size<typename parent2_t::type>::value);
-
-	//Get the moments of each parent
-	//(Iterate with the preprocessor)
-#       include <boost/preprocessor/iteration/iterate.hpp>
-#       define BOOST_PP_ITERATION_LIMITS (0, ENSEMBLE_LEARNING_COMPONENTS - 1 )
-#       define BOOST_PP_FILENAME_1       "EnsembleLearning/node/factor/Mixture_InitialiseMoments.hpp"
-#       include BOOST_PP_ITERATE()
+	  //add the moments to the vector (pre-reserved) (moments1)
+	  boost::fusion::for_each( m_parent2_nodes.data(), 
+				   GetMoments(moments1) );
+	  //add the moments to the vector (pre-reserved) (moments2)
+	  boost::fusion::for_each( m_parent2_nodes.data(), 
+				   GetMoments(moments2) );
 	  
 	  m_weights_node->InitialiseMoments();
 	  return Model::CalcSample(moments1,
@@ -188,16 +179,18 @@ namespace ICR{
 	  NaturalParameters<T> NP2Child(std::vector<T>(2));
 	  m_LogNorm = 0;
 	  
-	  const size_t size = boost::mpl::size<typename parent1_t::type>::value;
-	  std::vector<moments_t > moments1(size);
-	  std::vector<moments_t > moments2(size);
+	  const size_t size = boost::mpl::size<typename parent2_t::type>::value;
+	  std::vector<moments_t > moments1, moments2;
+	  //reserve the space so that push_back is not expensive
+	  moments1.reserve(size);
+	  moments2.reserve(size);
 
-	//Get the moments of each parent
-	//(Iterate with the preprocessor)
-#       include <boost/preprocessor/iteration/iterate.hpp>
-#       define BOOST_PP_ITERATION_LIMITS (0, ENSEMBLE_LEARNING_COMPONENTS - 1 )
-#       define BOOST_PP_FILENAME_1       "EnsembleLearning/node/factor/Mixture_InitialiseMoments.hpp"
-#       include BOOST_PP_ITERATE()
+	  //add the moments to the vector (pre-reserved) (moments1)
+	  boost::fusion::for_each( m_parent2_nodes.data(), 
+				   GetMoments(moments1) );
+	  //add the moments to the vector (pre-reserved) (moments2)
+	  boost::fusion::for_each( m_parent2_nodes.data(), 
+				   GetMoments(moments2) );
 
 	  const Moments<double>& weights = m_weights_node->GetMoments();
 	  for(size_t i=0;i<size;++i){
@@ -215,17 +208,19 @@ namespace ICR{
 	GetNaturalNot( discrete_parameter v) const
 	{
 	  
-	  const size_t size = boost::mpl::size<typename parent1_t::type>::value;
-	  std::vector<moments_t > moments1(size);
-	  std::vector<moments_t > moments2(size);
+	  const size_t size = boost::mpl::size<typename parent2_t::type>::value;
+	  std::vector<moments_t > moments1, moments2;
+	  //reserve the space so that push_back is not expensive
+	  moments1.reserve(size);
+	  moments2.reserve(size);
 	  NaturalParameters<T> NP2Weights(size);
 
-	//Get the moments of each parent
-	//(Iterate with the preprocessor)
-#       include <boost/preprocessor/iteration/iterate.hpp>
-#       define BOOST_PP_ITERATION_LIMITS (0, ENSEMBLE_LEARNING_COMPONENTS - 1 )
-#       define BOOST_PP_FILENAME_1       "EnsembleLearning/node/factor/Mixture_InitialiseMoments.hpp"
-#       include BOOST_PP_ITERATE()
+	  //add the moments to the vector (pre-reserved) (moments1)
+	  boost::fusion::for_each( m_parent2_nodes.data(), 
+				   GetMoments(moments1) );
+	  //add the moments to the vector (pre-reserved) (moments2)
+	  boost::fusion::for_each( m_parent2_nodes.data(), 
+				   GetMoments(moments2) );
 
 	  const Moments<T>& child = m_child_node->GetMoments();
 	  for(size_t i=0;i<size;++i){
@@ -234,13 +229,18 @@ namespace ICR{
 	  return NP2Weights;
 	}
 
-	//Define GetNaturalNot for each of the parent nodes.
-	//(Iterate with the preprocessor)
+	/* Define GetNaturalNot for each of the parent nodes.
+	 * (Iterate with the preprocessor)
+	 * This is done with an ugly preprocessor hack since these functions
+	 * are overloads the base FactorNode class.
+	 * They therefore must really be "written down" rather than just templated,
+	 * which is where the preprocessor comes in.
+	 */
 #       include <boost/preprocessor/iteration/iterate.hpp>
 #       define BOOST_PP_ITERATION_LIMITS (0, ENSEMBLE_LEARNING_COMPONENTS  - 1)
 #       define BOOST_PP_FILENAME_1       "EnsembleLearning/node/factor/Mixture_GetNaturalNot.hpp"
 #       include BOOST_PP_ITERATE()
-
+	/* End of pre-processor hack */
 
 	T
 	CalcLogNorm() const 
@@ -257,8 +257,30 @@ namespace ICR{
 	NaturalParameters<T>
 	GetNaturalNot( variable_parameter v) const;
       
-      private: 
+	private: 
       
+	struct GetMoments
+	{
+	  GetMoments(std::vector<moments_t>& m) : m_moments(m) {}
+	  void operator()(variable_parameter node) const 
+	  {
+	    m_moments.push_back(node->GetMoments());
+	  }
+	private:
+	  std::vector<moments_t>& m_moments;
+	};
+
+	struct AttachToChildFactor
+	{
+	  AttachToChildFactor(Mixture* p) : m_ptr(p) {}
+	  template <class Node>
+	  void operator()(Node node) const 
+	  {
+	    node->AddChildFactor(m_ptr);
+	  }
+	  Mixture* m_ptr;
+	};
+
 	p1_t m_parent1_nodes;
 	p2_t m_parent2_nodes;
 	discrete_t m_weights_node;
