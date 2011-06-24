@@ -159,7 +159,7 @@ namespace ICR{
 	  moments2.reserve(size);
 
 	  //add the moments to the vector (pre-reserved) (moments1)
-	  boost::fusion::for_each( m_parent2_nodes.data(), 
+	  boost::fusion::for_each( m_parent1_nodes.data(), 
 				   GetMoments(moments1) );
 	  //add the moments to the vector (pre-reserved) (moments2)
 	  boost::fusion::for_each( m_parent2_nodes.data(), 
@@ -186,7 +186,7 @@ namespace ICR{
 	  moments2.reserve(size);
 
 	  //add the moments to the vector (pre-reserved) (moments1)
-	  boost::fusion::for_each( m_parent2_nodes.data(), 
+	  boost::fusion::for_each( m_parent1_nodes.data(), 
 				   GetMoments(moments1) );
 	  //add the moments to the vector (pre-reserved) (moments2)
 	  boost::fusion::for_each( m_parent2_nodes.data(), 
@@ -216,7 +216,7 @@ namespace ICR{
 	  NaturalParameters<T> NP2Weights(size);
 
 	  //add the moments to the vector (pre-reserved) (moments1)
-	  boost::fusion::for_each( m_parent2_nodes.data(), 
+	  boost::fusion::for_each( m_parent1_nodes.data(), 
 				   GetMoments(moments1) );
 	  //add the moments to the vector (pre-reserved) (moments2)
 	  boost::fusion::for_each( m_parent2_nodes.data(), 

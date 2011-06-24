@@ -392,16 +392,8 @@ namespace ICR{
 	BOOST_MPL_ASSERT_RELATION(boost::fusion::result_of::size<p0_t>::type::value, ==,boost::fusion::result_of::size<p1_t>::type::value);
 	const size_t size = boost::fusion::result_of::size<p0_t>::type::value;
 	
-	// detail::TernaryOp(v0,v1,MV.data(), MakeMixtureModel<Model>(m_Factors, m_Nodes));
-	// //boost::fusion::transform( v0,v1, MakeMixtureModel() );
+	detail::TernaryOp(v0,v1,MV.data(), MakeMixtureModel<Model>(m_Factors, m_Nodes));
 
-	//create a new set of nodes.
-	//(Iterate with the preprocessor)
-#       include <boost/preprocessor/iteration/iterate.hpp>
-#       define BOOST_PP_ITERATION_LIMITS (0, ENSEMBLE_LEARNING_COMPONENTS - 1)
-#       define BOOST_PP_FILENAME_1       "EnsembleLearning/detail/MixtureVector_create.hpp"
-#       include BOOST_PP_ITERATE()
-	
 	return MV;
       }
 
@@ -417,76 +409,29 @@ namespace ICR{
 	typedef ObservedNode<Gamma,    T, detail::TypeList::zeros> p1_t;
 	const size_t size = ENSEMBLE_LEARNING_COMPONENTS;
 	
-	// std::vector<p0_t*> p_0(size);
-	// std::vector<p1_t*> p_1(size);
-	// for(size_t i=0;i<size;++i){
-	//   boost::shared_ptr<p0_t> tmp0(new p0_t(v1[i]));
-	//   boost::shared_ptr<p1_t> tmp1(new p1_t(v2[i]));
-	//   //store the reference so it doesn't get deleted till end of execution.
-	//   m_Nodes.push_back(tmp0);
-	//   m_Nodes.push_back(tmp1);
+	std::vector<p0_t*> p_0(size);
+	std::vector<p1_t*> p_1(size);
+	for(size_t i=0;i<size;++i){
+	  boost::shared_ptr<p0_t> tmp0(new p0_t(v1[i]));
+	  boost::shared_ptr<p1_t> tmp1(new p1_t(v2[i]));
+	  //store the reference so it doesn't get deleted till end of execution.
+	  m_Nodes.push_back(tmp0);
+	  m_Nodes.push_back(tmp1);
 	  
-	//   //store so that references can be put easily into fusion vector
-	//   p_0[i] = tmp0.get();
-	//   p_1[i] = tmp1.get();
-	// }
+	  //store so that references can be put easily into fusion vector
+	  p_0[i] = tmp0.get();
+	  p_1[i] = tmp1.get();
+	}
 	//The fusion vectors
-	// Vector<ObservedNode,Gaussian,T,size> vt0;
-	// Vector<ObservedNode,Gamma,T,size> vt1;
-	// //Assign
-	// boost::fusion::for_each(vt0.data(), AssignVector<p0_t>(p_0));
-	// boost::fusion::for_each(vt1.data(), AssignVector<p1_t>(p_1));
+	Vector<ObservedNode,Gaussian,T,size> vt0;
+	Vector<ObservedNode,Gamma,T,size> vt1;
+	//Assign
+	boost::fusion::for_each(vt0.data(), AssignVector<p0_t>(p_0));
+	boost::fusion::for_each(vt1.data(), AssignVector<p1_t>(p_1));
 	
-	// //pass on the pointers
-	// return mixture_vector<Model>(vt0.data(),vt1.data());
-				
-	
-	//Create a set of priors
-	//(Iterate with the preprocessor)
-#       include <boost/preprocessor/iteration/iterate.hpp>
-#       define BOOST_PP_ITERATION_LIMITS (0, ENSEMBLE_LEARNING_COMPONENTS - 1)
-#       define BOOST_PP_FILENAME_1       "EnsembleLearning/detail/MixtureVector_create_priors.hpp"
-#       include BOOST_PP_ITERATE()
-	
-
-	//place into a boost fusion vector.
-	//shared version
-	boost::fusion::vector<
-	BOOST_PP_ENUM(BOOST_PP_SUB(ENSEMBLE_LEARNING_COMPONENTS,0), ENSEMBLE_LEARNING_VEC_print,boost::shared_ptr<p0_t>)
-	    > shared_vt0(
-		   BOOST_PP_ENUM_PARAMS(ENSEMBLE_LEARNING_COMPONENTS,shared_p0_) 
-		 );
-
-	boost::fusion::vector<
-	BOOST_PP_ENUM(BOOST_PP_SUB(ENSEMBLE_LEARNING_COMPONENTS,0), ENSEMBLE_LEARNING_VEC_print,boost::shared_ptr<p1_t>)
-	    > shared_vt1(
-		   BOOST_PP_ENUM_PARAMS(ENSEMBLE_LEARNING_COMPONENTS,shared_p1_) 
-		 );
-	//pointers to shared vectors
-	boost::fusion::vector<
-	BOOST_PP_ENUM(BOOST_PP_SUB(ENSEMBLE_LEARNING_COMPONENTS,0), ENSEMBLE_LEARNING_VEC_print,p0_t*)
-	    > vt0(
-		   BOOST_PP_ENUM_PARAMS(ENSEMBLE_LEARNING_COMPONENTS,p0_) 
-		 );
-
-	boost::fusion::vector<
-	BOOST_PP_ENUM(BOOST_PP_SUB(ENSEMBLE_LEARNING_COMPONENTS,0), ENSEMBLE_LEARNING_VEC_print,p1_t*)
-	    > vt1(
-		   BOOST_PP_ENUM_PARAMS(ENSEMBLE_LEARNING_COMPONENTS,p1_) 
-		 );
-
-	//copy the shared pointers to container so they don't get deleted.
-	boost::fusion::for_each(shared_vt0, boost::bind(&std::vector<boost::shared_ptr<VariableNode<T> > >::push_back, 
-						 boost::ref(m_Nodes), 
-						 _1));
-
-	boost::fusion::for_each(shared_vt1, boost::bind(&std::vector<boost::shared_ptr<VariableNode<T> > >::push_back, 
-						 boost::ref(m_Nodes), 
-						 _1));
-
 	//pass on the pointers
-	return mixture_vector<Model>(vt0,vt1);
-
+	return mixture_vector<Model>(vt0.data(),vt1.data());
+				
       }
 
       template<template<class> class Model>
