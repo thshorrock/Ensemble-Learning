@@ -95,7 +95,12 @@ namespace ICR{
       data() const {return m_data;}
       data_t& 
       data() {return m_data;}
-  
+
+      //conversion operator
+      operator const data_t &() const  { return m_data;}
+      operator data_t& () {return m_data;}
+      
+
       /** Get the type for the object stored at the given index.
        *  @tparam index The index of the object whose type you want.
        */
