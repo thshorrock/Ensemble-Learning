@@ -28,36 +28,21 @@
 #ifndef MIXTUREVECTOR_HPP
 #define MIXTUREVECTOR_HPP
 
-
-#include <iostream>
-#include <typeinfo>
-
-
 #include "EnsembleLearning/node/variable/Hidden.hpp"
 #include "EnsembleLearning/detail/TypeList.hpp"
 
 #include <boost/mpl/vector.hpp>
 #include <boost/mpl/push_back.hpp>
-#include <boost/mpl/back.hpp>
-#include <boost/mpl/assert.hpp>
 #include <boost/type_traits.hpp>
 #include <boost/mpl/at.hpp> 
 #include <boost/mpl/transform.hpp> 
 
-#include <boost/tuple/tuple.hpp> 
-#include <boost/mpl/copy.hpp> 
-#include <boost/type_traits/is_same.hpp> 
-#include <boost/preprocessor/repetition/enum_params.hpp> 
-
-
-#include <boost/fusion/adapted/boost_tuple.hpp>
-#include <boost/fusion/include/boost_tuple.hpp>
-#include <boost/fusion/container/vector.hpp>
 #include <boost/fusion/include/vector.hpp>
-#include <boost/fusion/container/generation/make_vector.hpp>
 #include <boost/fusion/include/make_vector.hpp>
-#include <boost/fusion/sequence/intrinsic/at.hpp>
 #include <boost/fusion/include/at.hpp>
+#include <boost/fusion/include/as_vector.hpp>
+#include <boost/fusion/adapted/mpl.hpp>
+#include <boost/fusion/include/mpl.hpp>
 
 #ifndef ENSEMBLE_LEARNING_COMPONENTS
 #define   ENSEMBLE_LEARNING_COMPONENTS 5
@@ -67,162 +52,138 @@
 namespace ICR{
   namespace EnsembleLearning{
       
-    template<class T, class Tuple> 
-    struct tuple_push_front; 
-    template<class T, BOOST_PP_ENUM_PARAMS(ENSEMBLE_LEARNING_COMPONENTS, class T)> 
-    struct tuple_push_front<T, boost::fusion::vector<BOOST_PP_ENUM_PARAMS(ENSEMBLE_LEARNING_COMPONENTS, T)> > { 
-      typedef boost::fusion::vector<T, BOOST_PP_ENUM_PARAMS(ENSEMBLE_LEARNING_COMPONENTS_MINUS_1, T)> type; 
-    }; 
-    template<class Sequence> 
-    struct make_my_tuple { 
-      typedef typename boost::mpl::reverse_copy< 
-	Sequence, boost::mpl::inserter<boost::fusion::vector<>, 
-				       tuple_push_front<boost::mpl::_2, boost::mpl::_1> > 
-	>::type type; 
-}; 
+    
+    /** Store a vector of components for a Mixture model.
+     *  The types of each of the component are different,
+     *  (They have a different component id)
+     *  and so the mixture models cannot be stored in a regular vector.
+     *  This class resolves the problem, 
+     *  enabling the components to be stored together,
+     *  while maintaining their type information.
+     *  
+     *  To obtain a std::vector use the Mixture2Vector function.
+     *  @see Mixture2Vector.
+     */
+    template<template<class> class Model, class T, int I, class D = detail::TypeList::component>
+    class MixtureVector_impl
+    {
+      //Make all other MixtureVector_impl friends.
+      template< template<class> class Model2, class T2,int I2, class D2>
+      friend class  MixtureVector_impl;
+
+      //create an mpl vector that increments the component number for each type from 1 to #components.
+      typedef typename boost::mpl::push_back<typename MixtureVector_impl<Model,T,I-1,D>::base::type, HiddenNode<Model,T,typename detail::TypeList::incr_component<D,I>::type > >::type base;
+      //Make the same vector but this time as pointers.
+      typedef  boost::mpl::transform<typename base::type ,boost::add_pointer<boost::mpl::_1> > pointer_t;
+      //The data is stored as a boost fusion vector. 
+      //Obtain the fusion vector class from the mpl vector: base.
+      typedef typename boost::fusion::result_of::as_vector<typename pointer_t::type> data_base;
+      //Apply the fusion vector type to our data_t
+      struct data_t : data_base::type
+      {  };
+      // The data.
+      data_t m_data;
+    public:
+
+      //@Convenient typedefs
+      //@{
+      typedef  base type;
+      typedef  pointer_t pointer_type;
+
+      //@}
+      const data_t& 
+      data() const {return m_data;}
+      data_t& 
+      data() {return m_data;}
+  
+      /** Get the type for the object stored at the given index.
+       *  @tparam index The index of the object whose type you want.
+       */
+      template<int index>
+      struct
+      get_t 
+      {
+	typedef typename  boost::mpl::at<typename base::type,typename boost::mpl::int_<index>::type >::type type;
+      };
+
+      /** Get the object stored at the given index.
+       *  @tparam index The index of the object whose type you want.
+       *  @return The object stored at the given index.
+       */
+      template<int index>
+      typename boost::add_pointer<typename get_t<index>::type>::type&
+      get()
+      {
+	return boost::fusion::at_c<index>(m_data);
+      }
       
-template<template<class> class Model, class T, int I, class D = detail::TypeList::component>
-class MixtureVector_impl
-{
-  template< template<class> class Model2, class T2,int I2, class D2>
-  friend class  MixtureVector_impl;
 
-  typedef typename boost::mpl::push_back<typename MixtureVector_impl<Model,T,I-1,D>::result_t::type, 
-				 HiddenNode<Model,T,typename detail::TypeList::incr_component<D,I>::type > >::type result_t;
-typedef  boost::mpl::transform<typename result_t::type ,boost::add_pointer<boost::mpl::_1> > pointer_t;
-typedef make_my_tuple<typename pointer_t::type> data_base;
-  struct data_t : data_base::type
-{  };
-private:
+      /** Get the object stored at the given index.
+       *  @tparam index The index of the object whose type you want.
+       *  @return The object stored at the given index.
+       */
+      template<int index>
+      const typename  boost::add_pointer<typename get_t<index>::type>::type& 
+      get() const
+      {
+	return boost::fusion::at_c<index>(m_data);
+      }
 
-    data_t m_data;
-public:
+    };
 
-  typedef  result_t type;
-  typedef  pointer_t pointer_type;
+    /** Specialisation for when the vector is empty.
+     *  This terminates the recursive generation of a vector.
+     */
+    template<template<class> class Model, class T,class D>
+    class MixtureVector_impl<Model,T,0,D>
+    {
+      //Make all other MixtureVector_impl friends.
+      template< template<class> class Model2, class T2,int I2, class D2>
+      friend class  MixtureVector_impl;
+      
+      //create an mpl vector that increments the component number for each type from 1 to #components.
+      typedef  boost::mpl::vector<HiddenNode<Model,T,typename detail::TypeList::incr_component<D,0>::type> > base;
+      //Make the same vector but this time as pointers.
+      typedef  boost::mpl::transform<typename base::type ,boost::add_pointer<boost::mpl::_1> > pointer_t;
+      //The data is stored as a boost fusion vector. 
+      //Obtain the fusion vector class from the mpl vector: base.
+      typedef typename boost::fusion::result_of::as_vector<typename pointer_t::type> data_base;
+      //Apply the fusion vector type to our data_t
+      struct data_t : data_base::type 
+      { };  
+      
+    public:
+      //@Convenient typedefs
+      //@{
+      typedef  base type;
+      typedef  pointer_t pointer_type;
+      //@}
 
-  const data_t& 
-  data() const {return m_data;}
-   data_t& 
-  data() {return m_data;}
-  
-template<int index>
-struct
-get_t 
-{
-  typedef typename  boost::mpl::at<typename result_t::type,typename boost::mpl::int_<index>::type >::type type;
-};
-
-
-
-  template<int index>
-  typename boost::add_pointer<typename get_t<index>::type>::type&
-  get()
-  {
-    return boost::fusion::at_c<index>(m_data);
-  }
-  template<int index>
-  const typename  boost::add_pointer<typename get_t<index>::type>::type& 
-  get() const
-  {
-    return boost::fusion::at_c<index>(m_data);
-  }
-
-};
-
-
-template<template<class> class Model, class T,class D>
-class MixtureVector_impl<Model,T,0,D>
-{
-public:
-  typedef  boost::mpl::vector<HiddenNode<Model,T,typename detail::TypeList::incr_component<D,0>::type> > result_t;
-  typedef  boost::mpl::transform<typename result_t::type ,boost::add_pointer<boost::mpl::_1> > pointer_t;
-
-  typedef make_my_tuple<typename pointer_t::type> data_t;
-  
-  struct type : data_t::type 
-  { };  
-  template<int index>
-  struct
-  get_t 
-  {
-   typedef typename   boost::mpl::at<typename result_t::type,typename boost::mpl::int_<index>::type >::type type;
-  };
-};
-
-template<template<class> class Model, class T>
-class MixtureVector_impl<Model,T,0,detail::TypeList::component>
-{
-public:
-  typedef  boost::mpl::vector<HiddenNode<Model,T,typename detail::TypeList::incr_component<detail::TypeList::component,0>::type> > result_t;
-  typedef  boost::mpl::transform<typename result_t::type ,boost::add_pointer<boost::mpl::_1> > pointer_t;
-
-  typedef make_my_tuple<typename pointer_t::type> data_t;
-  
-  struct type : data_t::type 
-  { };  
-  template<int index>
-  struct
-  get_t
-  {
-    typedef typename    boost::mpl::at<typename result_t::type,typename boost::mpl::int_<index>::type >::type type;
-  };
-};
+      /** Get the type for the object stored at the given index.
+       *  @tparam index The index of the object whose type you want.
+       */
+      template<int index>
+      struct
+      get_t 
+      {
+	/** The type. */
+	typedef typename   boost::mpl::at<typename base::type,typename boost::mpl::int_<index>::type >::type type;
+      };
+    };
 
 
-// template<template<class> class Model, class T,int I>
-// class MixtureVector_impl
-// {
-// public:
-// 	typedef  boost::mpl::push_back<typename MixtureVector_impl<Model,T,I-1>::result_t::type, HiddenNode<Model,T,detail::MixtureList <typename boost::mpl::back<typename MixtureVector_impl<Model,T,I-1>::result_t::type>::type> > > result_t;
-	
-// 	typedef  boost::mpl::transform<typename result_t::type ,boost::add_pointer<boost::mpl::_1> > pointer_t;
-	
-// 	typedef make_my_tuple<typename pointer_t::type> data_t;
-
-// 	struct type : data_t::type 
-// 	{
-// 	};
-
-  
-// 	template<int index>
-// 	struct
-// 	get_t : boost::mpl::at<typename result_t::type,typename boost::mpl::int_<index>::type >
-// 	{};
-
-// };
-
-
-// template<template<class> class Model, class T>
-// class MixtureVector_impl<Model,T,1>
-// {
-// public:
-// 	typedef  boost::mpl::vector<HiddenNode<Model,T> > result_t;
-// 	typedef  boost::mpl::transform<typename result_t::type ,boost::add_pointer<boost::mpl::_1> > pointer_t;
-	
-// 	typedef  make_my_tuple<typename pointer_t::type> data_t;
-  
-// 	struct type : data_t::type 
-// 	{
-// 	};  
-// 	template<int index>
-// 	struct
-// 	get_t : boost::mpl::at<typename result_t::type,typename boost::mpl::int_<index>::type >::type
-// 	{};
-// };
-
-template<template<class> class Model, class T>
-struct MixtureVector : public MixtureVector_impl<Model, T, ENSEMBLE_LEARNING_COMPONENTS - 1,detail::TypeList::component>
+    template<template<class> class Model, class T, int size = ENSEMBLE_LEARNING_COMPONENTS>
+    struct MixtureVector : public MixtureVector_impl<Model, T, size-1 ,detail::TypeList::component>
 {};
 
-    
+    /** Get the id for a particular class */
 template<template<class> class Model, class T,class D>
 int
 get_id(HiddenNode<Model,T,D>* a)
 {
   return detail::TypeList::get_id_t<D>::type::value;
 }
- 
+ /** Get the component number for a particular class */
 template<template<class> class Model, class T,class D>
 int
 get_component(HiddenNode<Model,T,D>* a)
@@ -230,6 +191,7 @@ get_component(HiddenNode<Model,T,D>* a)
   return detail::TypeList::get_component_t<D>::type::value;
 }
 
+ /** Get the positional number for a particular class */
 template<template<class> class Model, class T,class D>
 int
 get_position(HiddenNode<Model,T,D>* a)
