@@ -379,22 +379,6 @@ namespace ICR{
       mixture_vector(
 		     const fusion_vector1& v0,
 		     const fusion_vector2& v1
-		     // const boost::fusion::vector<
-// 	//create a new set of nodes.
-// 	//(Iterate with the preprocessor)
-// #       include <boost/preprocessor/iteration/iterate.hpp>
-// #       define BOOST_PP_ITERATION_LIMITS (0, ENSEMBLE_LEARNING_COMPONENTS - 1)
-// #       define BOOST_PP_FILENAME_1       "EnsembleLearning/detail/MixtureVector_p0.hpp"
-// #       include BOOST_PP_ITERATE()
-// 		     >& v0,
-// 		    const  boost::fusion::vector<
-// 	//create a new set of nodes.
-// 	//(Iterate with the preprocessor)
-// #       include <boost/preprocessor/iteration/iterate.hpp>
-// #       define BOOST_PP_ITERATION_LIMITS (0, ENSEMBLE_LEARNING_COMPONENTS - 1)
-// #       define BOOST_PP_FILENAME_1       "EnsembleLearning/detail/MixtureVector_p1.hpp"
-// #       include BOOST_PP_ITERATE()
-// 		     >& v1
 		     )
       {
 
@@ -406,26 +390,6 @@ namespace ICR{
 	typedef fusion_vector1 p0_t;
 	typedef fusion_vector2 p1_t;
 	
-// 	typedef 
-// 	  boost::fusion::vector<
-// 	//create a new set of nodes.
-// 	//(Iterate with the preprocessor)
-// #       include <boost/preprocessor/iteration/iterate.hpp>
-// #       define BOOST_PP_ITERATION_LIMITS (0, ENSEMBLE_LEARNING_COMPONENTS - 1)
-// #       define BOOST_PP_FILENAME_1       "EnsembleLearning/detail/MixtureVector_p0.hpp"
-// #       include BOOST_PP_ITERATE()
-// 		     >
-// 	  p0_t;
-// 	typedef 
-// 	  boost::fusion::vector<
-// 	//create a new set of nodes.
-// 	//(Iterate with the preprocessor)
-// #       include <boost/preprocessor/iteration/iterate.hpp>
-// #       define BOOST_PP_ITERATION_LIMITS (0, ENSEMBLE_LEARNING_COMPONENTS - 1)
-// #       define BOOST_PP_FILENAME_1       "EnsembleLearning/detail/MixtureVector_p1.hpp"
-// #       include BOOST_PP_ITERATE()
-// 		     >
-// 	  p1_t;
 
 	//create a new set of nodes.
 	//(Iterate with the preprocessor)

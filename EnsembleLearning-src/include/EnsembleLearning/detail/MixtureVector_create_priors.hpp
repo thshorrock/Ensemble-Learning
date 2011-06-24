@@ -31,6 +31,4 @@ boost::shared_ptr<p1_t> BOOST_PP_CAT(shared_p1_,n)(new p1_t(v2[n]));
 p0_t* BOOST_PP_CAT(p0_,n) = BOOST_PP_CAT(shared_p0_,n).get();
 p1_t* BOOST_PP_CAT(p1_,n) = BOOST_PP_CAT(shared_p1_,n).get();
 
-//MV.template get<n>() = new typename MV_t::template get_t<n>(v1[n],v2[n]);
-//m_Nodes.push_back(MV.template get<n>() );
 #undef n
