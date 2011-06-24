@@ -104,6 +104,11 @@ namespace ICR{
 				      typename boost::mpl::apply_wrap2<scale,component,typename boost::mpl::int_<I>::type>
 				      ::type>::type type;
   };
+  template<class D, int I=1>
+  struct Identity
+  {
+    typedef D type;
+  };
 
   template <typename D>
   struct get_id_t

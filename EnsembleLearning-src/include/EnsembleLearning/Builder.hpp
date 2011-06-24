@@ -35,6 +35,7 @@
 #include "EnsembleLearning/node/factor/Factor.hpp"
 #include "EnsembleLearning/node/factor/Mixture.hpp"
 #include "EnsembleLearning/detail/MixtureVector.hpp"
+#include "EnsembleLearning/detail/TernaryOp.hpp"
 
 #include <boost/preprocessor/repetition/enum_params.hpp>
 #include <boost/preprocessor/repetition.hpp>
@@ -53,6 +54,7 @@
 #include <boost/fusion/include/make_vector.hpp>
 #include <boost/fusion/sequence/intrinsic/at.hpp>
 #include <boost/fusion/include/at.hpp>
+
 
 #include <boost/shared_ptr.hpp>
 #include <vector>
@@ -380,7 +382,6 @@ namespace ICR{
 		     const fusion_vector2& v1
 		     )
       {
-
 	typedef  MixtureVector<Model,T>
       	  MV_t;
 	
@@ -388,7 +389,11 @@ namespace ICR{
 
 	typedef fusion_vector1 p0_t;
 	typedef fusion_vector2 p1_t;
+	BOOST_MPL_ASSERT_RELATION(boost::fusion::result_of::size<p0_t>::type::value, ==,boost::fusion::result_of::size<p1_t>::type::value);
+	const size_t size = boost::fusion::result_of::size<p0_t>::type::value;
 	
+	// detail::TernaryOp(v0,v1,MV.data(), MakeMixtureModel<Model>(m_Factors, m_Nodes));
+	// //boost::fusion::transform( v0,v1, MakeMixtureModel() );
 
 	//create a new set of nodes.
 	//(Iterate with the preprocessor)
@@ -408,15 +413,33 @@ namespace ICR{
       		     const std::vector<T>& v2)
       {
 
-	// typedef  MixtureVector<Model,T>
-      	//   MV_t;
-	
-	// MV_t MV;
-
 	typedef ObservedNode<Gaussian, T, detail::TypeList::zeros> p0_t;
-	typedef ObservedNode<Gamma, T, detail::TypeList::zeros> p1_t;
+	typedef ObservedNode<Gamma,    T, detail::TypeList::zeros> p1_t;
+	const size_t size = ENSEMBLE_LEARNING_COMPONENTS;
 	
+	// std::vector<p0_t*> p_0(size);
+	// std::vector<p1_t*> p_1(size);
+	// for(size_t i=0;i<size;++i){
+	//   boost::shared_ptr<p0_t> tmp0(new p0_t(v1[i]));
+	//   boost::shared_ptr<p1_t> tmp1(new p1_t(v2[i]));
+	//   //store the reference so it doesn't get deleted till end of execution.
+	//   m_Nodes.push_back(tmp0);
+	//   m_Nodes.push_back(tmp1);
+	  
+	//   //store so that references can be put easily into fusion vector
+	//   p_0[i] = tmp0.get();
+	//   p_1[i] = tmp1.get();
+	// }
+	//The fusion vectors
+	// Vector<ObservedNode,Gaussian,T,size> vt0;
+	// Vector<ObservedNode,Gamma,T,size> vt1;
+	// //Assign
+	// boost::fusion::for_each(vt0.data(), AssignVector<p0_t>(p_0));
+	// boost::fusion::for_each(vt1.data(), AssignVector<p1_t>(p_1));
 	
+	// //pass on the pointers
+	// return mixture_vector<Model>(vt0.data(),vt1.data());
+				
 	
 	//Create a set of priors
 	//(Iterate with the preprocessor)
@@ -831,6 +854,55 @@ namespace ICR{
       
 	   ///@}
       private:
+      
+      template<class U>
+      struct AssignVector
+      {
+	AssignVector(const std::vector<U*>& vp) : m_index(0), m_vp(vp) {}
+	template <class Node>
+	void operator()(Node& node) const
+	{
+	  node = m_vp[m_index];
+	  ++m_index;
+	}
+	mutable size_t m_index;
+	const std::vector<U*>& m_vp;
+      };
+      
+      template<template<class> class Model>
+      struct MakeMixtureModel
+      {
+	MakeMixtureModel(std::vector<boost::shared_ptr<FactorNode_basic> >& F,
+			 std::vector<boost::shared_ptr<VariableNode<T> > >& N)
+	  : m_F(F), m_N(N)
+	{}
+
+	template <class p0_t, class p1_t, class pc_t>
+	void operator()(p0_t& p0, p1_t& p1, pc_t& ch) const
+	//it0, Itr1 it1, ItrChild itC) const
+	{
+	  typedef typename boost::remove_pointer<typename boost::remove_reference<p0_t>::type>::type n0_t;
+	  typedef typename boost::remove_pointer<typename boost::remove_reference<p1_t>::type>::type n1_t;
+	  typedef typename boost::remove_pointer<typename boost::remove_reference<pc_t>::type>::type child_t;
+	  ;
+	  
+	  boost::shared_ptr<child_t> child( new child_t() );
+	  
+	  typedef detail::Factor<Model,T,n0_t,n1_t,child_t> Factor_t;
+	  boost::shared_ptr<Factor_t > F(new Factor_t(p0, 
+						      p1, 
+						      child.get()));
+
+	  m_F.push_back(F);
+	  m_N.push_back(child);
+	  ch = child.get();
+	}
+	mutable std::vector<boost::shared_ptr<FactorNode_basic> >& m_F;
+	mutable std::vector<boost::shared_ptr<VariableNode<T> > >& m_N;
+      };
+	// MV_t& m_MV;
+		//};
+      
 	   double
 	   iterate();
 

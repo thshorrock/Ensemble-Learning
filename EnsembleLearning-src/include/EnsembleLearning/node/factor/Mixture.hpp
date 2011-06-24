@@ -262,7 +262,8 @@ namespace ICR{
 	struct GetMoments
 	{
 	  GetMoments(std::vector<moments_t>& m) : m_moments(m) {}
-	  void operator()(variable_parameter node) const 
+	  template <class Node>
+	  void operator()(Node& node) const 
 	  {
 	    m_moments.push_back(node->GetMoments());
 	  }
@@ -274,7 +275,7 @@ namespace ICR{
 	{
 	  AttachToChildFactor(Mixture* p) : m_ptr(p) {}
 	  template <class Node>
-	  void operator()(Node node) const 
+	  void operator()(Node& node) const 
 	  {
 	    node->AddChildFactor(m_ptr);
 	  }

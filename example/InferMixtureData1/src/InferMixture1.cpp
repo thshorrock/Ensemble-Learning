@@ -17,7 +17,7 @@ main  (int ac, char **av)
 {
   //Create the data
   rng* random = Random::Instance(10); //a random number generator with seed 10.
-  const size_t data_points = 10000; //make some data points.
+  const size_t data_points = 1000; //make some data points.
   std::vector<double> data(data_points);
   for(size_t i = 0; i<data_points; ++i)
     { 

@@ -24,7 +24,7 @@ install(DIRECTORY include/ DESTINATION include
 #set(CMAKE_BUILD_TYPE DEBUG)
 install (TARGETS EnsembleLearning DESTINATION lib)
 #Test
-add_subdirectory(test)
+#add_subdirectory(test)
 
 
 #Build Documentation
