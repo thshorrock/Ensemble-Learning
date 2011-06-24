@@ -37,22 +37,10 @@
 #include "EnsembleLearning/detail/MixtureVector.hpp"
 #include "EnsembleLearning/detail/TernaryOp.hpp"
 
-#include <boost/preprocessor/repetition/enum_params.hpp>
-#include <boost/preprocessor/repetition.hpp>
-#include <boost/preprocessor/arithmetic/sub.hpp>
-#include <boost/preprocessor/punctuation/comma_if.hpp>
-#include <boost/preprocessor/iteration/local.hpp>
-#  include <boost/preprocessor/control/if.hpp>
-#  include <boost/preprocessor/comparison/equal.hpp>
-#  include <boost/preprocessor/facilities/empty.hpp>
 
-#include <boost/fusion/algorithm/iteration/for_each.hpp>
 #include <boost/fusion/include/for_each.hpp>
-#include <boost/fusion/container/vector.hpp>
 #include <boost/fusion/include/vector.hpp>
-#include <boost/fusion/container/generation/make_vector.hpp>
 #include <boost/fusion/include/make_vector.hpp>
-#include <boost/fusion/sequence/intrinsic/at.hpp>
 #include <boost/fusion/include/at.hpp>
 
 
@@ -372,9 +360,6 @@ namespace ICR{
       ///@}
 
       
-
-#       define ENSEMBLE_LEARNING_VEC_print(z, n, data) data
-
       template<template<class> class Model, class fusion_vector1, class fusion_vector2>
       MixtureVector<Model,T>
       mixture_vector(
