@@ -36,8 +36,8 @@
 namespace ICR{
   namespace EnsembleLearning{
     //forward declare
-    template<class T> class Moments;
-    template<class T> class NaturalParameters;
+    template<class T, int array_size> class Moments;
+    template<class T, int array_size> class NaturalParameters;
     template<class T> class Expression; //only used as a pointer here
     template <class Model, class T,class List> class DeterministicNode; //only used as a pointer here
     

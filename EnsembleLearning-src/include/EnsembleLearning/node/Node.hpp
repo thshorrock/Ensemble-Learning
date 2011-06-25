@@ -38,34 +38,52 @@ namespace ICR{
     
     //forward declaration
     class Coster;
-    template<class T> class Moments;
-    template<class T> class NaturalParameters;
+    template<class T,int> class Moments;
+    template<class T,int> class NaturalParameters;
     
     // //forward
     // template<class T, class NotThis>
     // class FactorNode;
     
-    /** An interface for the Variable Nodes.
-     * Every variable node derives from this interface.
-     * @tparam T The data type used by the variable nodes in the model.
-     * This is either double or float.
-     */
-    template<class T>
-    class VariableNode  // : public Node
+    struct VariableNode_basic
     {
-    public:
-      
-      /** Get the moments stored in this node. 
-       *  @return The stored moments */
-      virtual
-      const Moments<T>&
-      GetMoments()  = 0;
 
       /** Initialise the moments to this node.
        *  The moments are random based upon the prior moments (of the parent nodes)*/
       virtual
       void
       InitialiseMoments()  = 0;
+
+      /** Collect the messages of adjacent factors and update the stored moments.
+       *  @param Cost The total cost of the approximation to which this node contributes.
+       */
+      virtual 
+      void
+      Iterate(Coster& Cost) = 0;
+
+
+      virtual ~VariableNode_basic() = 0;
+    };
+    inline
+    VariableNode_basic::~VariableNode_basic(){};
+
+
+    /** An interface for the Variable Nodes.
+     * Every variable node derives from this interface.
+     * @tparam T The data type used by the variable nodes in the model.
+     * This is either double or float.
+     */
+    template<class T,int size =2>
+    class VariableNode  : public VariableNode_basic
+    {
+    public:
+      
+      /** Get the moments stored in this node. 
+       *  @return The stored moments */
+      virtual
+      const Moments<T,size>&
+      GetMoments()  = 0;
+
 
       /** Set the parent factor for a node.
        *  Every variable node has only one parent factor, 
@@ -108,13 +126,6 @@ namespace ICR{
       const std::vector<T>
       GetVariance()  = 0;
 
-      /** Collect the messages of adjacent factors and update the stored moments.
-       *  @param Cost The total cost of the approximation to which this node contributes.
-       */
-      virtual 
-      void
-      Iterate(Coster& Cost) = 0;
-
       /** Destructor. */
       virtual 
       ~VariableNode(){};
@@ -146,7 +157,7 @@ namespace ICR{
      *  Every factor node derives from this.
      * @tparam T The data type used by all the factor nodes, either double or float.
      */
-    template<class T, class NotThis>
+    template<class T, class NotThis, int size = 2>
     class FactorNode //: public FactorNode_basic
     {
     public:
@@ -167,7 +178,7 @@ namespace ICR{
        * @return The natural parameter calculated for v.
        */
       virtual
-      NaturalParameters<T>
+      NaturalParameters<T, size>
       GetNaturalNot(variable_parameter v) const = 0;
  
       // virtual
@@ -186,7 +197,7 @@ namespace ICR{
        *  @return The Inital Moments for the child nodes.
        */
       virtual
-      Moments<T>
+      Moments<T, size>
       InitialiseMoments() const  = 0;
 
       /** Destructor */

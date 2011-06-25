@@ -31,6 +31,7 @@
 
 #include "Random.hpp"
 #include "EnsembleLearning/detail/parallel_algorithms.hpp"
+#include "EnsembleLearning/detail/MixtureVector.hpp" //for ENSEMBLE_LEARNING_COMPONENTS
 #include "EnsembleLearning/message/Moments.hpp"
 #include "EnsembleLearning/message/NaturalParameters.hpp"
 #include "EnsembleLearning/node/Node.hpp"
@@ -60,14 +61,14 @@ namespace ICR{
       /** @name Useful typdefs for types that are exposed to the user.
        */
       ///@{
-      typedef typename boost::call_traits< Moments<T> >::param_type
+      typedef typename boost::call_traits< Moments<T,ENSEMBLE_LEARNING_COMPONENTS> >::param_type
       moments_parameter;
-      typedef typename boost::call_traits< Moments<T> >::value_type
+      typedef typename boost::call_traits< Moments<T,ENSEMBLE_LEARNING_COMPONENTS> >::value_type
       moments_t;
 
-      typedef typename boost::call_traits< NaturalParameters<T> >::param_type
+      typedef typename boost::call_traits< NaturalParameters<T,ENSEMBLE_LEARNING_COMPONENTS> >::param_type
       NP_parameter;
-      typedef typename boost::call_traits< NaturalParameters<T> >::value_type
+      typedef typename boost::call_traits< NaturalParameters<T,ENSEMBLE_LEARNING_COMPONENTS> >::value_type
       NP_t;
 
       typedef typename boost::call_traits<T>::value_type
@@ -80,7 +81,7 @@ namespace ICR{
       typedef typename boost::call_traits<std::vector<T> >::value_type
       vector_data_t;
 
-      typedef typename boost::call_traits<const VariableNode<T>*>::param_type
+      typedef typename boost::call_traits<const VariableNode<T,ENSEMBLE_LEARNING_COMPONENTS>*>::param_type
       Variable_parameter;
 
       
@@ -152,8 +153,8 @@ namespace ICR{
 
 
       static
-      NaturalParameters<T>
-      CalcNP2Prior(const Moments<T>& Us) {return NaturalParameters<T>();};
+      NaturalParameters<T,ENSEMBLE_LEARNING_COMPONENTS>
+      CalcNP2Prior(moments_parameter Us) {return NP_t();};
 
 
     private:
@@ -338,7 +339,7 @@ inline
 typename ICR::EnsembleLearning::Dirichlet<T>::NP_t
 ICR::EnsembleLearning::Dirichlet<T>::CalcNP2Data(moments_parameter Us)
 {
-  NP_t NP = NP_t(Us.size());
+  NP_t NP ;
   PARALLEL_TRANSFORM( Us.begin(), Us.end(), NP.begin(), minus_one());
   return NP;
 }

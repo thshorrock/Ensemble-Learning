@@ -28,12 +28,14 @@
 
 
 
-#include "MomentsIterator.hpp"
-#include "EnsembleLearning/detail/Mutex.hpp"
-#include "EnsembleLearning/detail/parallel_algorithms.hpp"
+//#include "MomentsIterator.hpp"
+//#include "EnsembleLearning/detail/Mutex.hpp"
+//#include "EnsembleLearning/detail/parallel_algorithms.hpp"
 
-#include <iostream>
 #include <boost/call_traits.hpp>
+#include <boost/array.hpp>
+#include <iostream>
+#include <algorithm>
 
 namespace ICR{
   namespace EnsembleLearning{
@@ -42,7 +44,7 @@ namespace ICR{
     /** A threadsafe container for the Moments.
      *  @tparam T The datatype to be used for storing the moments (typically double or float).
      */
-    template<class T=double>
+    template<class T=double, int array_size = 2>
     class 
     Moments
     {
@@ -67,16 +69,16 @@ namespace ICR{
       data_type;
       
       
-      typedef typename boost::call_traits<Moments<T> >::param_type 
+      typedef typename boost::call_traits<Moments<T,array_size> >::param_type 
       parameter;
       
-      typedef typename boost::call_traits<Moments<T> >::reference  
+      typedef typename boost::call_traits<Moments<T,array_size> >::reference  
       reference;
       
-      typedef typename boost::call_traits<Moments<T> >::const_reference  
+      typedef typename boost::call_traits<Moments<T,array_size> >::const_reference  
       const_reference;
       
-      typedef typename boost::call_traits<Moments<T> >::value_type  
+      typedef typename boost::call_traits<Moments<T,array_size> >::value_type  
       type;
       
       typedef typename boost::call_traits<size_t>::param_type  
@@ -91,18 +93,24 @@ namespace ICR{
       typedef typename boost::call_traits<size_t>::const_reference  
       size_const_reference;
       
-      typedef  MomentsIterator<type, data_type>  
-      iterator;
+      // typedef  MomentsIterator<type, data_type>  
+      // iterator;
       
-      typedef  MomentsIterator<const type, const data_type>  
-      const_iterator;
+      // typedef  MomentsIterator<const type, const data_type>  
+      // const_iterator;
+       
+      typedef typename boost::array<data_type,array_size>::iterator
+       iterator;
+      
+      typedef typename boost::array<data_type,array_size>::const_iterator
+       const_iterator;
       
       ///@}
 
       /** Constructor 
        * @param size The size of the set of moments to store 
        */
-      Moments(size_parameter size = 0);
+      Moments();
 
       /** Constructor.
        *  Construct a set of moments based upon the passed vector.
@@ -242,8 +250,8 @@ namespace ICR{
       };
 
 
-      std::vector<T> m_data;
-      mutable Mutex m_mutex;
+      boost::array<data_type,array_size> m_data;
+      //mutable Mutex m_mutex;
 
     };
 
@@ -270,12 +278,12 @@ namespace ICR{
      *  @param b The second moments container to add
      *  @return The sum of the two moments.
      */
-    template<class T>
+    template<class T,int array_size>
     inline
-    const Moments<T>
-    operator+(const Moments<T>& a, const Moments<T>& b)
+    const Moments<T,array_size>
+    operator+(const Moments<T,array_size>& a, const Moments<T,array_size>& b)
     {
-      Moments<T> tmp = a;
+      Moments<T,array_size> tmp = a;
       return tmp+=b;
     }  
     
@@ -284,13 +292,13 @@ namespace ICR{
      *  @param d The scalar.
      *  @return The product of the moments and the scaler.
      */
-    template<class T>  
+    template<class T,int array_size>  
     inline 
-    const Moments<T>
-    operator*(const Moments<T>& m,  
+    const Moments<T,array_size>
+    operator*(const Moments<T,array_size>& m,  
 	      const T d)
     {
-      Moments<T> tmp = m;
+      Moments<T,array_size> tmp = m;
       return tmp*=d;
     }
       
@@ -300,55 +308,57 @@ namespace ICR{
      *  @param d The scalar.
      *  @return The product of the moments and the scaler.
      */
-    template<class T>  
+    template<class T,int array_size>  
     inline 
-    const Moments<T>
+    const Moments<T,array_size>
     operator*(const T d, 
-	      const Moments<T>& m)
+	      const Moments<T,array_size>& m)
     {
-      Moments<T> tmp = m;
+      Moments<T,array_size> tmp = m;
       return tmp*=d;
     }
   }
 }
 
 
-template<class T>
+template<class T,int array_size>
 inline
-ICR::EnsembleLearning::Moments<T>::Moments( vector_parameter data)
-  : m_data(data),
-    m_mutex()
-{}
+ICR::EnsembleLearning::Moments<T,array_size>::Moments( vector_parameter data)
+  : m_data()// ,
+    // m_mutex()
+{
+  std::copy(data.begin(),data.end(),m_data.begin());
+}
 
-template<class T> 
+template<class T,int array_size> 
 inline   
-ICR::EnsembleLearning::Moments<T>::Moments( size_parameter size)
-  : m_data(std::vector<T>(size)),
-    m_mutex() //non-copiable
-{}
+ICR::EnsembleLearning::Moments<T,array_size>::Moments()
+  : m_data()
+{
+}
 
-template<class T> 
+template<class T,int array_size> 
 inline   
-ICR::EnsembleLearning::Moments<T>::Moments(data_parameter d1,
-			      data_parameter d2)
-  : m_data(2),
-    m_mutex() //non-copiable
+ICR::EnsembleLearning::Moments<T,array_size>::Moments(data_parameter d1,
+						      data_parameter d2)
+  : m_data()
+    // m_mutex() //non-copiable
 {
   m_data[0] = d1;
   m_data[1] = d2;
 }
       
-template<class T> 
+template<class T,int array_size> 
 inline   
-ICR::EnsembleLearning::Moments<T>::Moments(parameter other)
-  : m_data(other.m_data),
-    m_mutex() //non-copiable
+ICR::EnsembleLearning::Moments<T,array_size>::Moments(parameter other)
+  : m_data(other.m_data)
+    // m_mutex() //non-copiable
 {}
       
-template<class T> 
+template<class T,int array_size> 
 inline   
-typename ICR::EnsembleLearning::Moments<T>::reference
-ICR::EnsembleLearning::Moments<T>::operator=(parameter other)
+typename ICR::EnsembleLearning::Moments<T,array_size>::reference
+ICR::EnsembleLearning::Moments<T,array_size>::operator=(parameter other)
 {    
   if (this!= &other) {
     m_data = (other.m_data);
@@ -357,88 +367,91 @@ ICR::EnsembleLearning::Moments<T>::operator=(parameter other)
   return *this;
 }
 
-template<class T>  
+template<class T,int array_size>  
 inline  
-typename ICR::EnsembleLearning::Moments<T>::iterator
-ICR::EnsembleLearning::Moments<T>::begin()
+typename ICR::EnsembleLearning::Moments<T,array_size>::iterator
+ICR::EnsembleLearning::Moments<T,array_size>::begin()
 {
-  return iterator(this,0);
+  return m_data.begin(); //iterator(this,0);
 }
 
-template<class T>
+template<class T,int array_size>
 inline
-typename ICR::EnsembleLearning::Moments<T>::const_iterator
-ICR::EnsembleLearning::Moments<T>::begin() const
+typename ICR::EnsembleLearning::Moments<T,array_size>::const_iterator
+ICR::EnsembleLearning::Moments<T,array_size>::begin() const
 {
-  return const_iterator (this,0);
+  return m_data.begin();
+  //  return const_iterator (this,0);
 }
 
-template<class T>
+template<class T,int array_size>
 inline
-typename ICR::EnsembleLearning::Moments<T>::iterator
-ICR::EnsembleLearning::Moments<T>::end()
-{
-  return iterator(this,m_data.size());
-}
-
-
-template<class T>
-inline
-typename ICR::EnsembleLearning::Moments<T>::const_iterator
-ICR::EnsembleLearning::Moments<T>::end() const
-{
-  return const_iterator(this,m_data.size());
+typename ICR::EnsembleLearning::Moments<T,array_size>::iterator
+ICR::EnsembleLearning::Moments<T,array_size>::end()
+{ 
+  return m_data.end();
+  //return iterator(this,m_data.size());
 }
 
 
-template<class T>
+template<class T,int array_size>
 inline
-typename ICR::EnsembleLearning::Moments<T>::data_const_reference
-ICR::EnsembleLearning::Moments<T>::operator[](size_parameter index) const
+typename ICR::EnsembleLearning::Moments<T,array_size>::const_iterator
+ICR::EnsembleLearning::Moments<T,array_size>::end() const
 {
-  Lock lock(m_mutex); 
+  return m_data.end();
+  //  return const_iterator(this,m_data.size());
+}
+
+
+template<class T,int array_size>
+inline
+typename ICR::EnsembleLearning::Moments<T,array_size>::data_const_reference
+ICR::EnsembleLearning::Moments<T,array_size>::operator[](size_parameter index) const
+{
+  // Lock lock(m_mutex); 
   return m_data[index];
 }
       
-template<class T>
+template<class T,int array_size>
 inline
-typename ICR::EnsembleLearning::Moments<T>::data_reference
-ICR::EnsembleLearning::Moments<T>::operator[](size_parameter index)
+typename ICR::EnsembleLearning::Moments<T,array_size>::data_reference
+ICR::EnsembleLearning::Moments<T,array_size>::operator[](size_parameter index)
 {
-  Lock lock(m_mutex); 
+  // Lock lock(m_mutex); 
   return m_data[index];
 }
       
 
-template<class T>
-typename ICR::EnsembleLearning::Moments<T>::reference  
-ICR::EnsembleLearning::Moments<T>::operator+=(parameter other)
+template<class T,int array_size>
+typename ICR::EnsembleLearning::Moments<T,array_size>::reference  
+ICR::EnsembleLearning::Moments<T,array_size>::operator+=(parameter other)
 {
   //This could be called by different threads, so lock
-  Lock lock(m_mutex);  
-  PARALLEL_TRANSFORM(m_data.begin(), m_data.end(), other.begin(), m_data.begin(), plus());
+  //  Lock lock(m_mutex);  
+  std::transform(m_data.begin(), m_data.end(), other.begin(), m_data.begin(), plus());
   return *this;
 }
       
-template<class T>  
+template<class T,int array_size>  
 inline 
-typename ICR::EnsembleLearning::Moments<T>::reference
-ICR::EnsembleLearning::Moments<T>::operator*=(parameter other)
+typename ICR::EnsembleLearning::Moments<T,array_size>::reference
+ICR::EnsembleLearning::Moments<T,array_size>::operator*=(parameter other)
 {
   //This could be called by different threads, so lock
-  Lock lock(m_mutex); 
-  PARALLEL_TRANSFORM(m_data.begin(), m_data.end(), other.begin(), m_data.begin(), times() );
+  //Lock lock(m_mutex); 
+  std::transform(m_data.begin(), m_data.end(), other.begin(), m_data.begin(), times() );
   return *this;
 }
 
-template<class T>  
+template<class T,int array_size>  
 inline 
-typename ICR::EnsembleLearning::Moments<T>::reference
-ICR::EnsembleLearning::Moments<T>::operator*=(data_parameter d)
+typename ICR::EnsembleLearning::Moments<T,array_size>::reference
+ICR::EnsembleLearning::Moments<T,array_size>::operator*=(data_parameter d)
 {
   //This could be called by different threads, so lock
-  Lock lock(m_mutex); 
-  PARALLEL_TRANSFORM(m_data.begin(), m_data.end(),  m_data.begin(), times_by(d));
+  //Lock lock(m_mutex); 
+  std::transform(m_data.begin(), m_data.end(),  m_data.begin(), times_by(d));
   return *this;
 }
       

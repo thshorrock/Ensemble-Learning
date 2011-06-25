@@ -65,25 +65,27 @@ namespace ICR{
      *  To obtain a std::vector use the Mixture2Vector function.
      *  @see Mixture2Vector.
      */
-    template<template<template<class> class,class,class,class> class ModelType,
+    template<template<template<class> class,class,class,int,class> class ModelType,
 	     template<class> class Model, 
 	     class T, 
 	     int I, 
 	     template<class, int> class Op = detail::TypeList::Identity,
-	     class D = detail::TypeList::zeros>
+	     class D = detail::TypeList::zeros,
+	     int array_size = 2>
     class Vector_impl
     {
       //Make all other ector_impl friends.
-    template<template<template<class> class,class,class,class> class ModelType2,
+      template<template<template<class> class,class,class,int,class> class ModelType2,
 	     template<class> class Model2, 
 	     class T2, 
 	     int I2, 
 	     template<class, int> class Operation2,
-	     class D2>
+	       class D2,
+	       int array_size_2>
     friend class Vector_impl;
 
       //create an mpl vector that increments the component number for each type from 1 to #components.
-      typedef typename boost::mpl::push_back<typename Vector_impl<ModelType,Model,T,I-1,Op,D>::base::type, ModelType<Model,T,typename Op<D,I>::type,void > >::type base;
+      typedef typename boost::mpl::push_back<typename Vector_impl<ModelType,Model,T,I-1,Op,D>::base::type, ModelType<Model,T,typename Op<D,I>::type,array_size,void > >::type base;
       //Make the same vector but this time as pointers.
       typedef  boost::mpl::transform<typename base::type ,boost::add_pointer<boost::mpl::_1> > pointer_t;
       //The data is stored as a boost fusion vector. 
@@ -150,24 +152,26 @@ namespace ICR{
      *  This terminates the recursive generation of a vector.
      */
     
-    template<template<template<class> class,class,class,class> class ModelType,
+    template<template<template<class> class,class,class,int,class> class ModelType,
 	     template<class> class Model, 
 	     class T, 
 	     template<class, int> class Op,
-	     class D>
-    class Vector_impl<ModelType,Model,T,0,Op,D>
+	     class D,
+	     int array_size>
+    class Vector_impl<ModelType,Model,T,0,Op,D,array_size>
     {
       //Make all other ector_impl friends.
-    template<template<template<class> class,class,class,class> class ModelType2,
+      template<template<template<class> class,class,class,int,class> class ModelType2,
 	     template<class> class Model2, 
 	     class T2, 
 	     int I2, 
 	     template<class, int> class Operation2,
-	     class D2>
+	     class D2,
+	       int array_size_2>
     friend class Vector_impl;
 
       //create an mpl vector that increments the component number for each type from 1 to #components.
-      typedef  boost::mpl::vector<ModelType<Model,T,typename Op<D,0>::type,void> > base;
+      typedef  boost::mpl::vector<ModelType<Model,T,typename Op<D,0>::type,array_size,void> > base;
       //Make the same vector but this time as pointers.
       typedef  boost::mpl::transform<typename base::type ,boost::add_pointer<boost::mpl::_1> > pointer_t;
       //The data is stored as a boost fusion vector. 
@@ -202,12 +206,14 @@ namespace ICR{
     {};
 
 
-    template<template<template<class> class,class,class,class> class ModelType,
+    template<template<template<class> class,class,class,int,class> class ModelType,
 	     template<class> class Model, 
 	     class T, 
 	     int size, 
 	     template<class, int> class Op = detail::TypeList::Identity,
-	     class D = detail::TypeList::zeros>
+	     class D = detail::TypeList::zeros,
+	     int array_size = 2
+	     >
     struct Vector : public Vector_impl<ModelType,Model, T, size-1 ,Op, D>
     {};
 

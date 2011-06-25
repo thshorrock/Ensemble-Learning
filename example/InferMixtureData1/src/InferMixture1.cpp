@@ -43,7 +43,7 @@ main  (int ac, char **av)
 
   
   //Node to hold the learnt weight of each component of the mixture
-  WeightsNode weights = build.weights(ENSEMBLE_LEARNING_COMPONENTS);
+  WeightsNode weights = build.weights();
   
   //vectors that hold the means and precisions
   BOOST_AUTO( vmean, build.mixture_vector<Gaussian>(0.00,0.001) ); 
@@ -52,30 +52,45 @@ main  (int ac, char **av)
   // auto vmean = build.mixture_vector<Gaussian>(0.0,0.001 );
   // auto vprec = build.mixture_vector<Gamma>(1.0,0.001 );
 
-  //Model The data as Gaussian distributed with the mean an precision determined from the above nodes.
+  std::cout<<"id 0 = "<<get_id(vmean.get<0>())<<std::endl;
+  std::cout<<"id 1 = "<<get_id(vmean.get<1>())<<std::endl;
+  std::cout<<"id 2 = "<<get_id(vmean.get<2>())<<std::endl;
+  std::cout<<"id 3 = "<<get_id(vmean.get<3>())<<std::endl;
+  std::cout<<"id 4 = "<<get_id(vmean.get<4>())<<std::endl;
+  //  std::cout<<"id 5 = "<<get_id(vmean.get<5>())<<std::endl;
+
+  std::cout<<"component 0 = "<<get_component(vmean.get<0>())<<std::endl;
+  std::cout<<"component 1 = "<<get_component(vmean.get<1>())<<std::endl;
+  std::cout<<"component 2 = "<<get_component(vmean.get<2>())<<std::endl;
+  std::cout<<"component 3 = "<<get_component(vmean.get<3>())<<std::endl;
+  std::cout<<"component 4 = "<<get_component(vmean.get<4>())<<std::endl;
+
+
+
+  // Model The data as Gaussian distributed with the mean an precision determined from the above nodes.
   //  Each data point is modelled indepenantly.
   for(size_t i=0; i<data.size(); ++i)
     {
       build.join(vmean,vprec, weights, data[i]);  
     }
   
-  //The model is complete, now need to do the inference.
-  //  Iterate until convergance of the evidence bound (per data point)
-  //  to within 0.01% or  at most 100 iterations.
-   build.run(1e-6,100);
+  // //The model is complete, now need to do the inference.
+  // //  Iterate until convergance of the evidence bound (per data point)
+  // //  to within 0.01% or  at most 100 iterations.
+  //  build.run(1e-6,100);
  
-  //output the inferred weights, means and precisions
-  std::cout<<"\nInferred results:\n"<<std::endl;
+  // //output the inferred weights, means and precisions
+  // std::cout<<"\nInferred results:\n"<<std::endl;
   
-  //first collect the learned nodes into std::vectors (which are more convenient to handle).
-  std::vector<Variable> means = Mixture2Vector(vmean);
-  std::vector<Variable> precs = Mixture2Vector(vprec);
+  // //first collect the learned nodes into std::vectors (which are more convenient to handle).
+  // std::vector<Variable> means = Mixture2Vector(vmean);
+  // std::vector<Variable> precs = Mixture2Vector(vprec);
   
-  //Then print.
-  for(size_t i=0;i<ENSEMBLE_LEARNING_COMPONENTS;++i){
-    std::cout<<"weight["<<i<<"]  = "<<Mean(weights,i)<<"\t +- "<<StandardDeviation(weights,i)<<std::endl;
-    std::cout<<"mean["<<i<<"]      = "<<Mean(means[i])<<"\t +- "<<StandardDeviation(means[i])<<std::endl;
-    std::cout<<"precision["<<i<<"] = "<<Mean(precs[i])<<"\t +- "<<StandardDeviation(precs[i])<<std::endl<<std::endl;
-  }
+  // //Then print.
+  // for(size_t i=0;i<ENSEMBLE_LEARNING_COMPONENTS;++i){
+  //   std::cout<<"weight["<<i<<"]  = "<<Mean(weights,i)<<"\t +- "<<StandardDeviation(weights,i)<<std::endl;
+  //   std::cout<<"mean["<<i<<"]      = "<<Mean(means[i])<<"\t +- "<<StandardDeviation(means[i])<<std::endl;
+  //   std::cout<<"precision["<<i<<"] = "<<Mean(precs[i])<<"\t +- "<<StandardDeviation(precs[i])<<std::endl<<std::endl;
+  // }
 
 }

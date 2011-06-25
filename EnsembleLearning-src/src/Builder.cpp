@@ -80,16 +80,16 @@ ICR::EnsembleLearning::Builder<T>::~Builder()
 
 template<class T>
 typename ICR::EnsembleLearning::Builder<T>::WeightsNode
-ICR::EnsembleLearning::Builder<T>::weights(const size_t size)
+ICR::EnsembleLearning::Builder<T>::weights()
 {
   typedef DirichletConstType prior_t;
   typedef ICR::EnsembleLearning::NoSecondParent blank;
   typedef DirichletType child_t;
-  typedef detail::Factor<Dirichlet,T,prior_t,blank,child_t> Factor_t;
+  typedef detail::Factor<Dirichlet,T,prior_t,blank,child_t,ENSEMBLE_LEARNING_COMPONENTS> Factor_t;
   
 
-  boost::shared_ptr<DirichletConstType > nDirichletPrior(new DirichletConstType(size,1.0));
-  boost::shared_ptr<DirichletType >      nDirichlet(new DirichletType(size));
+  boost::shared_ptr<DirichletConstType > nDirichletPrior(new DirichletConstType(1.0));
+  boost::shared_ptr<DirichletType >      nDirichlet(new DirichletType());
   
   boost::shared_ptr<Factor_t>    
     DirichletF(new Factor_t(nDirichletPrior.get(), nDirichlet.get()));
@@ -161,12 +161,12 @@ ICR::EnsembleLearning::Builder<T>::rectified_gaussian_mixture(std::vector<Variab
 {
   const size_t number = Weights->size();
 	
-  typedef HiddenNode<Dirichlet, T > prior_t;
+  typedef DirichletType prior_t;
   typedef ICR::EnsembleLearning::NoSecondParent blank;
   typedef CatagoryType child_t;
-  typedef detail::Factor<Discrete,T,prior_t,blank,child_t> Factor_t;
+  typedef detail::Factor<Discrete,T,prior_t,blank,child_t,ENSEMBLE_LEARNING_COMPONENTS> Factor_t;
 
-  boost::shared_ptr<CatagoryType>         Catagory(new CatagoryType(number));
+  boost::shared_ptr<CatagoryType>         Catagory(new CatagoryType());
   boost::shared_ptr< Factor_t>      CatagoryF(new Factor_t(Weights, Catagory.get()));
   m_Nodes.push_back(Catagory);
   m_Factors.push_back(CatagoryF);

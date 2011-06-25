@@ -51,7 +51,7 @@ namespace ICR{
     template<class T>
     class Discrete;
     
-    template <template<class> class Model, class T,class List, class Enable>
+    template <template<class> class Model, class T,class List,int array_size, class Enable>
     class HiddenNode; //only used as pointer here.
     
     namespace detail{
@@ -65,16 +65,17 @@ namespace ICR{
 	       >
       class Mixture : public FactorNode_basic,
 		      public boost::mpl::inherit_linearly<typename parent1_t::type,
-							  typename boost::mpl::inherit<boost::mpl::_1,
-										       FactorNode<T,boost::mpl::_2> 
-										       >::type 
-		      >::type,
-		      public boost::mpl::inherit_linearly<typename parent2_t::type,
-							    typename boost::mpl::inherit<boost::mpl::_1,
-											 FactorNode<T,boost::mpl::_2> 
-											 >::type 
-											 >::type, 
-											   public FactorNode<T,child_t>	,							   public FactorNode<T,HiddenNode<Discrete,T > >
+		      					  typename boost::mpl::inherit<boost::mpl::_1,
+		      								       FactorNode<T,boost::mpl::_2,2> 
+		      								       >::type 
+		      					  >::type ,
+		      // public boost::mpl::inherit_linearly<typename parent2_t::type,
+		      // 					    typename boost::mpl::inherit<boost::mpl::_1,
+		      // 									 FactorNode<T,boost::mpl::_2,2> 
+		      // 									 >::type 
+		      // >::type, 
+		      	public FactorNode<T,child_t,2>	,				
+		      	public FactorNode<T,HiddenNode<Discrete,T,detail::TypeList::zeros,ENSEMBLE_LEARNING_COMPONENTS >,ENSEMBLE_LEARNING_COMPONENTS >
 	
       {
 	//Non-copieable
@@ -112,10 +113,14 @@ namespace ICR{
 	moments_t;
 	typedef typename boost::call_traits< Moments<T> >::const_reference
 	moments_const_reference;
+	typedef typename boost::call_traits< Moments<T,ENSEMBLE_LEARNING_COMPONENTS> >::value_type
+	weights_moments_t;
+	typedef typename boost::call_traits< Moments<T,ENSEMBLE_LEARNING_COMPONENTS> >::const_reference
+	weights_moments_const_reference;
 
-	typedef typename boost::call_traits<HiddenNode<Discrete,T >* const>::value_type
+	typedef typename boost::call_traits<HiddenNode<Discrete,T,detail::TypeList::zeros,ENSEMBLE_LEARNING_COMPONENTS >* const>::value_type
 	discrete_t;
-	typedef typename boost::call_traits<HiddenNode<Discrete,T >* const>::value_type
+	typedef typename boost::call_traits<HiddenNode<Discrete,T,detail::TypeList::zeros,ENSEMBLE_LEARNING_COMPONENTS >* const>::value_type
 	discrete_parameter;
 
 	///@}
@@ -204,7 +209,7 @@ namespace ICR{
 	}
 
 	//Request From the weights Node
-	NaturalParameters<T>
+	NaturalParameters<T,ENSEMBLE_LEARNING_COMPONENTS>
 	GetNaturalNot( discrete_parameter v) const
 	{
 	  
@@ -213,7 +218,7 @@ namespace ICR{
 	  //reserve the space so that push_back is not expensive
 	  moments1.reserve(size);
 	  moments2.reserve(size);
-	  NaturalParameters<T> NP2Weights(size);
+	  NaturalParameters<T,ENSEMBLE_LEARNING_COMPONENTS> NP2Weights();
 
 	  //add the moments to the vector (pre-reserved) (moments1)
 	  boost::fusion::for_each( m_parent1_nodes.data(), 
@@ -222,7 +227,7 @@ namespace ICR{
 	  boost::fusion::for_each( m_parent2_nodes.data(), 
 				   GetMoments(moments2) );
 
-	  const Moments<T>& child = m_child_node->GetMoments();
+	  const moments_t child = m_child_node->GetMoments();
 	  for(size_t i=0;i<size;++i){
 	    NP2Weights[i] = Model::CalcAvLog(moments1[i], moments2[i],child);
 	  }

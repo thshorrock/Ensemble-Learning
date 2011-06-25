@@ -33,8 +33,10 @@
 #include <boost/call_traits.hpp>
 
 
+#include <boost/array.hpp>
 #include <iostream>
-#include<vector>
+#include <algorithm>
+//#include<vector>
 
 
 namespace ICR{
@@ -46,7 +48,7 @@ namespace ICR{
      *  This is intended to be either float or double.
      *  @attention Natural Parameters is not thread safe - it is intended to be a temporary container for passing messages between nodes.
      */
-    template<class T>
+    template<class T, int array_size = 2>
     class NaturalParameters
     {
     public:
@@ -69,16 +71,16 @@ namespace ICR{
       typedef typename boost::call_traits<T>::value_type
       data_type;
 
-      typedef typename boost::call_traits<NaturalParameters<T> >::param_type 
+      typedef typename boost::call_traits<NaturalParameters<T,array_size> >::param_type 
       parameter;
       
-      typedef typename boost::call_traits<NaturalParameters<T> >::reference  
+      typedef typename boost::call_traits<NaturalParameters<T,array_size> >::reference  
       reference;
       
-      typedef typename boost::call_traits<NaturalParameters<T> >::const_reference  
+      typedef typename boost::call_traits<NaturalParameters<T,array_size> >::const_reference  
       const_reference;
       
-      typedef typename boost::call_traits<NaturalParameters<T> >::value_type  
+      typedef typename boost::call_traits<NaturalParameters<T,array_size> >::value_type  
       type;
       
       typedef typename boost::call_traits<size_t>::param_type  
@@ -87,19 +89,24 @@ namespace ICR{
       typedef typename boost::call_traits<size_t>::value_type  
       size_type;
       
-   
-      typedef typename std::vector<T>::iterator
-      iterator;
+      typedef typename boost::array<data_type,array_size>::iterator
+       iterator;
       
-      typedef typename std::vector<T>::const_iterator
-      const_iterator;
+      typedef typename boost::array<data_type,array_size>::const_iterator
+       const_iterator;
+   
+      // typedef typename std::vector<T>::iterator
+      // iterator;
+      
+      // typedef typename std::vector<T>::const_iterator
+      // const_iterator;
 
       ///@}
 
       /** Constructor.
        *  @param size The number of elements to be held in the container.
        */
-      NaturalParameters(size_parameter size =0 );
+      NaturalParameters();
       
       /** Constructor.
        *  @param NP A vector containing the the Natural Parameters to be copied into the container.
@@ -191,11 +198,11 @@ namespace ICR{
        * @param b The Moments container.
        * @return The scalar product from the two containers.
        */
-      template<class U>
+      template<class U,int array_size2>
       friend
       U
-      operator*(const NaturalParameters<U>&  a, 
-		const Moments<U>& b);
+      operator*(const NaturalParameters<U,array_size2>&  a, 
+		const Moments<U,array_size2>& b);
     private:
 
       struct plus
@@ -240,7 +247,7 @@ namespace ICR{
 	data_type m_t;
       };
 
-      std::vector<data_type> m_data;
+      boost::array<data_type,array_size> m_data;
       
 
     };
@@ -250,10 +257,10 @@ namespace ICR{
      * @param m The Natural Parameters to output.
      * @return A reference to the output stream.
      */
-    template<class T>
+    template<class T,int array_size>
     inline
     std::ostream&
-    operator<<(std::ostream& out, const NaturalParameters<T>& NP)
+    operator<<(std::ostream& out, const NaturalParameters<T,array_size>& NP)
     {
       for(size_t i=0;i<NP.size();++i)
 	{
@@ -270,13 +277,13 @@ namespace ICR{
      *  @param b The second Natural Parameters container to add
      *  @return The sum of the two Natural Parameters.
      */
-    template<class T>
+    template<class T,int array_size>
     inline
-    NaturalParameters<T>
-    operator+(const NaturalParameters<T>& a,
-	      const NaturalParameters<T>& b)
+    NaturalParameters<T,array_size>
+    operator+(const NaturalParameters<T,array_size>& a,
+	      const NaturalParameters<T,array_size>& b)
     {
-      NaturalParameters<T> tmp = a;
+      NaturalParameters<T,array_size> tmp = a;
       return tmp+=b;
     }  
     
@@ -285,13 +292,13 @@ namespace ICR{
      *  @param b The second Natural Parameters container.
      *  @return The result of the subtraction.
      */
-    template<class T>
+    template<class T,int array_size>
     inline
-    NaturalParameters<T>
-    operator-(const NaturalParameters<T>& a,
-	      const NaturalParameters<T>& b)
+    NaturalParameters<T,array_size>
+    operator-(const NaturalParameters<T,array_size>& a,
+	      const NaturalParameters<T,array_size>& b)
     {
-      ICR::EnsembleLearning::NaturalParameters<T> tmp = a;
+      ICR::EnsembleLearning::NaturalParameters<T,array_size> tmp = a;
       return tmp-=b;
     }  
 
@@ -304,17 +311,18 @@ namespace ICR{
        * @return The scalar product from the two containers.
        */
 
-    template<class T>
+    template<class T,int array_size>
     inline
     T
-    operator*(const NaturalParameters<T>&  a, 
-	      const Moments<T>& b)
+    operator*(const NaturalParameters<T,array_size>&  a, 
+	      const Moments<T,array_size>& b)
     { 
-      std::vector<T> prod(a.size());
-      PARALLEL_TRANSFORM(a.begin(), a.end(), b.begin(), prod.begin(), 
-			 typename NaturalParameters<T>::times());
-      T sum = 0.0;
-      return PARALLEL_ACCUMULATE(prod.begin(), prod.end(), sum);
+      return std::inner_product(a.begin(), a.end(), b.begin(), 0.0);
+      // std::vector<T,array_size> prod(a.size());
+      // PARALLEL_TRANSFORM(a.begin(), a.end(), b.begin(), prod.begin(), 
+      // 			 typename NaturalParameters<T,array_size>::times());
+      // T sum = 0.0;
+      // return PARALLEL_ACCUMULATE(prod.begin(), prod.end(), sum);
     }  
       
 
@@ -324,10 +332,10 @@ namespace ICR{
      * @param m The Moments container.
      * @return The scalar product from the two containers.
      */
-    template<class T>
+    template<class T,int array_size>
     inline
     T
-    operator*(const Moments<T>& m,const NaturalParameters<T>&  p)
+    operator*(const Moments<T,array_size>& m,const NaturalParameters<T,array_size>&  p)
     {
       return p*m;
     }  
@@ -337,12 +345,12 @@ namespace ICR{
      * @param d The scalar.
      * @return The product of the natural parameters and the scalar.
      */
-    template<class T>
+    template<class T,int array_size>
     inline
-    const NaturalParameters<T>
-    operator*(const NaturalParameters<T>& n,const T  d)
+    const NaturalParameters<T,array_size>
+    operator*(const NaturalParameters<T,array_size>& n,const T  d)
     {
-      NaturalParameters<T> tmp(n);
+      NaturalParameters<T,array_size> tmp(n);
       return tmp*=d;
     }  
 
@@ -351,65 +359,66 @@ namespace ICR{
   }
 }
 
-template<class T>
+template<class T,int array_size>
 inline
-ICR::EnsembleLearning::NaturalParameters<T>::NaturalParameters(size_parameter size)
-  : //m_mutex_ptr(new boost::mutex), 
-  m_data(size)
+ICR::EnsembleLearning::NaturalParameters<T,array_size>::NaturalParameters()
+  : 
+  m_data()
 {
 }
 
-template<class T>
+template<class T,int array_size>
 inline
-ICR::EnsembleLearning::NaturalParameters<T>::NaturalParameters(vector_parameter NP)
+ICR::EnsembleLearning::NaturalParameters<T,array_size>::NaturalParameters(vector_parameter data)
   : //m_mutex_ptr(new boost::mutex), 
-    m_data(NP)
+    m_data()
 {
+  std::copy(data.begin(),data.end(),m_data.begin());
 }
 
-template<class T>
+template<class T,int array_size>
 inline
-ICR::EnsembleLearning::NaturalParameters<T>::NaturalParameters(data_parameter d1,
+ICR::EnsembleLearning::NaturalParameters<T,array_size>::NaturalParameters(data_parameter d1,
 						  data_parameter d2 )
 //  : 
   //  m_mutex_ptr(new boost::mutex)
-  : m_data(2)
+  : m_data()
 {
   //boost::lock_guard<boost::mutex> lock(*m_mutex_ptr);  
   m_data[0] = d1;
   m_data[1] = d2;
 }
 
-template<class T>
-typename ICR::EnsembleLearning::NaturalParameters<T>::iterator
-ICR::EnsembleLearning::NaturalParameters<T>::begin()
+template<class T,int array_size>
+typename ICR::EnsembleLearning::NaturalParameters<T,array_size>::iterator
+ICR::EnsembleLearning::NaturalParameters<T,array_size>::begin()
 {
   //  boost::lock_guard<boost::mutex> lock(*m_mutex_ptr);  
   return m_data.begin();
 }
 
 
-template<class T>
-typename ICR::EnsembleLearning::NaturalParameters<T>::const_iterator
-ICR::EnsembleLearning::NaturalParameters<T>::begin() const
+template<class T,int array_size>
+typename ICR::EnsembleLearning::NaturalParameters<T,array_size>::const_iterator
+ICR::EnsembleLearning::NaturalParameters<T,array_size>::begin() const
 {
   //  boost::lock_guard<boost::mutex> lock(*m_mutex_ptr);  
   return m_data.begin();
 }
 
 
-template<class T>
-typename ICR::EnsembleLearning::NaturalParameters<T>::iterator
-ICR::EnsembleLearning::NaturalParameters<T>::end()
+template<class T,int array_size>
+typename ICR::EnsembleLearning::NaturalParameters<T,array_size>::iterator
+ICR::EnsembleLearning::NaturalParameters<T,array_size>::end()
 {
   // boost::lock_guard<boost::mutex> lock(*m_mutex_ptr);  
   return m_data.end();
 }
 
 
-template<class T>
-typename ICR::EnsembleLearning::NaturalParameters<T>::const_iterator
-ICR::EnsembleLearning::NaturalParameters<T>::end() const
+template<class T,int array_size>
+typename ICR::EnsembleLearning::NaturalParameters<T,array_size>::const_iterator
+ICR::EnsembleLearning::NaturalParameters<T,array_size>::end() const
 {
   // boost::lock_guard<boost::mutex> lock(*m_mutex_ptr);  
   return m_data.end();
@@ -418,19 +427,19 @@ ICR::EnsembleLearning::NaturalParameters<T>::end() const
 
  
 
-template<class T>
+template<class T,int array_size>
 inline
-typename ICR::EnsembleLearning::NaturalParameters<T>::data_const_reference 
-ICR::EnsembleLearning::NaturalParameters<T>::operator[](size_parameter i) const
+typename ICR::EnsembleLearning::NaturalParameters<T,array_size>::data_const_reference 
+ICR::EnsembleLearning::NaturalParameters<T,array_size>::operator[](size_parameter i) const
 {
   //boost::lock_guard<boost::mutex> lock(*m_mutex_ptr);  
   return m_data[i];
 }
    
-template<class T>
+template<class T,int array_size>
 inline
-typename ICR::EnsembleLearning::NaturalParameters<T>::data_reference
-ICR::EnsembleLearning::NaturalParameters<T>::operator[](size_parameter i) 
+typename ICR::EnsembleLearning::NaturalParameters<T,array_size>::data_reference
+ICR::EnsembleLearning::NaturalParameters<T,array_size>::operator[](size_parameter i) 
 {
   //boost::lock_guard<boost::mutex> lock(*m_mutex_ptr);  
   return m_data[i];
@@ -438,16 +447,16 @@ ICR::EnsembleLearning::NaturalParameters<T>::operator[](size_parameter i)
    
 
 
-template<class T>
+template<class T,int array_size>
 inline
-typename ICR::EnsembleLearning::NaturalParameters<T>::reference
-ICR::EnsembleLearning::NaturalParameters<T>::operator+=(parameter other)
+typename ICR::EnsembleLearning::NaturalParameters<T,array_size>::reference
+ICR::EnsembleLearning::NaturalParameters<T,array_size>::operator+=(parameter other)
 {
   //This could be called by different threads, so lock
   //  boost::lock_guard<boost::mutex> lock(*m_mutex_ptr);  //DO KEEP THIS ONE!
   //  std::cout<<"size = "<<m_data.size()<<"other = "<<m_data.size<<std::endl;
 
-  PARALLEL_TRANSFORM(m_data.begin(), m_data.end(), other.begin(), m_data.begin(), plus());
+  std::transform(m_data.begin(), m_data.end(), other.begin(), m_data.begin(), plus());
   // for(size_t i=0;i<other.size();++i){
   //   m_data[i]+=other[i];
   // }
@@ -456,24 +465,24 @@ ICR::EnsembleLearning::NaturalParameters<T>::operator+=(parameter other)
 }
    
 
-template<class T>  
+template<class T,int array_size>  
 inline 
-typename ICR::EnsembleLearning::NaturalParameters<T>::reference
-ICR::EnsembleLearning::NaturalParameters<T>::operator-=(parameter other)
+typename ICR::EnsembleLearning::NaturalParameters<T,array_size>::reference
+ICR::EnsembleLearning::NaturalParameters<T,array_size>::operator-=(parameter other)
 {
   //This could be called by different threads, so lock
   //  boost::lock_guard<boost::mutex> lock(*m_mutex_ptr);  //DO KEEP THIS ONE!
-  PARALLEL_TRANSFORM(m_data.begin(), m_data.end(), other.begin(), m_data.begin(), minus());
+  std::transform(m_data.begin(), m_data.end(), other.begin(), m_data.begin(), minus());
   return *this;
 }
   
-template<class T>
+template<class T,int array_size>
 inline
-typename ICR::EnsembleLearning::NaturalParameters<T>::reference
-ICR::EnsembleLearning::NaturalParameters<T>::operator*=(data_parameter other)
+typename ICR::EnsembleLearning::NaturalParameters<T,array_size>::reference
+ICR::EnsembleLearning::NaturalParameters<T,array_size>::operator*=(data_parameter other)
 {
   
-  PARALLEL_TRANSFORM(m_data.begin(), m_data.end(), m_data.begin(), times_by(other));
+  std::transform(m_data.begin(), m_data.end(), m_data.begin(), times_by(other));
   return *this;
 }    
 

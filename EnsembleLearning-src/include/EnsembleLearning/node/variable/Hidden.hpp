@@ -51,8 +51,8 @@ namespace ICR{
      *  @tparam T The data type (float or double)
      */
     template <template<class> class Model, class T, class List=detail::TypeList::zeros
-	     ,class Enable = void >
-    class HiddenNode : public VariableNode<T> //, public List
+	      , int array_size =2,class Enable = void >
+    class HiddenNode : public VariableNode<T,array_size> //, public List
     {
       HiddenNode(HiddenNode<Model,T, List>& other); //non-copyable
 
@@ -61,13 +61,13 @@ namespace ICR{
        *  @param moment_size The number of elements in the stored moments.
        *  This is usually two but varies for discrete nodes.
        */
-      HiddenNode(const size_t moment_size = 2); //mostly two, but variable for Discrete model
+      HiddenNode(); //mostly two, but variable for Discrete model
 
       void
-      SetParentFactor(FactorNode<T, HiddenNode>* f);
+      SetParentFactor(FactorNode<T, HiddenNode,array_size>* f);
       
       void
-      AddChildFactor(FactorNode<T, HiddenNode>* f);
+      AddChildFactor(FactorNode<T, HiddenNode,array_size>* f);
 
       void 
       Iterate(Coster& C);
@@ -79,7 +79,7 @@ namespace ICR{
       }
 
 
-      const Moments<T>&
+      const Moments<T,array_size>&
       GetMoments() ;
 
       const std::vector<T>
@@ -102,12 +102,12 @@ namespace ICR{
       
     private:
       
-      const NaturalParameters<T>
+      const NaturalParameters<T,array_size>
       GetNP();
 
-      FactorNode<T, HiddenNode>* m_parent;
-      std::vector<FactorNode<T, HiddenNode>*> m_children;
-      Moments<T> m_Moments;
+      FactorNode<T, HiddenNode,array_size>* m_parent;
+      std::vector<FactorNode<T, HiddenNode,array_size>*> m_children;
+      Moments<T,array_size> m_Moments;
       mutable Mutex m_mutex;
     };
 
@@ -115,16 +115,16 @@ namespace ICR{
 }
 
 
-template<template<class> class Model,class T,class List,class Enable>
-ICR::EnsembleLearning::HiddenNode<Model,T,List,Enable>::HiddenNode(const size_t moment_size) 
-  :   m_parent(0), m_children(), m_Moments(moment_size)
+template<template<class> class Model,class T,class List,int array_size,class Enable>
+ICR::EnsembleLearning::HiddenNode<Model,T,List,array_size,Enable>::HiddenNode() 
+  :   m_parent(0), m_children(), m_Moments()
 {}
 
 
-template<template<class> class Model,class T,class List,class Enable>
+template<template<class> class Model,class T,class List,int array_size,class Enable>
 inline 
 void
-ICR::EnsembleLearning::HiddenNode<Model,T,List,Enable>::SetParentFactor(FactorNode<T, HiddenNode>* f)
+ICR::EnsembleLearning::HiddenNode<Model,T,List,array_size,Enable>::SetParentFactor(FactorNode<T, HiddenNode,array_size>* f)
 {
   //This should only be called once, so should get no collisions here
   m_parent=f;
@@ -136,10 +136,10 @@ ICR::EnsembleLearning::HiddenNode<Model,T,List,Enable>::SetParentFactor(FactorNo
 
 
    
-template<template<class> class Model,class T,class List,class Enable>
+template<template<class> class Model,class T,class List,int array_size,class Enable>
 inline
 void
-ICR::EnsembleLearning::HiddenNode<Model,T,List,Enable>::AddChildFactor(FactorNode<T, HiddenNode>* f)
+ICR::EnsembleLearning::HiddenNode<Model,T,List,array_size,Enable>::AddChildFactor(FactorNode<T, HiddenNode,array_size>* f)
 { 
   //This could be called simultaneously by different threads, so call it critical
 #pragma omp critical
@@ -148,10 +148,10 @@ ICR::EnsembleLearning::HiddenNode<Model,T,List,Enable>::AddChildFactor(FactorNod
   }
 }
 
-template<template<class> class Model,class T,class List,class Enable>
+template<template<class> class Model,class T,class List,int array_size,class Enable>
 inline
-const ICR::EnsembleLearning::Moments<T>&
-ICR::EnsembleLearning::HiddenNode<Model,T,List,Enable>::GetMoments() 
+const ICR::EnsembleLearning::Moments<T,array_size>&
+ICR::EnsembleLearning::HiddenNode<Model,T,List,array_size,Enable>::GetMoments() 
 {
   /*This value is update in Iterate and called to evaluate other Hidden Nodes
    * (also in iterate mode).  It therefore needs to be protected by a mutex.
@@ -160,20 +160,20 @@ ICR::EnsembleLearning::HiddenNode<Model,T,List,Enable>::GetMoments()
   return m_Moments;
 }
    
-template<template<class> class Model,class T,class List,class Enable>
+template<template<class> class Model,class T,class List,int array_size,class Enable>
 inline
-const ICR::EnsembleLearning::NaturalParameters<T>
-ICR::EnsembleLearning::HiddenNode<Model,T,List,Enable>::GetNP()
+const ICR::EnsembleLearning::NaturalParameters<T,array_size>
+ICR::EnsembleLearning::HiddenNode<Model,T,List,array_size,Enable>::GetNP()
 {
   //EVALUATE THE COST
   BOOST_ASSERT(m_parent != 0); 
   //first get the NP from the parent
-  const NaturalParameters<T> ParentNP = (m_parent->GetNaturalNot(this));
+  const NaturalParameters<T,array_size> ParentNP = (m_parent->GetNaturalNot(this));
   //The initial value in the total
-  NaturalParameters<T> NP = ParentNP; //total
+  NaturalParameters<T,array_size> NP = ParentNP; //total
 
   //get the Natural parameters from all the children.
-  std::vector<NaturalParameters<T> > ChildrenNP(m_children.size());
+  std::vector<NaturalParameters<T,array_size> > ChildrenNP(m_children.size());
   //and put them in the vector
   for(size_t i=0;i<m_children.size();++i){
     ChildrenNP[i] = m_children[i]->GetNaturalNot(this);
@@ -190,18 +190,18 @@ ICR::EnsembleLearning::HiddenNode<Model,T,List,Enable>::GetNP()
   return NP;
 }
 
-template<template<class> class Model,class T,class List,class Enable>
+template<template<class> class Model,class T,class List,int array_size,class Enable>
 inline
 const std::vector<T>
-ICR::EnsembleLearning::HiddenNode<Model,T,List,Enable>::GetMean() 
+ICR::EnsembleLearning::HiddenNode<Model,T,List,array_size,Enable>::GetMean() 
 {
   return Model<T>::CalcMean(GetNP());
 }
    
-template<template<class> class Model,class T,class List,class Enable>
+template<template<class> class Model,class T,class List,int array_size,class Enable>
 inline
 const std::vector<T>
-ICR::EnsembleLearning::HiddenNode<Model,T,List,Enable>::GetVariance() 
+ICR::EnsembleLearning::HiddenNode<Model,T,List,array_size,Enable>::GetVariance() 
 {
   std::vector<T> prec = Model<T>::CalcPrecision(GetNP());
   std::vector<T> var(prec.size());
@@ -211,28 +211,28 @@ ICR::EnsembleLearning::HiddenNode<Model,T,List,Enable>::GetVariance()
   return var;
 }
 
-template<template<class> class Model,class T,class List,class Enable>
+template<template<class> class Model,class T,class List,int array_size,class Enable>
 inline
 void
-ICR::EnsembleLearning::HiddenNode<Model,T,List,Enable>::SetMean(const std::vector<T>& m) 
+ICR::EnsembleLearning::HiddenNode<Model,T,List,array_size,Enable>::SetMean(const std::vector<T>& m) 
 {
   m_Moments = Model<T>::CalcMoments(m,GetVariance());
 }
    
-template<template<class> class Model,class T,class List,class Enable>
+template<template<class> class Model,class T,class List,int array_size,class Enable>
 inline
 void
-ICR::EnsembleLearning::HiddenNode<Model,T,List,Enable>::SetVariance(const std::vector<T>& v) 
+ICR::EnsembleLearning::HiddenNode<Model,T,List,array_size,Enable>::SetVariance(const std::vector<T>& v) 
 {
   m_Moments = Model<T>::CalcMoments(GetMean(),v);
 }
 
-template<template<class> class Model,class T,class List,class Enable>
+template<template<class> class Model,class T,class List,int array_size,class Enable>
 inline
 void 
-ICR::EnsembleLearning::HiddenNode<Model,T,List,Enable>::Iterate(Coster& C)
+ICR::EnsembleLearning::HiddenNode<Model,T,List,array_size,Enable>::Iterate(Coster& C)
 {
-  const NaturalParameters<T> NP = GetNP();
+  const NaturalParameters<T,array_size> NP = GetNP();
   //Get the moments and update the model
   const T LogNorm = Model<T>::CalcLogNorm(NP);
   {
@@ -240,7 +240,7 @@ ICR::EnsembleLearning::HiddenNode<Model,T,List,Enable>::Iterate(Coster& C)
     m_Moments = Model<T>::CalcMoments(NP);  //update the moments and the model
   }
   //first get the NP from the parent
-  const NaturalParameters<T> ParentNP = (m_parent->GetNaturalNot(this));
+  const NaturalParameters<T,array_size> ParentNP = (m_parent->GetNaturalNot(this));
   C +=  (ParentNP - NP)*m_Moments +m_parent->CalcLogNorm() -  LogNorm;
 
 }

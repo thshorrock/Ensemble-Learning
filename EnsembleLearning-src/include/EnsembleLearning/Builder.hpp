@@ -62,7 +62,7 @@ namespace ICR{
     template<class T> class RectifiedGaussian;
     
     //forward declaration of Interfaces
-    template<class T> class VariableNode;
+    template<class T, int array_size> class VariableNode;
     //template<class T> class FactorNode;
     
 
@@ -164,18 +164,18 @@ namespace ICR{
       typedef HiddenNode<Gaussian, T >      GaussianType;
       typedef HiddenNode<RectifiedGaussian, T >      RectifiedGaussianType;
       typedef HiddenNode<Gamma, T >         GammaType;
-      typedef HiddenNode<Dirichlet, T >     DirichletType;
-      typedef ObservedNode<Gaussian, T, detail::TypeList::zeros >     GaussianDataType;
-      typedef ObservedNode<Gamma, T, detail::TypeList::zeros >        GammaDataType;
-      typedef ObservedNode<Gaussian, T, detail::TypeList::zeros > GaussianConstType;
-      typedef ObservedNode<Gamma, T, detail::TypeList::zeros >    GammaConstType;
-      typedef ObservedNode<Gaussian, T, detail::TypeList::zeros >   NormalConstType;
-      typedef ObservedNode<Dirichlet, T, detail::TypeList::zeros >  DirichletConstType;
+      typedef HiddenNode<Dirichlet, T, detail::TypeList::zeros, ENSEMBLE_LEARNING_COMPONENTS >     DirichletType;
+      typedef ObservedNode<Gaussian, T, detail::TypeList::zeros,2 >     GaussianDataType;
+      typedef ObservedNode<Gamma, T, detail::TypeList::zeros,2 >        GammaDataType;
+      typedef ObservedNode<Gaussian, T, detail::TypeList::zeros,2 > GaussianConstType;
+      typedef ObservedNode<Gamma, T, detail::TypeList::zeros,2 >    GammaConstType;
+      typedef ObservedNode<Gaussian, T, detail::TypeList::zeros,2 >   NormalConstType;
+      typedef ObservedNode<Dirichlet, T, detail::TypeList::zeros, ENSEMBLE_LEARNING_COMPONENTS>  DirichletConstType;
       typedef DeterministicNode<Gaussian<T>, T>    GaussianResultType;
 
       
-      typedef HiddenNode<Dirichlet, T >     WeightsType;
-      typedef HiddenNode<Discrete, T >      CatagoryType;
+      typedef HiddenNode<Dirichlet, T,detail::TypeList::zeros,ENSEMBLE_LEARNING_COMPONENTS >     WeightsType;
+      typedef HiddenNode<Discrete, T,detail::TypeList::zeros,ENSEMBLE_LEARNING_COMPONENTS >      CatagoryType;
     public:
       
       /** @name Useful typdefs for types that are exposed to the user.
@@ -185,14 +185,14 @@ namespace ICR{
       typedef HiddenNode<RectifiedGaussian, T >*      RectifiedGaussianNode;
       typedef HiddenNode<Gaussian, T >*      GaussianNode;
       typedef HiddenNode<Gamma, T >*         GammaNode;
-      typedef ObservedNode<Gaussian, T, detail::TypeList::zeros >*     GaussianDataNode;
-      typedef ObservedNode<Gamma, T, detail::TypeList::zeros >*        GammaDataNode;
-      typedef ObservedNode<Gaussian, T, detail::TypeList::zeros >* GaussianConstNode;
-      typedef ObservedNode<Gamma, T, detail::TypeList::zeros >*    GammaConstNode;
+      typedef ObservedNode<Gaussian, T, detail::TypeList::zeros,2 >*     GaussianDataNode;
+      typedef ObservedNode<Gamma, T, detail::TypeList::zeros,2 >*        GammaDataNode;
+      typedef ObservedNode<Gaussian, T, detail::TypeList::zeros ,2>* GaussianConstNode;
+      typedef ObservedNode<Gamma, T, detail::TypeList::zeros,2 >*    GammaConstNode;
       typedef DeterministicNode<Gaussian<T>, T>*    GaussianResultNode;
       
-      typedef HiddenNode<Dirichlet, T >*      WeightsNode;
-      typedef HiddenNode<Discrete, T >*       CatagoryNode;
+      typedef HiddenNode<Dirichlet, T,detail::TypeList::zeros,ENSEMBLE_LEARNING_COMPONENTS >*      WeightsNode;
+      typedef HiddenNode<Discrete, T,detail::TypeList::zeros,ENSEMBLE_LEARNING_COMPONENTS >*       CatagoryNode;
       ///@}
 
       /** A constructor.
@@ -222,22 +222,22 @@ namespace ICR{
        *  The model for the Precision node must be a Gamma.
        * @return The GaussianNode that holds the inferred Gaussian Moments.
        */
-      template<template<template<class> class,class,class,class> class MeanType,
+      template<template<template<class> class,class,class,int,class> class MeanType,
 	       class MeanId, class MeanEnabler,
-	       template<template<class> class,class,class,class> class PrecType,
+	       template<template<class> class,class,class,int,class> class PrecType,
 	       class PrecId, class PrecEnabler>
       HiddenNode<Gaussian, T, typename detail::TypeList::incr_id<MeanId>::type >*
-      gaussian(MeanType<Gaussian,T,MeanId,MeanEnabler>* Mean, 
-	       PrecType<Gamma,T,PrecId,PrecEnabler>   * Precision);
+      gaussian(MeanType<Gaussian,T,MeanId,2,MeanEnabler>* Mean, 
+	       PrecType<Gamma,T,PrecId,2,PrecEnabler>   * Precision);
 
     
-      template<template<template<class> class,class,class,class> class MeanType,
+      template<template<template<class> class,class,class,int,class> class MeanType,
 	       class MeanId, class MeanEnabler,
-	       template<template<class> class,class,class,class> class PrecType,
+	       template<template<class> class,class,class,int,class> class PrecType,
 	       class PrecId, class PrecEnabler>
       HiddenNode<Gaussian, T, typename detail::TypeList::incr_id<MeanId>::type >*
-      gaussian(MeanType<RectifiedGaussian,T,MeanId,MeanEnabler>* Mean, 
-	       PrecType<Gamma,T,PrecId,PrecEnabler>   * Precision);
+      gaussian(MeanType<RectifiedGaussian,T,MeanId,2,MeanEnabler>* Mean, 
+	       PrecType<Gamma,T,PrecId,2,PrecEnabler>   * Precision);
       /** Create a Gaussian VariableNode.
        * @param Mean The node that stores the Momets for the Mean.
        *  The model for the Mean node must be a Gaussian or Rectified Gaussian.
@@ -245,16 +245,16 @@ namespace ICR{
        * @return The GaussianNode that holds the inferred Gaussian Moments.
        */
       
-      template<template<template<class> class,class,class,class> class MeanType,
+      template<template<template<class> class,class,class,int,class> class MeanType,
 	       class MeanId, class MeanEnabler>
       HiddenNode<Gaussian, T, typename detail::TypeList::incr_id<MeanId>::type >*
-      gaussian(MeanType<Gaussian,T,MeanId,MeanEnabler>* Mean, const T& precision);
+      gaussian(MeanType<Gaussian,T,MeanId,2,MeanEnabler>* Mean, const T& precision);
 
       
-      template<template<template<class> class,class,class,class> class MeanType,
+      template<template<template<class> class,class,class,int,class> class MeanType,
 	       class MeanId, class MeanEnabler>
       HiddenNode<Gaussian, T, typename detail::TypeList::incr_id<MeanId>::type >*
-      gaussian(MeanType<RectifiedGaussian,T,MeanId,MeanEnabler>* Mean, const T& precision);
+      gaussian(MeanType<RectifiedGaussian,T,MeanId,2,MeanEnabler>* Mean, const T& precision);
 
       /** Create a Gaussian VariableNode.
        * @param mean The value of the mean.
@@ -264,10 +264,10 @@ namespace ICR{
        * @return The GaussianNode that holds the inferred Gaussian Moments.
        */
     
-      template<template<template<class> class,class,class,class> class PrecType,
+      template<template<template<class> class,class,class,int,class> class PrecType,
 	       class PrecId, class PrecEnabler>
       HiddenNode<Gaussian,T,typename detail::TypeList::incr_id<detail::TypeList::zeros>::type >*
-      gaussian(const T& mean, PrecType<Gamma,T,PrecId,PrecEnabler>* Precision);
+      gaussian(const T& mean, PrecType<Gamma,T,PrecId,2,PrecEnabler>* Precision);
 
       /** Create a Gaussian VariableNode.
        * @param mean The value of the mean.
@@ -291,22 +291,22 @@ namespace ICR{
        */
       
 
-      template<template<template<class> class,class,class,class> class MeanType,
+      template<template<template<class> class,class,class,int,class> class MeanType,
 	       class MeanId, class MeanEnabler,
-	       template<template<class> class,class,class,class> class PrecType,
+	       template<template<class> class,class,class,int,class> class PrecType,
 	       class PrecId, class PrecEnabler>
       HiddenNode<RectifiedGaussian, T, typename detail::TypeList::incr_id<MeanId>::type >*
-      rectified_gaussian(MeanType<Gaussian,T,MeanId,MeanEnabler>* Mean, 
-			 PrecType<Gamma,T,PrecId,PrecEnabler>   * Precision);
+      rectified_gaussian(MeanType<Gaussian,T,MeanId,2,MeanEnabler>* Mean, 
+			 PrecType<Gamma,T,PrecId,2,PrecEnabler>   * Precision);
 
 
-      template<template<template<class> class,class,class,class> class MeanType,
+      template<template<template<class> class,class,class,int,class> class MeanType,
 	       class MeanId, class MeanEnabler,
-	       template<template<class> class,class,class,class> class PrecType,
+	       template<template<class> class,class,class,int,class> class PrecType,
 	       class PrecId, class PrecEnabler>
       HiddenNode<RectifiedGaussian, T, typename detail::TypeList::incr_id<MeanId>::type >*
-      rectified_gaussian(MeanType<RectifiedGaussian,T,MeanId,MeanEnabler>* Mean, 
-			 PrecType<Gamma,T,PrecId,PrecEnabler>   * Precision);
+      rectified_gaussian(MeanType<RectifiedGaussian,T,MeanId,2,MeanEnabler>* Mean, 
+			 PrecType<Gamma,T,PrecId,2,PrecEnabler>   * Precision);
 
       /** Create a RectifiedGaussian VariableNode.
        * @param Mean The node that stores the Momets for the Mean.
@@ -314,15 +314,15 @@ namespace ICR{
        * @param precision The value of the precision.
        * @return The GaussianNode that holds the inferred Rectified Gaussian Moments.
        */
-      template<template<template<class> class,class,class,class> class MeanType,
+      template<template<template<class> class,class,class,int,class> class MeanType,
 	       class MeanId, class MeanEnabler>
       HiddenNode<RectifiedGaussian, T, typename detail::TypeList::incr_id<MeanId>::type >*
-      rectified_gaussian(MeanType<Gaussian,T,MeanId,MeanEnabler>* Mean, const T& precision);
+      rectified_gaussian(MeanType<Gaussian,T,MeanId,2,MeanEnabler>* Mean, const T& precision);
       
-      template<template<template<class> class,class,class,class> class MeanType,
+      template<template<template<class> class,class,class,int,class> class MeanType,
 	       class MeanId, class MeanEnabler>
       HiddenNode<RectifiedGaussian, T, typename detail::TypeList::incr_id<MeanId>::type >*
-      rectified_gaussian(MeanType<RectifiedGaussian,T,MeanId,MeanEnabler>* Mean, const T& precision);
+      rectified_gaussian(MeanType<RectifiedGaussian,T,MeanId,2,MeanEnabler>* Mean, const T& precision);
        /** Create a RectifiedGaussian VariableNode.
        * @param mean The value of the mean.
        *  The model for the Mean node must be a Gaussian or Rectified Gaussian.
@@ -332,10 +332,10 @@ namespace ICR{
        */
       
     
-      template<template<template<class> class,class,class,class> class PrecType,
+      template<template<template<class> class,class,class,int,class> class PrecType,
 	       class PrecId, class PrecEnabler>
       HiddenNode<RectifiedGaussian,T, typename detail::TypeList::incr_id<detail::TypeList::zeros>::type >*
-      rectified_gaussian(const T& mean,PrecType<Gamma,T,PrecId,PrecEnabler>*  Precision);
+      rectified_gaussian(const T& mean,PrecType<Gamma,T,PrecId,2,PrecEnabler>*  Precision);
   
     /** Create a RectifiedGaussian VariableNode.
      * @param mean The value of the mean.
@@ -390,8 +390,8 @@ namespace ICR{
       		     const std::vector<T>& v2)
       {
 
-	typedef ObservedNode<Gaussian, T, detail::TypeList::zeros> p0_t;
-	typedef ObservedNode<Gamma,    T, detail::TypeList::zeros> p1_t;
+	typedef ObservedNode<Gaussian, T, detail::TypeList::zeros,2> p0_t;
+	typedef ObservedNode<Gamma,    T, detail::TypeList::zeros,2> p1_t;
 	const size_t size = ENSEMBLE_LEARNING_COMPONENTS;
 	
 	std::vector<p0_t*> p_0(size);
@@ -446,7 +446,7 @@ namespace ICR{
        * @return The WeightsNode that holds the inferred logarithm of the weights.
        */
       WeightsNode
-      weights(const size_t size);
+      weights();
 
       /** Gaussian Mixture Model.
        *  @param vMean The vector container containing all the  variables representing the means.
@@ -610,85 +610,85 @@ namespace ICR{
        *  @param Data The GaussianDataNode that holds the data.
        */
          
-      template<template<template<class> class,class,class,class> class MeanType,
+      template<template<template<class> class,class,class,int,class> class MeanType,
 	       class MeanId,
 	       class Enabler>
       void 
-      join(MeanType<Gaussian,T,MeanId,Enabler>* Mean, T& precision, GaussianDataNode Data  );
+      join(MeanType<Gaussian,T,MeanId,2,Enabler>* Mean, T& precision, GaussianDataNode Data  );
       
-    template<template<template<class> class,class,class,class> class MeanType,
+    template<template<template<class> class,class,class,int,class> class MeanType,
 	     class MeanId,
 	     class Enabler>
     void 
-    join(MeanType<RectifiedGaussian,T,MeanId,Enabler>* Mean, T& precision, GaussianDataNode Data  );
+    join(MeanType<RectifiedGaussian,T,MeanId,2,Enabler>* Mean, T& precision, GaussianDataNode Data  );
 
   /** Join Gaussian Data with the mean and precision.
    *  @param mean The value of the mean.
    *  @param Precision The VariableNode that models the Precision.
        *  @param Data The GaussianDataNode that holds the data.
        */
-      template<template<template<class> class,class,class,class> class PrecType,
+      template<template<template<class> class,class,class,int,class> class PrecType,
 	       class PrecId,
 	       class PrecEnabler>
       void 
-      join(T& mean,  PrecType<Gamma,T,PrecId,PrecEnabler>* Precision, GaussianDataNode Data  );
+      join(T& mean,  PrecType<Gamma,T,PrecId,2,PrecEnabler>* Precision, GaussianDataNode Data  );
       
       /** Join Gaussian Data with the mean and precision.
        *  @param Mean The VariableNode that models the mean.
        *  @param Precision The VariableNode that models the Precision.
        *  @param Data The GaussianDataNode that holds the data.
        */
-      // template<template<template<class> class,class,class,class> class MeanType,
+      // template<template<template<class> class,class,class,int,class> class MeanType,
       // 	       template<class> class Model1,
       // 	       class MeanId,
       // 	       class MeanEnabler,
-      // 	       template<template<class> class,class,class,class> class PrecType,
+      // 	       template<template<class> class,class,class,int,class> class PrecType,
       // 	       template<class> class  Model2,
       // 	       class PrecId, class PrecEnabler> 
       // void 
       // join(MeanType<Model1,T,MeanId,MeanEnabler>* Mean, PrecType<Model2,T,PrecId,PrecEnabler>* Precision, GaussianDataNode& Data  );  //needs to be specialised
 
-      template<template<template<class> class,class,class,class> class MeanType,
+      template<template<template<class> class,class,class,int,class> class MeanType,
 	       class MeanId,
 	       class MeanEnabler,
-	       template<template<class> class,class,class,class> class PrecType,
+	       template<template<class> class,class,class,int,class> class PrecType,
 	       class PrecId, class PrecEnabler> 
       void 
-      join(MeanType<Gaussian,T,MeanId,MeanEnabler>* Mean, PrecType<Gamma,T,PrecId,PrecEnabler>* Precision, GaussianDataNode& Data  );
+      join(MeanType<Gaussian,T,MeanId,2,MeanEnabler>* Mean, PrecType<Gamma,T,PrecId,2,PrecEnabler>* Precision, GaussianDataNode& Data  );
  
-      template<template<template<class> class,class,class,class> class MeanType,
+      template<template<template<class> class,class,class,int,class> class MeanType,
 	       class MeanId,class MeanEnabler,
-	       template<template<class> class,class,class,class> class PrecType,
+	       template<template<class> class,class,class,int,class> class PrecType,
 	       class PrecId, class PrecEnabler> 
       void 
-      join(MeanType<RectifiedGaussian,T,MeanId,MeanEnabler>* Mean, PrecType<Gamma,T,PrecId,PrecEnabler>* Precision, GaussianDataNode& Data  );
+      join(MeanType<RectifiedGaussian,T,MeanId,2,MeanEnabler>* Mean, PrecType<Gamma,T,PrecId,2,PrecEnabler>* Precision, GaussianDataNode& Data  );
       /** Join Gaussian Data with the mean and precision.
        *  @param Mean The VariableNode that models the mean.
        *  @param Precision The VariableNode that models the Precision.
        *  @param data The value of the data.
        */
-	   template<template<template<class> class,class,class,class> class MeanType,
+	   template<template<template<class> class,class,class,int,class> class MeanType,
 	   class MeanId,class MeanEnabler,
-	   template<template<class> class,class,class,class> class PrecType,
+	   template<template<class> class,class,class,int,class> class PrecType,
 	   class PrecId, class PrecEnabler> 
 	   void 
-      join(MeanType<Gaussian,T,MeanId,MeanEnabler>* Mean, PrecType<Gamma,T,PrecId,PrecEnabler>* Precision, const T data );
+      join(MeanType<Gaussian,T,MeanId,2,MeanEnabler>* Mean, PrecType<Gamma,T,PrecId,2,PrecEnabler>* Precision, const T data );
 
-      // template<template<template<class> class,class,class,class> class MeanType,
+      // template<template<template<class> class,class,class,int,class> class MeanType,
       // 	       class MeanId,class MeanEnabler,
-      // 	       template<template<class> class,class,class,class> class PrecType,
+      // 	       template<template<class> class,class,class,int,class> class PrecType,
       // 	       class PrecId, class PrecEnabler> 
       // void 
       // 	   join(MeanType<Gaussian,T,MeanId,MeanEnabler>* Mean, 
       // 		PrecType<Gamma,T,PrecId,PrecEnabler>* Precision, 
       // 		const T data );
 	   
-      template<template<template<class> class,class,class,class> class MeanType,
+      template<template<template<class> class,class,class,int,class> class MeanType,
 	       class MeanId,class MeanEnabler,
-	       template<template<class> class,class,class,class> class PrecType,
+	       template<template<class> class,class,class,int,class> class PrecType,
 	       class PrecId, class PrecEnabler> 
       void 
-      join(MeanType<RectifiedGaussian,T,MeanId,MeanEnabler>* Mean, PrecType<Gamma,T,PrecId,PrecEnabler>* Precision, const T data );
+      join(MeanType<RectifiedGaussian,T,MeanId,2,MeanEnabler>* Mean, PrecType<Gamma,T,PrecId,2,PrecEnabler>* Precision, const T data );
 
 
       /** Join Gaussian Modelled data to a mixture model.
@@ -803,7 +803,7 @@ namespace ICR{
       struct MakeMixtureModel
       {
 	MakeMixtureModel(std::vector<boost::shared_ptr<FactorNode_basic> >& F,
-			 std::vector<boost::shared_ptr<VariableNode<T> > >& N)
+			 std::vector<boost::shared_ptr<VariableNode_basic > >& N)
 	  : m_F(F), m_N(N)
 	{}
 
@@ -828,50 +828,50 @@ namespace ICR{
 	  ch = child.get();
 	}
 	mutable std::vector<boost::shared_ptr<FactorNode_basic> >& m_F;
-	mutable std::vector<boost::shared_ptr<VariableNode<T> > >& m_N;
+	mutable std::vector<boost::shared_ptr<VariableNode_basic > >& m_N;
       };
-	// MV_t& m_MV;
-		//};
+      // MV_t& m_MV;
+      //};
       
-	   double
-	   iterate();
+      double
+      iterate();
 
-	   bool
-	   HasConverged(const T Cost, const T epsilon);
+      bool
+      HasConverged(const T Cost, const T epsilon);
       
 
-	   T m_PrevCost;
-	   std::vector<boost::shared_ptr<FactorNode_basic> > m_Factors;
-	   std::vector<boost::shared_ptr<VariableNode<T> > > m_Nodes;
-	   bool m_initialised;
-	   size_t m_data_nodes;
-	   std::string m_cost_file;
-	   };
+      T m_PrevCost;
+      std::vector<boost::shared_ptr<FactorNode_basic> > m_Factors;
+      std::vector<boost::shared_ptr<VariableNode_basic > > m_Nodes;
+      bool m_initialised;
+      size_t m_data_nodes;
+      std::string m_cost_file;
+    };
 
-		}
-	   }
+  }
+}
 
 
-	   /********************************************************
-	    ********************************************************
-	    ** Implementation
-	    ********************************************************
-	    ********************************************************/
+/********************************************************
+ ********************************************************
+ ** Implementation
+ ********************************************************
+ ********************************************************/
 
-	   template<class T>
-	   template<template<template<class> class,class,class,class> class MeanType,
-	   class MeanId, class MeanEnabler,
-	   template<template<class> class,class,class,class> class PrecType,
-	   class PrecId, class PrecEnabler>
-	   ICR::EnsembleLearning::HiddenNode<ICR::EnsembleLearning::Gaussian,
-	   T, typename ICR::EnsembleLearning::detail::TypeList::incr_id<MeanId>::type
-	   >*
-	   ICR::EnsembleLearning::Builder<T>::gaussian(MeanType<Gaussian,T,MeanId,MeanEnabler>* Mean, 
-						       PrecType<Gamma,T,PrecId,PrecEnabler>* Precision)
-						       {
+template<class T>
+template<template<template<class> class,class,class,int,class> class MeanType,
+	 class MeanId, class MeanEnabler,
+	 template<template<class> class,class,class,int,class> class PrecType,
+	 class PrecId, class PrecEnabler>
+ICR::EnsembleLearning::HiddenNode<ICR::EnsembleLearning::Gaussian,
+				  T, typename ICR::EnsembleLearning::detail::TypeList::incr_id<MeanId>::type
+				  >*
+ICR::EnsembleLearning::Builder<T>::gaussian(MeanType<Gaussian,T,MeanId,2,MeanEnabler>* Mean, 
+					    PrecType<Gamma,T,PrecId,2,PrecEnabler>* Precision)
+{
   typedef HiddenNode<Gaussian, T, typename detail::TypeList::incr_id<MeanId>::type > c_t;
-  typedef MeanType<Gaussian,T,MeanId,MeanEnabler> p0_t;
-  typedef PrecType<Gamma,T,PrecId,PrecEnabler>    p1_t;
+  typedef MeanType<Gaussian,T,MeanId,2,MeanEnabler> p0_t;
+  typedef PrecType<Gamma,T,PrecId,2,PrecEnabler>    p1_t;
   typedef detail::Factor<Gaussian,T,p0_t,p1_t,c_t> Factor_t;
   
   boost::shared_ptr<c_t > GaussianN(new c_t());
@@ -884,19 +884,19 @@ namespace ICR{
 }
 
 template<class T>
-template<template<template<class> class,class,class,class> class MeanType,
+template<template<template<class> class,class,class,int,class> class MeanType,
 	 class MeanId, class MeanEnabler,
-	 template<template<class> class,class,class,class> class PrecType,
+	 template<template<class> class,class,class,int,class> class PrecType,
 	 class PrecId, class PrecEnabler>
 ICR::EnsembleLearning::HiddenNode<ICR::EnsembleLearning::Gaussian,
 				  T,typename  ICR::EnsembleLearning:: detail::TypeList::incr_id<MeanId>::type
 				  >*
-ICR::EnsembleLearning::Builder<T>::gaussian(MeanType<RectifiedGaussian,T,MeanId,MeanEnabler>* Mean, 
-					    PrecType<Gamma,T,PrecId,PrecEnabler>* Precision)
+ICR::EnsembleLearning::Builder<T>::gaussian(MeanType<RectifiedGaussian,T,MeanId,2,MeanEnabler>* Mean, 
+					    PrecType<Gamma,T,PrecId,2,PrecEnabler>* Precision)
 {
   typedef HiddenNode<Gaussian, T, typename detail::TypeList::incr_id<MeanId>::type > c_t;
-  typedef MeanType<RectifiedGaussian,T,MeanId,MeanEnabler> p0_t;
-  typedef PrecType<Gamma,T,PrecId,PrecEnabler>    p1_t;
+  typedef MeanType<RectifiedGaussian,T,MeanId,2,MeanEnabler> p0_t;
+  typedef PrecType<Gamma,T,PrecId,2,PrecEnabler>    p1_t;
   typedef detail::Factor<Gaussian,T,p0_t,p1_t,c_t> Factor_t;
   
   boost::shared_ptr<c_t > GaussianN(new c_t());
@@ -910,12 +910,12 @@ ICR::EnsembleLearning::Builder<T>::gaussian(MeanType<RectifiedGaussian,T,MeanId,
 
 
 template<class T>
-template<template<template<class> class,class,class,class> class MeanType,
+template<template<template<class> class,class,class,int,class> class MeanType,
 	 class MeanId, class MeanEnabler>
 ICR::EnsembleLearning::HiddenNode<ICR::EnsembleLearning::Gaussian,
 				  T, 
 				  typename ICR::EnsembleLearning::detail::TypeList::incr_id<MeanId>::type >*
-ICR::EnsembleLearning::Builder<T>::gaussian(MeanType<Gaussian,T,MeanId,MeanEnabler>* Mean, 
+ICR::EnsembleLearning::Builder<T>::gaussian(MeanType<Gaussian,T,MeanId,2,MeanEnabler>* Mean, 
 					    const T& precision)
 {
   typedef ObservedNode<Gamma, T, ICR::EnsembleLearning::detail::TypeList::zeros > p1_t;
@@ -925,12 +925,12 @@ ICR::EnsembleLearning::Builder<T>::gaussian(MeanType<Gaussian,T,MeanId,MeanEnabl
 }
 
 template<class T>
-template<template<template<class> class,class,class,class> class MeanType,
+template<template<template<class> class,class,class,int,class> class MeanType,
 	 class MeanId, class MeanEnabler>
 ICR::EnsembleLearning::HiddenNode<ICR::EnsembleLearning::Gaussian,
 				  T, 
 				  typename ICR::EnsembleLearning::detail::TypeList::incr_id<MeanId>::type>*
-ICR::EnsembleLearning::Builder<T>::gaussian(MeanType<RectifiedGaussian,T,MeanId,MeanEnabler>* Mean, 
+ICR::EnsembleLearning::Builder<T>::gaussian(MeanType<RectifiedGaussian,T,MeanId,2,MeanEnabler>* Mean, 
 					    const T& precision)
 {
   typedef ObservedNode<Gamma, T, ICR::EnsembleLearning::detail::TypeList::zeros > p1_t;
@@ -941,14 +941,14 @@ ICR::EnsembleLearning::Builder<T>::gaussian(MeanType<RectifiedGaussian,T,MeanId,
 
     
 template<class T>  
-template<template<template<class> class,class,class,class> class PrecType,
+template<template<template<class> class,class,class,int,class> class PrecType,
 	 class PrecId, class PrecEnabler>
 ICR::EnsembleLearning::HiddenNode<ICR::EnsembleLearning::Gaussian,
 				  T,
 				   typename ICR::EnsembleLearning::detail::TypeList::incr_id<ICR::EnsembleLearning::detail::TypeList::zeros>::type
 				  >*
 ICR::EnsembleLearning::Builder<T>::gaussian(const T& mean, 
-					    PrecType<Gamma,T,PrecId,PrecEnabler>* Precision)
+					    PrecType<Gamma,T,PrecId,2,PrecEnabler>* Precision)
 {
   
   typedef ObservedNode<Gaussian, T, ICR::EnsembleLearning::detail::TypeList::zeros > p0_t;
@@ -984,19 +984,19 @@ ICR::EnsembleLearning::Builder<T>::gaussian(const T mean, const T precision)
 
 
 template<class T>
-template<template<template<class> class,class,class,class> class MeanType,
+template<template<template<class> class,class,class,int,class> class MeanType,
 					    class MeanId, class MeanEnabler,
-	 template<template<class> class,class,class,class> class PrecType,
+	 template<template<class> class,class,class,int,class> class PrecType,
 	 class PrecId, class PrecEnabler>
 ICR::EnsembleLearning::HiddenNode<ICR::EnsembleLearning::RectifiedGaussian,
 				  T, typename ICR::EnsembleLearning::detail::TypeList::incr_id<MeanId>::type
 				  >*
-					    ICR::EnsembleLearning::Builder<T>::rectified_gaussian(MeanType<Gaussian,T,MeanId,MeanEnabler>* Mean, 
-						      PrecType<Gamma,T,PrecId,PrecEnabler>* Precision)
+ICR::EnsembleLearning::Builder<T>::rectified_gaussian(MeanType<Gaussian,T,MeanId,2,MeanEnabler>* Mean, 
+						      PrecType<Gamma,T,PrecId,2,PrecEnabler>* Precision)
 {
   typedef HiddenNode<RectifiedGaussian, T, typename detail::TypeList::incr_id<MeanId>::type > c_t;
-  typedef MeanType<Gaussian,T,MeanId,MeanEnabler> p0_t;
-  typedef PrecType<Gamma,T,PrecId,PrecEnabler>    p1_t;
+  typedef MeanType<Gaussian,T,MeanId,2,MeanEnabler> p0_t;
+  typedef PrecType<Gamma,T,PrecId,2,PrecEnabler>    p1_t;
   typedef detail::Factor<RectifiedGaussian,T,p0_t,p1_t,c_t> Factor_t;
   
   boost::shared_ptr<c_t > RectifiedGaussianN(new c_t());
@@ -1009,19 +1009,19 @@ ICR::EnsembleLearning::HiddenNode<ICR::EnsembleLearning::RectifiedGaussian,
 }
 
 template<class T>
-template<template<template<class> class,class,class,class> class MeanType,
+template<template<template<class> class,class,class,int,class> class MeanType,
 	 class MeanId,class MeanEnabler,
-	 template<template<class> class,class,class,class> class PrecType,
+	 template<template<class> class,class,class,int,class> class PrecType,
 	 class PrecId, class PrecEnabler>
 ICR::EnsembleLearning::HiddenNode<ICR::EnsembleLearning::RectifiedGaussian,
 				  T, typename ICR::EnsembleLearning::detail::TypeList::incr_id<MeanId>::type
 				  >*
-ICR::EnsembleLearning::Builder<T>::rectified_gaussian(MeanType<RectifiedGaussian,T,MeanId,MeanEnabler>* Mean, 
-						      PrecType<Gamma,T,PrecId,PrecEnabler>* Precision)
+ICR::EnsembleLearning::Builder<T>::rectified_gaussian(MeanType<RectifiedGaussian,T,MeanId,2,MeanEnabler>* Mean, 
+						      PrecType<Gamma,T,PrecId,2,PrecEnabler>* Precision)
 {
   typedef HiddenNode<RectifiedGaussian, T, typename detail::TypeList::incr_id<MeanId>::type > c_t;
-  typedef MeanType<RectifiedGaussian,T,MeanId,MeanEnabler> p0_t;
-  typedef PrecType<Gamma,T,PrecId,PrecEnabler>    p1_t;
+  typedef MeanType<RectifiedGaussian,T,MeanId,2,MeanEnabler> p0_t;
+  typedef PrecType<Gamma,T,PrecId,2,PrecEnabler>    p1_t;
   typedef detail::Factor<RectifiedGaussian,T,p0_t,p1_t,c_t> Factor_t;
   
   boost::shared_ptr<c_t > RectifiedGaussianN(new c_t());
@@ -1035,12 +1035,12 @@ ICR::EnsembleLearning::Builder<T>::rectified_gaussian(MeanType<RectifiedGaussian
 
 
 template<class T>
-template<template<template<class> class,class,class,class> class MeanType,
+template<template<template<class> class,class,class,int,class> class MeanType,
 	 class MeanId, class MeanEnabler>
 ICR::EnsembleLearning::HiddenNode<ICR::EnsembleLearning::RectifiedGaussian,
 				  T, 
 				  typename ICR::EnsembleLearning::detail::TypeList::incr_id<MeanId>::type >*
-ICR::EnsembleLearning::Builder<T>::rectified_gaussian(MeanType<Gaussian,T,MeanId,MeanEnabler>* Mean, 
+ICR::EnsembleLearning::Builder<T>::rectified_gaussian(MeanType<Gaussian,T,MeanId,2,MeanEnabler>* Mean, 
 						      const T& precision)
 {
   typedef ObservedNode<Gamma, T, ICR::EnsembleLearning::detail::TypeList::zeros > p1_t;
@@ -1050,12 +1050,12 @@ ICR::EnsembleLearning::Builder<T>::rectified_gaussian(MeanType<Gaussian,T,MeanId
 }
 
 template<class T>
-template<template<template<class> class,class,class,class> class MeanType,
+template<template<template<class> class,class,class,int,class> class MeanType,
 	 class MeanId, class MeanEnabler>
 ICR::EnsembleLearning::HiddenNode<ICR::EnsembleLearning::RectifiedGaussian,
 				  T, 
 				  typename ICR::EnsembleLearning::detail::TypeList::incr_id<MeanId>::type >*
-ICR::EnsembleLearning::Builder<T>::rectified_gaussian(MeanType<RectifiedGaussian,T,MeanId,MeanEnabler>* Mean, 
+ICR::EnsembleLearning::Builder<T>::rectified_gaussian(MeanType<RectifiedGaussian,T,MeanId,2,MeanEnabler>* Mean, 
 						      const T& precision)
 {
   typedef ObservedNode<Gamma, T, ICR::EnsembleLearning::detail::TypeList::zeros > p1_t;
@@ -1066,14 +1066,14 @@ ICR::EnsembleLearning::Builder<T>::rectified_gaussian(MeanType<RectifiedGaussian
 
     
 template<class T>  
-template<template<template<class> class,class,class,class> class PrecType,
+template<template<template<class> class,class,class,int,class> class PrecType,
 	 class PrecId, class PrecEnabler>
 ICR::EnsembleLearning::HiddenNode<ICR::EnsembleLearning::RectifiedGaussian,
 				  T, 
 				   typename ICR::EnsembleLearning::detail::TypeList::incr_id<ICR::EnsembleLearning::detail::TypeList::zeros>::type
 				  >*
 ICR::EnsembleLearning::Builder<T>::rectified_gaussian(const T& mean, 
-						      PrecType<Gamma,T,PrecId,PrecEnabler>* Precision)
+						      PrecType<Gamma,T,PrecId,2,PrecEnabler>* Precision)
 {
   
   typedef ObservedNode<RectifiedGaussian, T, ICR::EnsembleLearning::detail::TypeList::zeros > p0_t;
@@ -1120,12 +1120,12 @@ ICR::EnsembleLearning::Builder<T>::rectified_gaussian(const T& mean, const T& pr
 
 
 template<class T>   
-template<template<template<class> class,class,class,class> class MeanType,
+template<template<template<class> class,class,class,int,class> class MeanType,
 	 class MeanId, class MeanEnabler>
 void 
-ICR::EnsembleLearning::Builder<T>::join(MeanType<Gaussian,T,MeanId,MeanEnabler>* Mean, T& precision, GaussianDataNode Data  )
+ICR::EnsembleLearning::Builder<T>::join(MeanType<Gaussian,T,MeanId,2,MeanEnabler>* Mean, T& precision, GaussianDataNode Data  )
 {
-  typedef MeanType<RectifiedGaussian,T,MeanId,MeanEnabler> p0_t;
+  typedef MeanType<RectifiedGaussian,T,MeanId,2,MeanEnabler> p0_t;
   typedef detail::Factor<Gaussian,T,p0_t,GammaConstType,GaussianDataType> Factor_t;
   
   boost::shared_ptr<GammaConstType > Precision(new GammaConstType(precision));
@@ -1135,12 +1135,12 @@ ICR::EnsembleLearning::Builder<T>::join(MeanType<Gaussian,T,MeanId,MeanEnabler>*
   m_Nodes.push_back(Precision);
 }
 template<class T>   
-template<template<template<class> class,class,class,class> class MeanType,
+template<template<template<class> class,class,class,int,class> class MeanType,
 	 class MeanId, class MeanEnabler>
 void 
-ICR::EnsembleLearning::Builder<T>::join(MeanType<RectifiedGaussian,T,MeanId,MeanEnabler>* Mean, T& precision, GaussianDataNode Data  )
+ICR::EnsembleLearning::Builder<T>::join(MeanType<RectifiedGaussian,T,MeanId,2,MeanEnabler>* Mean, T& precision, GaussianDataNode Data  )
 {
-  typedef MeanType<RectifiedGaussian,T,MeanId,MeanEnabler> p0_t;
+  typedef MeanType<RectifiedGaussian,T,MeanId,2,MeanEnabler> p0_t;
   typedef detail::Factor<RectifiedGaussian,T,p0_t,GammaConstType,GaussianDataType> Factor_t;
   
   boost::shared_ptr<GammaConstType > Precision(new GammaConstType(precision));
@@ -1152,12 +1152,12 @@ ICR::EnsembleLearning::Builder<T>::join(MeanType<RectifiedGaussian,T,MeanId,Mean
   
   
 template<class T> 
-template<template<template<class> class,class,class,class> class PrecType,
+template<template<template<class> class,class,class,int,class> class PrecType,
 	 class PrecId, class PrecEnabler>
 void 
-ICR::EnsembleLearning::Builder<T>::join(T& mean, PrecType<Gamma,T,PrecId,PrecEnabler>* Precision, GaussianDataNode Data  )
+ICR::EnsembleLearning::Builder<T>::join(T& mean, PrecType<Gamma,T,PrecId,2,PrecEnabler>* Precision, GaussianDataNode Data  )
 {
-  typedef PrecType<Gamma,T,PrecId,PrecEnabler> p1_t;
+  typedef PrecType<Gamma,T,PrecId,2,PrecEnabler> p1_t;
   typedef detail::Factor<Gaussian,T,GaussianConstType,p1_t,GaussianDataType> Factor_t;
 
   boost::shared_ptr<GaussianConstType > Mean(new GaussianConstType(mean));
@@ -1169,15 +1169,15 @@ ICR::EnsembleLearning::Builder<T>::join(T& mean, PrecType<Gamma,T,PrecId,PrecEna
       
 					
 					template<class T>   
-					template<template<template<class> class,class,class,class> class MeanType,
+					template<template<template<class> class,class,class,int,class> class MeanType,
 					class MeanId, class MeanEnabler,
-					template<template<class> class,class,class,class> class PrecType,
+					template<template<class> class,class,class,int,class> class PrecType,
 					class PrecId, class PrecEnabler>
 					void
-					ICR::EnsembleLearning::Builder<T>::join(MeanType<Gaussian,T,MeanId,MeanEnabler>* Mean,PrecType<Gamma,T,PrecId,PrecEnabler>* Precision, GaussianDataNode& Data  )
+					ICR::EnsembleLearning::Builder<T>::join(MeanType<Gaussian,T,MeanId,2,MeanEnabler>* Mean,PrecType<Gamma,T,PrecId,2,PrecEnabler>* Precision, GaussianDataNode& Data  )
 {
-  typedef MeanType<Gaussian,T,MeanId,MeanEnabler> p0_t;
-  typedef PrecType<Gamma,T,PrecId,PrecEnabler> p1_t;
+  typedef MeanType<Gaussian,T,MeanId,2,MeanEnabler> p0_t;
+  typedef PrecType<Gamma,T,PrecId,2,PrecEnabler> p1_t;
   typedef detail::Factor<Gaussian,T,p0_t,p1_t,GaussianDataType> Factor_t;
 
   boost::shared_ptr<Factor_t> GaussianF(new Factor_t(Mean,Precision,Data));
@@ -1185,15 +1185,15 @@ ICR::EnsembleLearning::Builder<T>::join(T& mean, PrecType<Gamma,T,PrecId,PrecEna
 }
 
 template<class T>   
-      template<template<template<class> class,class,class,class> class MeanType,
+      template<template<template<class> class,class,class,int,class> class MeanType,
 	       class MeanId, class MeanEnabler,
-	       template<template<class> class,class,class,class> class PrecType,
+	       template<template<class> class,class,class,int,class> class PrecType,
 	       class PrecId, class PrecEnabler>
 void 
-ICR::EnsembleLearning::Builder<T>::join(MeanType<RectifiedGaussian,T,MeanId,MeanEnabler>* Mean,PrecType<Gamma,T,PrecId,PrecEnabler>* Precision, GaussianDataNode& Data  )
+ICR::EnsembleLearning::Builder<T>::join(MeanType<RectifiedGaussian,T,MeanId,2,MeanEnabler>* Mean,PrecType<Gamma,T,PrecId,2,PrecEnabler>* Precision, GaussianDataNode& Data  )
 {
-  typedef MeanType<RectifiedGaussian,T,MeanId,MeanEnabler> p0_t;
-  typedef PrecType<Gamma,T,PrecId,PrecEnabler> p1_t;
+  typedef MeanType<RectifiedGaussian,T,MeanId,2,MeanEnabler> p0_t;
+  typedef PrecType<Gamma,T,PrecId,2,PrecEnabler> p1_t;
   typedef detail::Factor<RectifiedGaussian,T,p0_t,p1_t,GaussianDataType> Factor_t;
 
   boost::shared_ptr<Factor_t> RGaussianF(new Factor_t(Mean,Precision,Data));
@@ -1202,17 +1202,17 @@ ICR::EnsembleLearning::Builder<T>::join(MeanType<RectifiedGaussian,T,MeanId,Mean
 
 
 template<class T>
-      template<template<template<class> class,class,class,class> class MeanType,
+      template<template<template<class> class,class,class,int,class> class MeanType,
 	       class MeanId, class MeanEnabler,
-	       template<template<class> class,class,class,class> class PrecType,
+	       template<template<class> class,class,class,int,class> class PrecType,
 	       class PrecId, class PrecEnabler>  
 void 
-ICR::EnsembleLearning::Builder<T>::join(MeanType<Gaussian,T,MeanId,MeanEnabler>* Mean,
-					PrecType<Gamma,T,PrecId,PrecEnabler>* Precision, 
+ICR::EnsembleLearning::Builder<T>::join(MeanType<Gaussian,T,MeanId,2,MeanEnabler>* Mean,
+					PrecType<Gamma,T,PrecId,2,PrecEnabler>* Precision, 
 					const T data )
 {
-  typedef MeanType<Gaussian,T,MeanId,MeanEnabler> p0_t;
-  typedef PrecType<Gamma,T,PrecId,PrecEnabler> p1_t;
+  typedef MeanType<Gaussian,T,MeanId,2,MeanEnabler> p0_t;
+  typedef PrecType<Gamma,T,PrecId,2,PrecEnabler> p1_t;
 	
   typedef detail::Factor<Gaussian,T,p0_t,p1_t,GaussianDataType> Factor_t;
 
@@ -1224,17 +1224,17 @@ ICR::EnsembleLearning::Builder<T>::join(MeanType<Gaussian,T,MeanId,MeanEnabler>*
 }
 
 template<class T>
-      template<template<template<class> class,class,class,class> class MeanType,
+      template<template<template<class> class,class,class,int,class> class MeanType,
 	       class MeanId, class MeanEnabler,
-	       template<template<class> class,class,class,class> class PrecType,
+	       template<template<class> class,class,class,int,class> class PrecType,
 	       class PrecId, class PrecEnabler>  
 void 
-ICR::EnsembleLearning::Builder<T>::join(MeanType<RectifiedGaussian,T,MeanId,MeanEnabler>* Mean,
-					PrecType<Gamma,T,PrecId,PrecEnabler>* Precision, 
+ICR::EnsembleLearning::Builder<T>::join(MeanType<RectifiedGaussian,T,MeanId,2,MeanEnabler>* Mean,
+					PrecType<Gamma,T,PrecId,2,PrecEnabler>* Precision, 
 					const T data )
 {
-  typedef MeanType<RectifiedGaussian,T,MeanId,MeanEnabler> p0_t;
-  typedef PrecType<Gamma,T,PrecId,PrecEnabler> p1_t;
+  typedef MeanType<RectifiedGaussian,T,MeanId,2,MeanEnabler> p0_t;
+  typedef PrecType<Gamma,T,PrecId,2,PrecEnabler> p1_t;
 	
   typedef detail::Factor<RectifiedGaussian,T,p0_t,p1_t,GaussianDataType> Factor_t;
 
@@ -1256,14 +1256,14 @@ ICR::EnsembleLearning::Builder<T>::gaussian_mixture(
 						    WeightsNode Weights)
 {
   
-  typedef HiddenNode<Dirichlet, T > prior_t;
+  typedef WeightsType prior_t;
   typedef ICR::EnsembleLearning::NoSecondParent blank;
-  typedef CatagoryType weights_t;
-  typedef detail::Factor<Discrete,T,prior_t,blank,weights_t> Factor_t;
+  typedef CatagoryType catagory_t;
+  typedef detail::Factor<Discrete,T,prior_t,blank,catagory_t,ENSEMBLE_LEARNING_COMPONENTS> Factor_t;
 
   const size_t number = Weights->size();
 	
-  boost::shared_ptr<CatagoryType>         Catagory(new CatagoryType(number));
+  boost::shared_ptr<catagory_t>     Catagory(new catagory_t());
   boost::shared_ptr<Factor_t >      CatagoryF(new Factor_t(Weights, Catagory.get()));
   m_Nodes.push_back(Catagory);
   m_Factors.push_back(CatagoryF);
@@ -1290,18 +1290,17 @@ template<class vMean_t, class vPrec_t>
 void
 ICR::EnsembleLearning::Builder<T>::join( vMean_t& vMean, vPrec_t& vPrecision, WeightsNode Weights,const T data )
 {
-  typedef HiddenNode<Dirichlet, T > prior_t;
+  typedef WeightsType prior_t;
   typedef ICR::EnsembleLearning::NoSecondParent blank;
-  typedef DirichletType p0_t;
-  typedef CatagoryType weights_t;
-  typedef detail::Factor<Discrete,T,prior_t,blank,weights_t> Factor_t;
+  typedef CatagoryType catagory_t;
+  typedef detail::Factor<Discrete,T,prior_t,blank,catagory_t,ENSEMBLE_LEARNING_COMPONENTS> Factor_t;
 
   boost::shared_ptr<GaussianDataType > Data(new GaussianDataType(data));
   ++m_data_nodes;
 
   const size_t number = Weights->size();
 	
-  boost::shared_ptr<CatagoryType>         Catagory(new CatagoryType(number));
+  boost::shared_ptr<catagory_t>         Catagory(new catagory_t());
   boost::shared_ptr< Factor_t>      CatagoryF(new Factor_t(Weights, Catagory.get()));
   m_Nodes.push_back(Catagory);
   m_Factors.push_back(CatagoryF);
@@ -1313,7 +1312,7 @@ ICR::EnsembleLearning::Builder<T>::join( vMean_t& vMean, vPrec_t& vPrecision, We
   
    boost::shared_ptr<GaussianMixtureFactor> MixtureF(new GaussianMixtureFactor(vMean, vPrecision, Catagory.get() , Data.get()));
 	
-   m_Factors.push_back(MixtureF);
+  // m_Factors.push_back(MixtureF);
 }
 	
 

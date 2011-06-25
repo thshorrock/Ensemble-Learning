@@ -30,6 +30,7 @@
 
 #include "Random.hpp"
 #include "EnsembleLearning/detail/parallel_algorithms.hpp"
+#include "EnsembleLearning/detail/MixtureVector.hpp" //for ENSEMBLE_LEARNING_COMPONENTS
 #include "EnsembleLearning/message/Moments.hpp"
 #include "EnsembleLearning/message/NaturalParameters.hpp"
 #include "EnsembleLearning/node/Node.hpp"
@@ -57,19 +58,19 @@ namespace ICR{
       /** @name Useful typdefs for types that are exposed to the user.
        */
       ///@{
-      typedef typename boost::call_traits< VariableNode<T>* const>::param_type
+      typedef typename boost::call_traits< VariableNode<T,ENSEMBLE_LEARNING_COMPONENTS>* const>::param_type
       variable_parameter;
       
-      typedef typename boost::call_traits< Moments<T> >::param_type
+      typedef typename boost::call_traits< Moments<T,ENSEMBLE_LEARNING_COMPONENTS> >::param_type
       moments_parameter;
-      typedef typename boost::call_traits< Moments<T> >::const_reference
+      typedef typename boost::call_traits< Moments<T,ENSEMBLE_LEARNING_COMPONENTS> >::const_reference
       moments_const_reference;
-      typedef typename boost::call_traits< Moments<T> >::value_type
+      typedef typename boost::call_traits< Moments<T,ENSEMBLE_LEARNING_COMPONENTS> >::value_type
       moments_t;
       
-      typedef typename boost::call_traits< NaturalParameters<T> >::param_type
+      typedef typename boost::call_traits< NaturalParameters<T,ENSEMBLE_LEARNING_COMPONENTS> >::param_type
       NP_parameter;
-      typedef typename boost::call_traits< NaturalParameters<T> >::value_type
+      typedef typename boost::call_traits< NaturalParameters<T,ENSEMBLE_LEARNING_COMPONENTS> >::value_type
       NP_t;
 
       typedef typename boost::call_traits<T>::value_type
@@ -314,7 +315,7 @@ ICR::EnsembleLearning::Discrete<T>::CalcNP2Prior(moments_parameter Discrete)
 {
   //The probabilities are provided by Discrete and need to be passsed onto Prior
   // Want to simply foward these:
-  NP_t NP(Discrete.size());
+  NP_t NP;
   PARALLEL_COPY(Discrete.begin(), Discrete.end(), NP.begin());
   return NP;
 }
@@ -327,7 +328,7 @@ ICR::EnsembleLearning::Discrete<T>::CalcNP2Data(moments_parameter Dirichlet)
 {
   //the log probs are provided by Dirichlet, need to pass them on
   //Want to simply copy these
-  NP_t NP(Dirichlet.size());
+  NP_t NP;
   PARALLEL_COPY(Dirichlet.begin(), Dirichlet.end(), NP.begin());
   return  NP;
 }

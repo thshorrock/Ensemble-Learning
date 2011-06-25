@@ -45,9 +45,9 @@ namespace ICR{
      * @return The mean for the given node and index.
      * @ingroup UserInterface
      */
-    template<class T>
+    template<class T,int array_size>
     T
-    Mean(VariableNode<T>* node, size_t index = 0)
+    Mean(VariableNode<T,array_size>* node, size_t index = 0)
     {
       return node->GetMean()[index];
     }
@@ -76,9 +76,9 @@ namespace ICR{
      * @return The variance for the given node and index.
      * @ingroup UserInterface
      */
-    template<class T>
+    template<class T,int array_size>
     T
-    StandardDeviation(VariableNode<T>* node, size_t index = 0)
+    StandardDeviation(VariableNode<T,array_size>* node, size_t index = 0)
     {
       return std::sqrt(node->GetVariance()[index]);
     }

@@ -66,10 +66,10 @@ namespace ICR{
       {};
       
     //forward declare
-    template<template<class> class Model, class T,class List>
+    template<template<class> class Model, class T,class List,int array_size>
     struct GetMean_impl;
 
-    template<template<class> class Model, class T,class List>
+    template<template<class> class Model, class T,class List,int array_size>
     struct GetVariance_impl;
     
   }
@@ -86,7 +86,7 @@ namespace ICR{
      *  @tparam Enable Enable the Observed node. This is where the compile time checking of the model occurs.
      */
     template<template<class> class Model,
-	     class T,class List
+	     class T,class List,int array_size = 2
 	     ,class Enable = void
 	     >
     class ObservedNode ; //uninitialised
@@ -101,11 +101,11 @@ namespace ICR{
      *    Attempting to call any other class will not compile.
      *  @tparam T The data type used in calculations - either float or double.
      */
-    template<template<class> class Model, class T,class List>
-    class ObservedNode<Model,T,List
+    template<template<class> class Model, class T,class List,int array_size>
+    class ObservedNode<Model,T,List,array_size
 		       ,typename boost::enable_if<detail::is_observable<Model,T> >::type
 		       > 
-      :  public VariableNode<T> //public detail::TypeList::zeros,
+      :  public VariableNode<T,array_size> //public detail::TypeList::zeros,
     {
     public:
       //using detail::TypeList<void>::id;
@@ -121,29 +121,18 @@ namespace ICR{
 	  m_children()
       {}
 
-      /** A Constructor.
-       * @param  elements The number of elements in the observed node.
-       * @param  value The value of each of the elements 
-       *  This constructor is only available for Discrete and Dirichlet models.
-       */
-      ObservedNode(const size_t& elements, const T& value
-		   )
-	: m_Moments(make_Moments(elements,value, Model<T>() ) ), 
-	  m_parent(0), 
-	  m_children()
-      {}
       
       
       void
-      SetParentFactor(FactorNode<T,ObservedNode>* f);
+      SetParentFactor(FactorNode<T,ObservedNode,array_size>* f);
 
       void
-      AddChildFactor(FactorNode<T,ObservedNode>* f);
+      AddChildFactor(FactorNode<T,ObservedNode,array_size>* f);
       
       void
       InitialiseMoments(){};
 
-      const Moments<T>&
+      const Moments<T,array_size>&
       GetMoments() ;
       
       const std::vector<T>
@@ -156,32 +145,32 @@ namespace ICR{
       Iterate(Coster& C);
       
     private:
-      friend struct detail::GetMean_impl<Model,T, List>;
-      friend struct detail::GetVariance_impl< Model,T, List >;
+      friend struct detail::GetMean_impl<Model,T, List,array_size>;
+      friend struct detail::GetVariance_impl< Model,T, List ,array_size>;
       
-      Moments<T>
+      Moments<T,array_size>
       make_Moments(const T& d, const Gaussian<T> )
       {
-	return Moments<T>(d, d*d);
+	return Moments<T,array_size>(d, d*d);
       }
-      Moments<T>
+      Moments<T,array_size>
       make_Moments(const T& d, const RectifiedGaussian<T>)
       {
-	return Moments<T>(d, d*d);
+	return Moments<T,array_size>(d, d*d);
       }
-      Moments<T>
+      Moments<T,array_size>
       make_Moments(const T& d, const Gamma<T>)
       {
-	return Moments<T>(d, std::log(d));
+	return Moments<T,array_size>(d, std::log(d));
       }
-      Moments<T>
-      make_Moments(const size_t s,const T& d, const Dirichlet<T>)
+      Moments<T,array_size>
+      make_Moments(const T& d, const Dirichlet<T>)
       {
-	return Moments<T>(std::vector<T>(s,d));
+	return Moments<T,array_size>(std::vector<T>(array_size,d));
       }
-      const Moments<T> m_Moments;
-      FactorNode<T,ObservedNode>* m_parent;
-      std::vector<FactorNode<T,ObservedNode>*> m_children;
+      const Moments<T,array_size> m_Moments;
+      FactorNode<T,ObservedNode,array_size>* m_parent;
+      std::vector<FactorNode<T,ObservedNode,array_size>*> m_children;
     };
     
     namespace detail{
@@ -190,7 +179,7 @@ namespace ICR{
        *  @tparam Model The model.
        *  @tparam T The data type (float or double)
        */
-      template<template<class> class Model, class T,class List>
+      template<template<class> class Model, class T,class List,int array_size>
       struct GetMean_impl
       {
 	/** Get the mean.
@@ -198,7 +187,7 @@ namespace ICR{
 	 *  @return The vector of means (size of 1)
 	 */
 	static const std::vector<T>
-	GetMean(ObservedNode<Model,T,List>& t){
+	GetMean(ObservedNode<Model,T,List,array_size>& t){
 	  return std::vector<T>(1, t.m_Moments[0]);
 	}
       };
@@ -207,8 +196,8 @@ namespace ICR{
        *  @tparam Model The model.
        *  @tparam T The data type (float or double)
        */
-      template<class T,class List>
-      struct GetMean_impl<Dirichlet,T,List>
+      template<class T,class List,int array_size>
+      struct GetMean_impl<Dirichlet,T,List, array_size>
       {
 	/** Get the mean.
 	 *  @param t The Dirichlet node for which to obtain the mean
@@ -216,7 +205,7 @@ namespace ICR{
 	 */
 	static
 	const std::vector<T>
-	GetMean(ObservedNode<Dirichlet,T,List>& t){
+	GetMean(ObservedNode<Dirichlet,T,List,array_size>& t){
 	  return std::vector<T>(t.m_Moments.size(), t.m_Moments[0]);
 	}
       };
@@ -225,7 +214,7 @@ namespace ICR{
        *  @tparam Model The model.
        *  @tparam T The data type (float or double)
        */
-      template<template<class> class Model, class T,class List>
+      template<template<class> class Model, class T,class List,int array_size>
       struct GetVariance_impl
       {
 	/** Get the variance.
@@ -234,7 +223,7 @@ namespace ICR{
 	 */
 	static  
 	const std::vector<T>
-	GetVariance(ObservedNode<Model,T,List>& t){
+	GetVariance(ObservedNode<Model,T,List, array_size>& t){
 	  return std::vector<T>(1, 0);
 	}
       };
@@ -243,8 +232,8 @@ namespace ICR{
        *  @tparam Model The model.
        *  @tparam T The data type (float or double)
        */
-      template<class T,class List>
-      struct GetVariance_impl<Dirichlet,T,List>
+      template<class T,class List,int array_size>
+      struct GetVariance_impl<Dirichlet,T,List,array_size>
       {
 	/** Get the variance.
 	 *  @param t The Dirichlet node for which to obtain the variance
@@ -252,7 +241,7 @@ namespace ICR{
 	 */
 	static 
 	const std::vector<T>
-	GetVariance(ObservedNode<Dirichlet,T,List>& t){
+	GetVariance(ObservedNode<Dirichlet,T,List,array_size>& t){
 	  return  std::vector<T>(t.m_Moments.size(), 0);
 	}
       };
@@ -263,10 +252,10 @@ namespace ICR{
   } 
 }
 
-template<template<class> class Model,class T,class List>
+template<template<class> class Model,class T,class List,int array_size>
 inline
-const ICR::EnsembleLearning::Moments<T>&
-ICR::EnsembleLearning::ObservedNode<Model,T,List 
+const ICR::EnsembleLearning::Moments<T,array_size>&
+ICR::EnsembleLearning::ObservedNode<Model,T,List,array_size
 				    ,typename boost::enable_if<ICR::EnsembleLearning::detail::is_observable<Model,T> >::type
 				    >
 ::GetMoments() 
@@ -275,13 +264,13 @@ ICR::EnsembleLearning::ObservedNode<Model,T,List
   return m_Moments;
 }
 
-template<template<class> class Model,class T,class List>
+template<template<class> class Model,class T,class List,int array_size>
 inline
 void
-ICR::EnsembleLearning::ObservedNode<Model,T,List
+ICR::EnsembleLearning::ObservedNode<Model,T,List, array_size
 				    ,typename boost::enable_if<ICR::EnsembleLearning::detail::is_observable<Model,T> >::type
 				    >
-::AddChildFactor(FactorNode<T,ObservedNode>* f)
+::AddChildFactor(FactorNode<T,ObservedNode,array_size>* f)
 {
   //Could be many factors, potentially added with many threads,
   //therefore make the following critical
@@ -292,45 +281,45 @@ ICR::EnsembleLearning::ObservedNode<Model,T,List
 }
 
 
-template<template<class> class Model, class T,class List>
+template<template<class> class Model, class T,class List,int array_size>
 inline
 void
-ICR::EnsembleLearning::ObservedNode<Model,T,List
+ICR::EnsembleLearning::ObservedNode<Model,T,List, array_size
 				    ,typename boost::enable_if<ICR::EnsembleLearning::detail::is_observable<Model,T> >::type
 				    >
-::SetParentFactor(FactorNode<T,ObservedNode>* f)
+::SetParentFactor(FactorNode<T,ObservedNode,array_size>* f)
 {
   //Only one factor: this should be called once (therefore thread safe)
   m_parent = f;
 }
   
 
-template<template<class> class Model,class T,class List>
+template<template<class> class Model,class T,class List,int array_size>
 inline
 const std::vector<T>
-ICR::EnsembleLearning::ObservedNode<Model,T,List
+ICR::EnsembleLearning::ObservedNode<Model,T,List, array_size
 				    ,typename boost::enable_if<ICR::EnsembleLearning::detail::is_observable<Model,T> >::type
 				    >
 ::GetMean() 
 {
-  return detail::GetMean_impl<Model,T,List>::GetMean(*this);
+  return detail::GetMean_impl<Model,T,List,array_size>::GetMean(*this);
 }
    
-template<template<class> class Model,class T,class List>
+template<template<class> class Model,class T,class List,int array_size>
 inline
 const std::vector<T>
-ICR::EnsembleLearning::ObservedNode<Model,T,List
+ICR::EnsembleLearning::ObservedNode<Model,T,List, array_size
 				    ,typename boost::enable_if<ICR::EnsembleLearning::detail::is_observable<Model,T> >::type
 				    >
 ::GetVariance() 
 {
-  return detail::GetVariance_impl<Model,T,List>::GetVariance(*this);
+  return detail::GetVariance_impl<Model,T,List,array_size>::GetVariance(*this);
 }
 
-template<template<class> class Model, class T,class List>
+template<template<class> class Model, class T,class List,int array_size>
 inline
 void
-ICR::EnsembleLearning::ObservedNode<Model,T,List
+ICR::EnsembleLearning::ObservedNode<Model,T,List, array_size
 				     ,typename boost::enable_if<ICR::EnsembleLearning::detail::is_observable<Model,T> >::type
 				    >
 ::Iterate(Coster& Total)
@@ -340,7 +329,7 @@ ICR::EnsembleLearning::ObservedNode<Model,T,List
     {
       //This is a data node...
       //Assume thead-safety of other nodes so do not need to worry here.
-      const NaturalParameters<T> ParentNP =m_parent->GetNaturalNot(this); 
+      const NaturalParameters<T,array_size> ParentNP =m_parent->GetNaturalNot(this); 
       //See page 41 of Winn's thesis for this formula
       const T Cost = ParentNP*GetMoments() +  m_parent->CalcLogNorm();
       Total += Cost;
