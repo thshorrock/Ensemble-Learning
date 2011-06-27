@@ -117,6 +117,9 @@ namespace ICR{
       
       typedef typename boost::call_traits<ParentFactorNode<T,ObservedNode, typename boost::mpl::int_<array_size>::type>* >::value_type 
       ParentF_t;
+
+      typedef typename boost::call_traits<Moments<T,array_size> >::value_type 
+      moments_t;
     public:
       //using detail::TypeList<void>::id;
       /** A Constructor.
@@ -142,7 +145,7 @@ namespace ICR{
       void
       InitialiseMoments(){};
 
-      const Moments<T,array_size>&
+      const moments_t
       GetMoments() ;
       
       const std::vector<T>
@@ -158,27 +161,27 @@ namespace ICR{
       friend struct detail::GetMean_impl<Model,T, List,array_size>;
       friend struct detail::GetVariance_impl< Model,T, List ,array_size>;
       
-      Moments<T,array_size>
+      moments_t
       make_Moments(const T& d, const Gaussian<T> )
       {
-	return Moments<T,array_size>(d, d*d);
+	return moments_t(d, d*d);
       }
-      Moments<T,array_size>
+      moments_t
       make_Moments(const T& d, const RectifiedGaussian<T>)
       {
-	return Moments<T,array_size>(d, d*d);
+	return moments_t(d, d*d);
       }
-      Moments<T,array_size>
+      moments_t
       make_Moments(const T& d, const Gamma<T>)
       {
-	return Moments<T,array_size>(d, std::log(d));
+	return moments_t(d, std::log(d));
       }
-      Moments<T,array_size>
+      moments_t
       make_Moments(const T& d, const Dirichlet<T>)
       {
-	return Moments<T,array_size>(std::vector<T>(array_size,d));
+	return moments_t(std::vector<T>(array_size,d));
       }
-      const Moments<T,array_size> m_Moments;
+      const moments_t m_Moments;
       ParentF_t m_parent;
       std::vector<F_t> m_children;
     };
@@ -264,7 +267,10 @@ namespace ICR{
 
 template<template<class> class Model,class T,class List,int array_size>
 inline
-const ICR::EnsembleLearning::Moments<T,array_size>&
+const typename ICR::EnsembleLearning::ObservedNode<Model,T,List,array_size
+				    ,typename boost::enable_if<ICR::EnsembleLearning::detail::is_observable<Model,T> >::type
+						     >
+::moments_t
 ICR::EnsembleLearning::ObservedNode<Model,T,List,array_size
 				    ,typename boost::enable_if<ICR::EnsembleLearning::detail::is_observable<Model,T> >::type
 				    >

@@ -70,7 +70,7 @@ namespace ICR{
       void 
       Iterate(Coster& C);
 
-      const Moments<T>&
+      const Moments<T>
       GetMoments() ;
 
       //should make a const version of this 
@@ -143,7 +143,7 @@ ICR::EnsembleLearning::DeterministicNode<Model,T,List>::AddChildFactor(FactorNod
 
 template<class Model,class T,class List>
 inline
-const ICR::EnsembleLearning::Moments<T>&
+const ICR::EnsembleLearning::Moments<T>
 ICR::EnsembleLearning::DeterministicNode<Model,T,List>::GetMoments() 
 {
 

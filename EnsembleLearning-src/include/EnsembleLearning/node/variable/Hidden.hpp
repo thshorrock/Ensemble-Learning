@@ -68,12 +68,18 @@ namespace ICR{
       typedef typename boost::call_traits<ParentFactorNode<T, HiddenNode, typename boost::mpl::int_<array_size>::type>* >::value_type 
       ParentF_t;
       
+      typedef typename boost::call_traits<Moments<T,array_size> >::value_type 
+      moments_t;
     public:
       /** A constructor.
        *  @param moment_size The number of elements in the stored moments.
        *  This is usually two but varies for discrete nodes.
        */
       HiddenNode(); //mostly two, but variable for Discrete model
+
+      /** Destructor.
+       */
+      ~HiddenNode(); 
 
       void
       SetParentFactor(ParentF_parameter f);
@@ -87,11 +93,11 @@ namespace ICR{
       void
       InitialiseMoments()
       {
-	m_Moments = m_parent->InitialiseMoments();
+	*m_Moments = m_parent->InitialiseMoments();
       }
 
 
-      const Moments<T,array_size>&
+      const moments_t
       GetMoments() ;
 
       const std::vector<T>
@@ -110,7 +116,7 @@ namespace ICR{
 
       /** The number of elements in the stored Moments */
       size_t 
-      size() const {return m_Moments.size();}
+      size() const {return m_Moments->size();}
       
     private:
       
@@ -119,7 +125,7 @@ namespace ICR{
 
       ParentF_t m_parent;
       std::vector<F_t> m_children;
-      Moments<T,array_size> m_Moments;
+      moments_t* m_Moments;
       mutable Mutex m_mutex;
     };
 
@@ -129,9 +135,16 @@ namespace ICR{
 
 template<template<class> class Model,class T,class List,int array_size,class Enable>
 ICR::EnsembleLearning::HiddenNode<Model,T,List,array_size,Enable>::HiddenNode() 
-  :   m_parent(0), m_children(), m_Moments()
-{}
+  :   m_parent(0), m_children()
+{
+  m_Moments = new moments_t();
+}
 
+template<template<class> class Model,class T,class List,int array_size,class Enable>
+ICR::EnsembleLearning::HiddenNode<Model,T,List,array_size,Enable>::~HiddenNode() 
+{
+  delete m_Moments;
+}
 
 template<template<class> class Model,class T,class List,int array_size,class Enable>
 inline 
@@ -162,14 +175,14 @@ ICR::EnsembleLearning::HiddenNode<Model,T,List,array_size,Enable>::AddChildFacto
 
 template<template<class> class Model,class T,class List,int array_size,class Enable>
 inline
-const ICR::EnsembleLearning::Moments<T,array_size>&
+const typename ICR::EnsembleLearning::HiddenNode<Model,T,List,array_size,Enable>::moments_t
 ICR::EnsembleLearning::HiddenNode<Model,T,List,array_size,Enable>::GetMoments() 
 {
   /*This value is update in Iterate and called to evaluate other Hidden Nodes
    * (also in iterate mode).  It therefore needs to be protected by a mutex.
    */
   Lock lock(m_mutex);
-  return m_Moments;
+  return *m_Moments;
 }
    
 template<template<class> class Model,class T,class List,int array_size,class Enable>
@@ -228,7 +241,7 @@ inline
 void
 ICR::EnsembleLearning::HiddenNode<Model,T,List,array_size,Enable>::SetMean(const std::vector<T>& m) 
 {
-  m_Moments = Model<T>::CalcMoments(m,GetVariance());
+  *m_Moments = Model<T>::CalcMoments(m,GetVariance());
 }
    
 template<template<class> class Model,class T,class List,int array_size,class Enable>
@@ -236,7 +249,7 @@ inline
 void
 ICR::EnsembleLearning::HiddenNode<Model,T,List,array_size,Enable>::SetVariance(const std::vector<T>& v) 
 {
-  m_Moments = Model<T>::CalcMoments(GetMean(),v);
+  *m_Moments = Model<T>::CalcMoments(GetMean(),v);
 }
 
 template<template<class> class Model,class T,class List,int array_size,class Enable>
@@ -249,11 +262,11 @@ ICR::EnsembleLearning::HiddenNode<Model,T,List,array_size,Enable>::Iterate(Coste
   const T LogNorm = Model<T>::CalcLogNorm(NP);
   {
     Lock lock(m_mutex);
-    m_Moments = Model<T>::CalcMoments(NP);  //update the moments and the model
+    *m_Moments = Model<T>::CalcMoments(NP);  //update the moments and the model
   }
   //first get the NP from the parent
   const NaturalParameters<T,array_size> ParentNP = (m_parent->GetNaturalNot(this));
-  C +=  (ParentNP - NP)*m_Moments +m_parent->CalcLogNorm() -  LogNorm;
+  C +=  (ParentNP - NP)* (*m_Moments) +m_parent->CalcLogNorm() -  LogNorm;
 
 }
 
