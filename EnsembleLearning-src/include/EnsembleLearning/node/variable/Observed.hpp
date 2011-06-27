@@ -145,7 +145,7 @@ namespace ICR{
       void
       InitialiseMoments(){};
 
-      const moments_t
+      const moments_t&
       GetMoments() ;
       
       const std::vector<T>
@@ -270,7 +270,7 @@ inline
 const typename ICR::EnsembleLearning::ObservedNode<Model,T,List,array_size
 				    ,typename boost::enable_if<ICR::EnsembleLearning::detail::is_observable<Model,T> >::type
 						     >
-::moments_t
+::moments_t&
 ICR::EnsembleLearning::ObservedNode<Model,T,List,array_size
 				    ,typename boost::enable_if<ICR::EnsembleLearning::detail::is_observable<Model,T> >::type
 				    >

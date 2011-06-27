@@ -81,7 +81,7 @@ namespace ICR{
       /** Get the moments stored in this node. 
        *  @return The stored moments */
       virtual
-      const Moments<T,size>
+      const Moments<T,size>&
       GetMoments()  = 0;
 
 
