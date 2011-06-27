@@ -31,6 +31,7 @@
 
 #include "EnsembleLearning/detail/Mutex.hpp"
 #include <boost/call_traits.hpp>
+#include <omp.h>
 
 namespace ICR {
   namespace EnsembleLearning {
@@ -42,12 +43,12 @@ namespace ICR {
      */
     class Coster
     {
-      typedef boost::call_traits<double>::param_type pDouble;
+      typedef boost::call_traits<double>::param_type double_p;
     public:
       /** Constructor. 
        *  @param cost The initial cost (default 0).
        */
-      Coster(pDouble cost = 0.0) 
+      Coster(double_p cost = 0.0) 
 	: m_Cost(cost) 
       {}
       
@@ -61,9 +62,10 @@ namespace ICR {
        * @param local The local cost on a variable node that is to be added to the global cost.
        */
       void
-      operator+=(pDouble local)
+      operator+=(double_p local)
       { 
-	Lock lock(m_mutex); 
+	//Lock lock(m_mutex); 
+	#pragma omp atomic
 	m_Cost+=local;
       }
 
@@ -71,9 +73,9 @@ namespace ICR {
        * @param cost The new cost stored.
        */
       void 
-      operator=(pDouble cost)
+      operator=(double_p cost)
       {
-	Lock lock(m_mutex); 
+	//Lock lock(m_mutex); 
 	m_Cost = cost;
       }
 
@@ -81,11 +83,11 @@ namespace ICR {
        */
       operator double() const
       {
-	Lock lock(m_mutex); 
+	//Lock lock(m_mutex); 
 	return m_Cost;
       }
     private:
-      mutable Mutex m_mutex;
+      //mutable Mutex m_mutex;
       double m_Cost;
     };
     
