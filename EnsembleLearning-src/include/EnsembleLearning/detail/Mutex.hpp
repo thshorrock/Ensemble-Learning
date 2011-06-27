@@ -84,9 +84,9 @@ namespace ICR{
     };
     
     template <class T>
-    bool CAS(T* addr, T exp, T val) {
+    bool CAS(T* addr, T exp, T fresh) {
       if (*addr == exp) {
-	*addr = val;
+	*addr = fresh;
 	return true;
       }
       return false;

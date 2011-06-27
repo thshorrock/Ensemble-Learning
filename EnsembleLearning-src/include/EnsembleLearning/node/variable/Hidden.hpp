@@ -93,6 +93,8 @@ namespace ICR{
       void
       InitialiseMoments()
       {
+	//before iteration stage - no chance for GetMoments to be called by another thread,
+	// therefore thread considerations don't apply here.
 	*m_Moments = m_parent->InitialiseMoments();
       }
 
@@ -126,6 +128,8 @@ namespace ICR{
       ParentF_t m_parent;
       std::vector<F_t> m_children;
       moments_t* m_Moments;
+      //store the moments that might still being called by other threads after moments updated, deleted at the beginning of each iteration.
+      moments_t* m_oldMoments; 
       mutable Mutex m_mutex;
     };
 
@@ -138,12 +142,14 @@ ICR::EnsembleLearning::HiddenNode<Model,T,List,array_size,Enable>::HiddenNode()
   :   m_parent(0), m_children()
 {
   m_Moments = new moments_t();
+  m_oldMoments = new moments_t(); //dummy, deleted first iteration
 }
 
 template<template<class> class Model,class T,class List,int array_size,class Enable>
 ICR::EnsembleLearning::HiddenNode<Model,T,List,array_size,Enable>::~HiddenNode() 
 {
   delete m_Moments;
+  //oldMoments deleted in iteration.
 }
 
 template<template<class> class Model,class T,class List,int array_size,class Enable>
@@ -257,13 +263,35 @@ inline
 void 
 ICR::EnsembleLearning::HiddenNode<Model,T,List,array_size,Enable>::Iterate(Coster& C)
 {
+
+  /* This node is called exactly once per iteration.
+   * Therefore can atomically update the moments via their pointers
+   *  with a simple deletion mechanism for old pointers.
+   * (The old pointer from the previous iteration is for sure no longer being used).
+   *  Also, since called exactly once, 
+   *  don't need a CAS to check that right pointer is updated.
+   */
+  
+  //first of all, delete the old moments.
+  delete m_oldMoments;
+
   const NaturalParameters<T,array_size> NP = GetNP();
   //Get the moments and update the model
   const T LogNorm = Model<T>::CalcLogNorm(NP);
-  {
-    Lock lock(m_mutex);
-    *m_Moments = Model<T>::CalcMoments(NP);  //update the moments and the model
-  }
+  
+  //make the new Moments 
+  moments_t* newMoments = new moments_t(Model<T>::CalcMoments(NP));
+  
+  //store the old pointer so that it can be deleted next iteration.
+  m_oldMoments = m_Moments; 
+  //atomically swap in new pointer
+  m_Moments = newMoments;
+  
+  // {
+  //   Lock lock(m_mutex);
+  //   *m_Moments = Model<T>::CalcMoments(NP);  //update the moments and the model
+  // }
+
   //first get the NP from the parent
   const NaturalParameters<T,array_size> ParentNP = (m_parent->GetNaturalNot(this));
   C +=  (ParentNP - NP)* (*m_Moments) +m_parent->CalcLogNorm() -  LogNorm;
