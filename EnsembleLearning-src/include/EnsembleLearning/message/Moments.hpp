@@ -455,7 +455,7 @@ ICR::EnsembleLearning::Moments<T,array_size>::operator*=(data_parameter d)
 {
   //more efficient than the std::transform
   for(size_t i=0;i<array_size;++i){
-    m_data[i]*=other;
+    m_data[i]*=d;
   }
   //std::transform(m_data.begin(), m_data.end(),  m_data.begin(), times_by(d));
   return *this;
