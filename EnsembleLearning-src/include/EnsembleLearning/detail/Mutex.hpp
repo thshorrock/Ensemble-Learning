@@ -82,6 +82,15 @@ namespace ICR{
     private:
       Mutex& m_mutex;
     };
+    
+    template <class T>
+    bool CAS(T* addr, T exp, T val) {
+      if (*addr == exp) {
+	*addr = val;
+	return true;
+      }
+      return false;
+    }
 
   }
 }

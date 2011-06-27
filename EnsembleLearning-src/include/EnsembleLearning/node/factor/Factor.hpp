@@ -81,9 +81,9 @@ namespace ICR{
 	       class parent1_t, class parent2_t, class child_t, int array_size = 2
 	       >
       class Factor : 
-	public FactorNode<T,parent1_t,array_size>,
-	public FactorNode<T,parent2_t,array_size>,
-	public FactorNode<T,child_t,array_size>,
+	public FactorNode<T,parent1_t,typename boost::mpl::int_<array_size>::type >,
+	public FactorNode<T,parent2_t,typename boost::mpl::int_<array_size>::type >,
+	public ParentFactorNode<T,child_t,typename boost::mpl::int_<array_size>::type >,
 	public FactorNode_basic
       {
 	struct enabler {};

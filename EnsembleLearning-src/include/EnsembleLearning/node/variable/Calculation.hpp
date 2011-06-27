@@ -62,7 +62,7 @@ namespace ICR{
       DeterministicNode(const size_t moment_size = 2); 
 
       void
-      SetParentFactor(FactorNode<T,DeterministicNode>* f);
+      SetParentFactor(ParentFactorNode<T,DeterministicNode>* f);
       
       void
       AddChildFactor(FactorNode<T,DeterministicNode>* f);
@@ -100,7 +100,7 @@ namespace ICR{
       
     private:
       
-      FactorNode<T,DeterministicNode>* m_parent;
+      ParentFactorNode<T,DeterministicNode>* m_parent;
       std::vector<FactorNode<T,DeterministicNode>*> m_children;
       mutable Moments<T> m_Moments;
       mutable Mutex m_mutex;
@@ -120,7 +120,7 @@ ICR::EnsembleLearning::DeterministicNode<Model,T,List>::DeterministicNode(const 
 template<class Model,class T,class List>
 inline 
 void
-ICR::EnsembleLearning::DeterministicNode<Model,T,List>::SetParentFactor(FactorNode<T,DeterministicNode>* f)
+ICR::EnsembleLearning::DeterministicNode<Model,T,List>::SetParentFactor(ParentFactorNode<T,DeterministicNode>* f)
 {
   //This should only be called once, so should get no collisions here
   m_parent=f;

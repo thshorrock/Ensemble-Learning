@@ -157,8 +157,8 @@ namespace ICR{
      *  Every factor node derives from this.
      * @tparam T The data type used by all the factor nodes, either double or float.
      */
-    template<class T, class NotThis, int size = 2>
-    class FactorNode //: public FactorNode_basic
+    template<class T, class NotThis, class array_size = typename boost::mpl::int_<2>::type>
+    class FactorNode 
     {
     public:
       
@@ -178,7 +178,7 @@ namespace ICR{
        * @return The natural parameter calculated for v.
        */
       virtual
-      NaturalParameters<T, size>
+      NaturalParameters<T, array_size::value>
       GetNaturalNot(variable_parameter v) const = 0;
  
       // virtual
@@ -191,20 +191,35 @@ namespace ICR{
       T
       CalcLogNorm() const = 0;
       
+      /** Destructor */
+      virtual 
+      ~FactorNode(){};
+    };
+      
+
+    /** The interface to the factor nodes.
+     *  Every factor node derives from this.
+     * @tparam T The data type used by all the factor nodes, either double or float.
+     */
+    template<class T, class NotThis, class array_size = typename boost::mpl::int_<2>::type>
+    class ParentFactorNode : public FactorNode<T,NotThis,array_size>
+    {
+    public:
+      
       /** Calculate the initial moments for the child node.
        *  These are evaluated from Random samples from the model's distribution,
        * based upon the values of the parent nodes.
        *  @return The Inital Moments for the child nodes.
        */
       virtual
-      Moments<T, size>
+      Moments<T, array_size::value>
       InitialiseMoments() const  = 0;
 
       /** Destructor */
       virtual 
-      ~FactorNode(){};
+      ~ParentFactorNode(){};
     };
-      
+
   }
 }
 

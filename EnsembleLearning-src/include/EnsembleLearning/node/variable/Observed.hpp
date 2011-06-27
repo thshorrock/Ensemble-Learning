@@ -102,11 +102,21 @@ namespace ICR{
      *  @tparam T The data type used in calculations - either float or double.
      */
     template<template<class> class Model, class T,class List,int array_size>
-    class ObservedNode<Model,T,List,array_size
-		       ,typename boost::enable_if<detail::is_observable<Model,T> >::type
-		       > 
+    class ObservedNode<Model,T,List,array_size,typename boost::enable_if<detail::is_observable<Model,T> >::type> 
       :  public VariableNode<T,array_size> //public detail::TypeList::zeros,
+
     {
+      typedef typename boost::call_traits<FactorNode<T,ObservedNode, typename boost::mpl::int_<array_size>::type >* >::param_type 
+      F_parameter;
+      
+      typedef typename boost::call_traits<ParentFactorNode<T,ObservedNode, typename boost::mpl::int_<array_size>::type>* >::param_type 
+      ParentF_parameter;
+      
+      typedef typename boost::call_traits<FactorNode<T,ObservedNode, typename boost::mpl::int_<array_size>::type >* >::value_type 
+      F_t;
+      
+      typedef typename boost::call_traits<ParentFactorNode<T,ObservedNode, typename boost::mpl::int_<array_size>::type>* >::value_type 
+      ParentF_t;
     public:
       //using detail::TypeList<void>::id;
       /** A Constructor.
@@ -124,10 +134,10 @@ namespace ICR{
       
       
       void
-      SetParentFactor(FactorNode<T,ObservedNode,array_size>* f);
+      SetParentFactor(ParentF_parameter f);
 
       void
-      AddChildFactor(FactorNode<T,ObservedNode,array_size>* f);
+      AddChildFactor(F_parameter f);
       
       void
       InitialiseMoments(){};
@@ -169,8 +179,8 @@ namespace ICR{
 	return Moments<T,array_size>(std::vector<T>(array_size,d));
       }
       const Moments<T,array_size> m_Moments;
-      FactorNode<T,ObservedNode,array_size>* m_parent;
-      std::vector<FactorNode<T,ObservedNode,array_size>*> m_children;
+      ParentF_t m_parent;
+      std::vector<F_t> m_children;
     };
     
     namespace detail{
@@ -270,7 +280,7 @@ void
 ICR::EnsembleLearning::ObservedNode<Model,T,List, array_size
 				    ,typename boost::enable_if<ICR::EnsembleLearning::detail::is_observable<Model,T> >::type
 				    >
-::AddChildFactor(FactorNode<T,ObservedNode,array_size>* f)
+::AddChildFactor(F_parameter f)
 {
   //Could be many factors, potentially added with many threads,
   //therefore make the following critical
@@ -287,7 +297,7 @@ void
 ICR::EnsembleLearning::ObservedNode<Model,T,List, array_size
 				    ,typename boost::enable_if<ICR::EnsembleLearning::detail::is_observable<Model,T> >::type
 				    >
-::SetParentFactor(FactorNode<T,ObservedNode,array_size>* f)
+::SetParentFactor(ParentF_parameter f)
 {
   //Only one factor: this should be called once (therefore thread safe)
   m_parent = f;

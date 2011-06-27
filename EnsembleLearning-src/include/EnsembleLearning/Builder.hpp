@@ -1310,9 +1310,9 @@ ICR::EnsembleLearning::Builder<T>::join( vMean_t& vMean, vPrec_t& vPrecision, We
 	
   typedef detail::Mixture<Gaussian<T>, T,vMean_t,  vPrec_t, GaussianDataType >     GaussianMixtureFactor;
   
-   boost::shared_ptr<GaussianMixtureFactor> MixtureF(new GaussianMixtureFactor(vMean, vPrecision, Catagory.get() , Data.get()));
+  boost::shared_ptr<GaussianMixtureFactor> MixtureF(new GaussianMixtureFactor(vMean, vPrecision, Catagory.get() , Data.get()));
 	
-  // m_Factors.push_back(MixtureF);
+  m_Factors.push_back(MixtureF);
 }
 	
 

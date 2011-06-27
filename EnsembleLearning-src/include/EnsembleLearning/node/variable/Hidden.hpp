@@ -52,10 +52,22 @@ namespace ICR{
      */
     template <template<class> class Model, class T, class List=detail::TypeList::zeros
 	      , int array_size =2,class Enable = void >
-    class HiddenNode : public VariableNode<T,array_size> //, public List
+    class HiddenNode : public VariableNode<T, boost::mpl::int_<array_size>::value> //, public List
     {
       HiddenNode(HiddenNode<Model,T, List>& other); //non-copyable
-
+      
+      typedef typename boost::call_traits<FactorNode<T, HiddenNode, typename boost::mpl::int_<array_size>::type >* >::param_type 
+      F_parameter;
+      
+      typedef typename boost::call_traits<ParentFactorNode<T, HiddenNode, typename boost::mpl::int_<array_size>::type>* >::param_type 
+      ParentF_parameter;
+      
+      typedef typename boost::call_traits<FactorNode<T, HiddenNode, typename boost::mpl::int_<array_size>::type >* >::value_type 
+      F_t;
+      
+      typedef typename boost::call_traits<ParentFactorNode<T, HiddenNode, typename boost::mpl::int_<array_size>::type>* >::value_type 
+      ParentF_t;
+      
     public:
       /** A constructor.
        *  @param moment_size The number of elements in the stored moments.
@@ -64,10 +76,10 @@ namespace ICR{
       HiddenNode(); //mostly two, but variable for Discrete model
 
       void
-      SetParentFactor(FactorNode<T, HiddenNode,array_size>* f);
+      SetParentFactor(ParentF_parameter f);
       
       void
-      AddChildFactor(FactorNode<T, HiddenNode,array_size>* f);
+      AddChildFactor(F_parameter f);
 
       void 
       Iterate(Coster& C);
@@ -105,8 +117,8 @@ namespace ICR{
       const NaturalParameters<T,array_size>
       GetNP();
 
-      FactorNode<T, HiddenNode,array_size>* m_parent;
-      std::vector<FactorNode<T, HiddenNode,array_size>*> m_children;
+      ParentF_t m_parent;
+      std::vector<F_t> m_children;
       Moments<T,array_size> m_Moments;
       mutable Mutex m_mutex;
     };
@@ -124,7 +136,7 @@ ICR::EnsembleLearning::HiddenNode<Model,T,List,array_size,Enable>::HiddenNode()
 template<template<class> class Model,class T,class List,int array_size,class Enable>
 inline 
 void
-ICR::EnsembleLearning::HiddenNode<Model,T,List,array_size,Enable>::SetParentFactor(FactorNode<T, HiddenNode,array_size>* f)
+ICR::EnsembleLearning::HiddenNode<Model,T,List,array_size,Enable>::SetParentFactor(ParentF_parameter f)
 {
   //This should only be called once, so should get no collisions here
   m_parent=f;
@@ -139,7 +151,7 @@ ICR::EnsembleLearning::HiddenNode<Model,T,List,array_size,Enable>::SetParentFact
 template<template<class> class Model,class T,class List,int array_size,class Enable>
 inline
 void
-ICR::EnsembleLearning::HiddenNode<Model,T,List,array_size,Enable>::AddChildFactor(FactorNode<T, HiddenNode,array_size>* f)
+ICR::EnsembleLearning::HiddenNode<Model,T,List,array_size,Enable>::AddChildFactor(F_parameter f)
 { 
   //This could be called simultaneously by different threads, so call it critical
 #pragma omp critical

@@ -66,16 +66,16 @@ namespace ICR{
       class Mixture : public FactorNode_basic,
 		      public boost::mpl::inherit_linearly<typename parent1_t::type,
 		      					  typename boost::mpl::inherit<boost::mpl::_1,
-		      								       FactorNode<T,boost::mpl::_2,2> 
+		      								       FactorNode<T,typename boost::mpl::_2> 
 		      								       >::type 
 		      					  >::type ,
-		      // public boost::mpl::inherit_linearly<typename parent2_t::type,
-		      // 					    typename boost::mpl::inherit<boost::mpl::_1,
-		      // 									 FactorNode<T,boost::mpl::_2,2> 
-		      // 									 >::type 
-		      // >::type, 
-		      	public FactorNode<T,child_t,2>	,				
-		      	public FactorNode<T,HiddenNode<Discrete,T,detail::TypeList::zeros,ENSEMBLE_LEARNING_COMPONENTS >,ENSEMBLE_LEARNING_COMPONENTS >
+		      public boost::mpl::inherit_linearly<typename parent2_t::type,
+		      					    typename boost::mpl::inherit<boost::mpl::_1,
+		      									 FactorNode<T,typename boost::mpl::_2> 
+		      									 >::type 
+		      >::type, 
+		      	public ParentFactorNode<T,child_t>	,				
+		      	public FactorNode<T,HiddenNode<Discrete,T,detail::TypeList::zeros,ENSEMBLE_LEARNING_COMPONENTS >, typename boost::mpl::int_<ENSEMBLE_LEARNING_COMPONENTS>::type >
 	
       {
 	//Non-copieable
@@ -174,7 +174,7 @@ namespace ICR{
 	  return Model::CalcSample(moments1,
 	  			 moments2, 
 	  			 m_weights_node ->GetMoments()
-	  			 );
+				   );
 	}
 
 	//Request From the child Node
@@ -197,7 +197,7 @@ namespace ICR{
 	  boost::fusion::for_each( m_parent2_nodes.data(), 
 				   GetMoments(moments2) );
 
-	  const Moments<double>& weights = m_weights_node->GetMoments();
+	  const weights_moments_t weights = m_weights_node->GetMoments();
 	  for(size_t i=0;i<size;++i){
 	    NP2Child
 	      += Model::CalcNP2Data(moments1[i], moments2[i]) * weights[i];
@@ -218,7 +218,7 @@ namespace ICR{
 	  //reserve the space so that push_back is not expensive
 	  moments1.reserve(size);
 	  moments2.reserve(size);
-	  NaturalParameters<T,ENSEMBLE_LEARNING_COMPONENTS> NP2Weights();
+	  NaturalParameters<T,ENSEMBLE_LEARNING_COMPONENTS> NP2Weights;
 
 	  //add the moments to the vector (pre-reserved) (moments1)
 	  boost::fusion::for_each( m_parent1_nodes.data(), 

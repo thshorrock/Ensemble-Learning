@@ -30,6 +30,7 @@
 
 #include "Random.hpp"
 #include "EnsembleLearning/detail/parallel_algorithms.hpp"
+#include "EnsembleLearning/detail/MixtureVector.hpp" //for ENSEMBLE_LEARNING_COMPONENTS
 #include "EnsembleLearning/message/Moments.hpp"
 #include "EnsembleLearning/message/NaturalParameters.hpp"
 #include "EnsembleLearning/node/Node.hpp"
@@ -72,6 +73,8 @@ namespace ICR{
       moments_vector_parameter;
 
       
+      typedef typename boost::call_traits< Moments<T,ENSEMBLE_LEARNING_COMPONENTS> >::param_type
+      weights_moments_parameter;
       typedef typename boost::call_traits< Moments<T> >::param_type
       moments_parameter;
       typedef typename boost::call_traits< Moments<T> >::value_type
@@ -162,7 +165,7 @@ namespace ICR{
       moments_t
       CalcSample(moments_vector_parameter mean_nodes,
 		 moments_vector_parameter precision_nodes,
-		 moments_parameter weights_node);
+		 weights_moments_parameter weights_node);
 
 
       /** Calculate the Mean from the Natural Paramters.
@@ -366,7 +369,7 @@ template<class T>
 typename ICR::EnsembleLearning::RectifiedGaussian<T>::moments_t
 ICR::EnsembleLearning::RectifiedGaussian<T>::CalcSample(moments_vector_parameter mean,
 							moments_vector_parameter precision,
-							moments_parameter weights)
+							weights_moments_parameter weights)
 	
 {
 	
