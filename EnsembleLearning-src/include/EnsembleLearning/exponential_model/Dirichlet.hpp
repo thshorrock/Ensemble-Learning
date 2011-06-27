@@ -61,9 +61,9 @@ namespace ICR{
       /** @name Useful typdefs for types that are exposed to the user.
        */
       ///@{
-      typedef typename boost::call_traits< Moments<T,ENSEMBLE_LEARNING_COMPONENTS> >::param_type
+      typedef typename boost::call_traits< const Moments<T,ENSEMBLE_LEARNING_COMPONENTS>* >::param_type
       moments_parameter;
-      typedef typename boost::call_traits< Moments<T,ENSEMBLE_LEARNING_COMPONENTS> >::value_type
+      typedef typename boost::call_traits<  Moments<T,ENSEMBLE_LEARNING_COMPONENTS> >::value_type
       moments_t;
 
       typedef typename boost::call_traits< NaturalParameters<T,ENSEMBLE_LEARNING_COMPONENTS> >::param_type
@@ -92,7 +92,7 @@ namespace ICR{
        *  The normalisation is the inverse of the partition factor.
        *  @param Us The moments from the Dirichlet constant node.
        *  @return The log or the normalisation.
-        */
+       */
       static
       data_t
       CalcLogNorm(moments_parameter Us) ;
@@ -244,8 +244,8 @@ inline
 typename ICR::EnsembleLearning::Dirichlet<T>::data_t 
 ICR::EnsembleLearning::Dirichlet<T>::CalcLogNorm(moments_parameter Us)  
 {
-  std::vector<T> u(Us.size());
-  PARALLEL_COPY(Us.begin(),Us.end(), u.begin());
+  std::vector<T> u(Us->size());
+  PARALLEL_COPY(Us->begin(),Us->end(), u.begin());
   return CalcLogNorm(u);
 }
 
@@ -269,11 +269,11 @@ typename ICR::EnsembleLearning::Dirichlet<T>::moments_t
 ICR::EnsembleLearning::Dirichlet<T>::CalcSample(moments_parameter Mus) 
 {
   rng* random = Random::Instance();
-  const size_t     size   = Mus.size();
+  const size_t     size   = Mus->size();
 
   double u[size]; //double to go to rng
   double x[size];
-  PARALLEL_COPY(Mus.begin(),Mus.end(),u);
+  PARALLEL_COPY(Mus->begin(),Mus->end(),u);
   random->dirichlet(size, u, x);
 	
   std::vector<data_t> M(size);
@@ -340,7 +340,7 @@ typename ICR::EnsembleLearning::Dirichlet<T>::NP_t
 ICR::EnsembleLearning::Dirichlet<T>::CalcNP2Data(moments_parameter Us)
 {
   NP_t NP ;
-  PARALLEL_TRANSFORM( Us.begin(), Us.end(), NP.begin(), minus_one());
+  PARALLEL_TRANSFORM( Us->begin(), Us->end(), NP.begin(), minus_one());
   return NP;
 }
 

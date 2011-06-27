@@ -145,7 +145,7 @@ namespace ICR{
       void
       InitialiseMoments(){};
 
-      const moments_t&
+      const moments_t*
       GetMoments() ;
       
       const std::vector<T>
@@ -270,14 +270,14 @@ inline
 const typename ICR::EnsembleLearning::ObservedNode<Model,T,List,array_size
 				    ,typename boost::enable_if<ICR::EnsembleLearning::detail::is_observable<Model,T> >::type
 						     >
-::moments_t&
+::moments_t*
 ICR::EnsembleLearning::ObservedNode<Model,T,List,array_size
 				    ,typename boost::enable_if<ICR::EnsembleLearning::detail::is_observable<Model,T> >::type
 				    >
 ::GetMoments() 
 {
   //Obvserved moments are not modified and so this is thead safe.
-  return m_Moments;
+  return &m_Moments;
 }
 
 template<template<class> class Model,class T,class List,int array_size>
@@ -347,7 +347,7 @@ ICR::EnsembleLearning::ObservedNode<Model,T,List, array_size
       //Assume thead-safety of other nodes so do not need to worry here.
       const NaturalParameters<T,array_size> ParentNP =m_parent->GetNaturalNot(this); 
       //See page 41 of Winn's thesis for this formula
-      const T Cost = ParentNP*GetMoments() +  m_parent->CalcLogNorm();
+      const T Cost = ParentNP*m_Moments +  m_parent->CalcLogNorm();
       Total += Cost;
     }
 }

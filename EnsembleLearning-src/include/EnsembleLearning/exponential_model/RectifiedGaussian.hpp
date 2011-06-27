@@ -73,9 +73,9 @@ namespace ICR{
       moments_vector_parameter;
 
       
-      typedef typename boost::call_traits< Moments<T,ENSEMBLE_LEARNING_COMPONENTS> >::param_type
+      typedef typename boost::call_traits< const Moments<T,ENSEMBLE_LEARNING_COMPONENTS>* >::param_type
       weights_moments_parameter;
-      typedef typename boost::call_traits< Moments<T> >::param_type
+      typedef typename boost::call_traits< const Moments<T>* >::param_type
       moments_parameter;
       typedef typename boost::call_traits< Moments<T> >::value_type
       moments_t;
@@ -318,7 +318,7 @@ typename ICR::EnsembleLearning::RectifiedGaussian<T>::data_t
 ICR::EnsembleLearning::RectifiedGaussian<T>::CalcLogNorm(moments_parameter Mean,
 					    moments_parameter Precision)  
 {
-  return  CalcLogNorm(Mean[0], Mean[1], Precision[0]);
+  return  CalcLogNorm(Mean->operator[](0), Mean->operator[](1), Precision->operator[](0));
 }
 
 template<class T>
@@ -345,7 +345,7 @@ ICR::EnsembleLearning::RectifiedGaussian<T>::CalcAvLog(moments_parameter Mean,
   BOOST_ASSERT(Precision.size() == 2);
   const NP_t NPData = CalcNP2Data(Mean, Precision);
   return 
-    NPData*Data + CalcLogNorm(Mean,Precision);
+    NPData*(*Data) + CalcLogNorm(Mean,Precision);
 }
     
 
@@ -357,8 +357,8 @@ ICR::EnsembleLearning::RectifiedGaussian<T>::CalcSample(moments_parameter Mean,
 {
 
   rng* random = Random::Instance();
-  const data_t mean = Mean[0];
-  const data_t prec = Precision[0];
+  const data_t mean = Mean->operator[](0);
+  const data_t prec = Precision->operator[](0);
   const data_t x=  random->gaussian_tail(1.0/std::sqrt(prec),mean);
   return moments_t(x, x*x +1.0/prec);
 	
@@ -374,9 +374,9 @@ ICR::EnsembleLearning::RectifiedGaussian<T>::CalcSample(moments_vector_parameter
 {
 	
   moments_t AvMean(0,0);
-  AvMean= PARALLEL_INNERPRODUCT(weights.begin(), weights.end(),mean.begin(), AvMean);
+  AvMean= PARALLEL_INNERPRODUCT(weights->begin(), weights->end(),mean.begin(), AvMean);
   moments_t AvPrec(0,0);
-  AvPrec = PARALLEL_INNERPRODUCT(weights.begin(), weights.end(),precision.begin(), AvPrec);
+  AvPrec = PARALLEL_INNERPRODUCT(weights->begin(), weights->end(),precision.begin(), AvPrec);
 
   rng* random = Random::Instance();
   const data_t mean0 = AvMean[0];
@@ -484,10 +484,10 @@ inline
 typename ICR::EnsembleLearning::RectifiedGaussian<T>::NP_t
 ICR::EnsembleLearning::RectifiedGaussian<T>::CalcNP2Parent1(moments_parameter Precision,moments_parameter Data)
 {
-  BOOST_ASSERT(Precision.size() == 2);
-  BOOST_ASSERT(Data.size() == 2);
-  const data_t precision = Precision[0];
-  const data_t data = Data[0];
+  BOOST_ASSERT(Precision->size() == 2);
+  BOOST_ASSERT(Data->size() == 2);
+  const data_t precision = Precision->operator[](0);
+  const data_t data = Data->operator[](0);
   return NP_t(precision*data, -0.5*precision);
 }
 
@@ -496,12 +496,12 @@ inline
 typename ICR::EnsembleLearning::RectifiedGaussian<T>::NP_t
 ICR::EnsembleLearning::RectifiedGaussian<T>::CalcNP2Parent2(moments_parameter Mean,moments_parameter Data)
 {
-  BOOST_ASSERT(Mean.size() == 2);
-  BOOST_ASSERT(Data.size() == 2);
-  const data_t mean = Mean[0];
-  const data_t mean_squared = Mean[1];
-  const data_t data = Data[0];
-  const data_t data_squared = Data[1];
+  BOOST_ASSERT(Mean->size() == 2);
+  BOOST_ASSERT(Data->size() == 2);
+  const data_t mean = Mean->operator[](0);
+  const data_t mean_squared = Mean->operator[](1);
+  const data_t data = Data->operator[](0);
+  const data_t data_squared = Data->operator[](1);
 
   //This is going to the precision - therefore we know that:
   BOOST_ASSERT(data_squared - 2*data*mean + mean_squared>0);
@@ -515,10 +515,10 @@ inline
 typename ICR::EnsembleLearning::RectifiedGaussian<T>::NP_t
 ICR::EnsembleLearning::RectifiedGaussian<T>::CalcNP2Data(moments_parameter Mean,moments_parameter Precision)
 {
-  BOOST_ASSERT(Mean.size() == 2);
-  BOOST_ASSERT(Precision.size() == 2);
-  const data_t mean = Mean[0];
-  const data_t precision = Precision[0];
+  BOOST_ASSERT(Mean->size() == 2);
+  BOOST_ASSERT(Precision->size() == 2);
+  const data_t mean = Mean->operator[](0);
+  const data_t precision = Precision->operator[](0);
   return NP_t(mean*precision, -0.5*precision);
 }
 

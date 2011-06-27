@@ -61,7 +61,7 @@ namespace ICR{
       typedef typename boost::call_traits< VariableNode<T,ENSEMBLE_LEARNING_COMPONENTS>* const>::param_type
       variable_parameter;
       
-      typedef typename boost::call_traits< Moments<T,ENSEMBLE_LEARNING_COMPONENTS> >::param_type
+      typedef typename boost::call_traits< const Moments<T,ENSEMBLE_LEARNING_COMPONENTS> *>::param_type
       moments_parameter;
       typedef typename boost::call_traits< Moments<T,ENSEMBLE_LEARNING_COMPONENTS> >::const_reference
       moments_const_reference;
@@ -223,8 +223,8 @@ typename ICR::EnsembleLearning::Discrete<T>::data_t
 ICR::EnsembleLearning::Discrete<T>::CalcLogNorm(moments_parameter Dirichlet) 
 {
   //the log probs are provided by Dirichlet, need to pass them on
-  std::vector<T> unLogProbs(Dirichlet.size());
-  PARALLEL_COPY( Dirichlet.begin(), Dirichlet.end(), unLogProbs.begin());
+  std::vector<T> unLogProbs(Dirichlet->size());
+  PARALLEL_COPY( Dirichlet->begin(), Dirichlet->end(), unLogProbs.begin());
   
   return  CalcLogNorm(unLogProbs);
 }
@@ -246,8 +246,8 @@ inline
 typename ICR::EnsembleLearning::Discrete<T>::moments_t
 ICR::EnsembleLearning::Discrete<T>::CalcSample(moments_parameter PM) 
 {
-  std::vector<data_t> M(PM.size());
-  std::transform(PM.begin(),PM.end(),M.begin(),exponentiate());
+  std::vector<data_t> M(PM->size());
+  std::transform(PM->begin(),PM->end(),M.begin(),exponentiate());
   return moments_t(M);
 }
 
@@ -316,7 +316,7 @@ ICR::EnsembleLearning::Discrete<T>::CalcNP2Prior(moments_parameter Discrete)
   //The probabilities are provided by Discrete and need to be passsed onto Prior
   // Want to simply foward these:
   NP_t NP;
-  PARALLEL_COPY(Discrete.begin(), Discrete.end(), NP.begin());
+  PARALLEL_COPY(Discrete->begin(), Discrete->end(), NP.begin());
   return NP;
 }
   
@@ -329,7 +329,7 @@ ICR::EnsembleLearning::Discrete<T>::CalcNP2Data(moments_parameter Dirichlet)
   //the log probs are provided by Dirichlet, need to pass them on
   //Want to simply copy these
   NP_t NP;
-  PARALLEL_COPY(Dirichlet.begin(), Dirichlet.end(), NP.begin());
+  PARALLEL_COPY(Dirichlet->begin(), Dirichlet->end(), NP.begin());
   return  NP;
 }
    

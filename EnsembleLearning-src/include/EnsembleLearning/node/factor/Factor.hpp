@@ -213,8 +213,8 @@ namespace ICR{
       GetNaturalNot(parent1_t* const,
 		    typename boost::disable_if<boost::is_same<parent2_t, NoSecondParent_t>, enabler >::type = enabler()) const
       {
-	moments_t parent2 = m_parent2_node->GetMoments();
-	moments_t child = m_child_node->GetMoments();
+	const moments_t* parent2 = m_parent2_node->GetMoments();
+	const moments_t* child = m_child_node->GetMoments();
 	return Model<T>::CalcNP2Parent1(parent2,child);
       }
 
@@ -225,7 +225,7 @@ namespace ICR{
 		    typename boost::enable_if<boost::is_same<parent2_t, NoSecondParent_t>, enabler >::type = enabler()
 		    ) const
       {
-	const moments_t child = m_child_node->GetMoments();
+	const moments_t* child = m_child_node->GetMoments();
 	return Model<T>::CalcNP2Prior(child);
       }
 
@@ -244,8 +244,8 @@ namespace ICR{
 		       typename boost::disable_if<boost::is_same<parent2_t, NoSecondParent_t>, enabler >::type = enabler()
 		       ) const
 	{
-	  moments_t parent1 = m_parent1_node->GetMoments();
-	  moments_t child = m_child_node->GetMoments();
+	  const moments_t* parent1 = m_parent1_node->GetMoments();
+	  const moments_t* child = m_child_node->GetMoments();
 	  return Model<T>::CalcNP2Parent2(parent1,child);
 	}
 
@@ -275,8 +275,8 @@ namespace ICR{
 		       typename boost::disable_if<boost::is_same<parent2_t, NoSecondParent_t>, enabler >::type = enabler()
 		       ) const
 	{
-	  moments_t parent1 = m_parent1_node->GetMoments();
-	  moments_t parent2 = m_parent2_node->GetMoments();
+	  const moments_t* parent1 = m_parent1_node->GetMoments();
+	  const moments_t* parent2 = m_parent2_node->GetMoments();
 	  m_LogNorm = Model<T>::CalcLogNorm(parent1,parent2);
 	  return Model<T>::CalcNP2Data(parent1,parent2);
 	}
@@ -289,7 +289,7 @@ namespace ICR{
 		       typename boost::enable_if<boost::is_same<parent2_t, NoSecondParent_t>, enabler >::type = enabler()
 		       ) const
 	{
-	  const moments_t parent1 = m_parent1_node->GetMoments();
+	  const moments_t* parent1 = m_parent1_node->GetMoments();
 	  m_LogNorm = Model<T>::CalcLogNorm(parent1);
 	  return Model<T>::CalcNP2Data(parent1);
 	}

@@ -81,7 +81,7 @@ namespace ICR{
       /** Get the moments stored in this node. 
        *  @return The stored moments */
       virtual
-      const Moments<T,size>&
+      const Moments<T,size>*
       GetMoments()  = 0;
 
 
@@ -141,7 +141,7 @@ namespace ICR{
     operator<<(std::ostream& out,  VariableNode<T>* v)
     {
       printf("NODE: %p \t", v );
-      out<<v->GetMoments();
+      out<<*(v->GetMoments());
       return out;
     }
 

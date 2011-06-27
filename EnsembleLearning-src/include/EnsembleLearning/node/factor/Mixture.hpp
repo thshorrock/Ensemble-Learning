@@ -158,22 +158,22 @@ namespace ICR{
 	InitialiseMoments() const
 	{
 	  const size_t size = boost::mpl::size<typename parent2_t::type>::value;
-	  std::vector<moments_t > moments1, moments2;
+	  std::vector< moments_t > moments1, moments2;
 	  //reserve the space so that push_back is not expensive
 	  moments1.reserve(size);
 	  moments2.reserve(size);
 
 	  //add the moments to the vector (pre-reserved) (moments1)
 	  boost::fusion::for_each( m_parent1_nodes.data(), 
-				   GetMoments(moments1) );
+				   GetMomentsInit(moments1) );
 	  //add the moments to the vector (pre-reserved) (moments2)
 	  boost::fusion::for_each( m_parent2_nodes.data(), 
-				   GetMoments(moments2) );
+				   GetMomentsInit(moments2) );
 	  
 	  m_weights_node->InitialiseMoments();
 	  return Model::CalcSample(moments1,
-	  			 moments2, 
-	  			 m_weights_node ->GetMoments()
+				   moments2, 
+				   m_weights_node -> GetMoments()
 				   );
 	}
 
@@ -185,7 +185,7 @@ namespace ICR{
 	  m_LogNorm = 0;
 	  
 	  const size_t size = boost::mpl::size<typename parent2_t::type>::value;
-	  std::vector<moments_t > moments1, moments2;
+	  std::vector<const moments_t* > moments1, moments2;
 	  //reserve the space so that push_back is not expensive
 	  moments1.reserve(size);
 	  moments2.reserve(size);
@@ -197,13 +197,17 @@ namespace ICR{
 	  boost::fusion::for_each( m_parent2_nodes.data(), 
 				   GetMoments(moments2) );
 
-	  const weights_moments_t weights = m_weights_node->GetMoments();
+	  const weights_moments_t* weights = m_weights_node->GetMoments();
 	  for(size_t i=0;i<size;++i){
+	    const moments_t* m1i = moments1[i];
+	    const moments_t* m2i = moments2[i];
+	    const T wi  = weights->operator[](i);
+	    
 	    NP2Child
-	      += Model::CalcNP2Data(moments1[i], moments2[i]) * weights[i];
+	      += Model::CalcNP2Data(m1i, m2i) * wi;
 	    
 	    m_LogNorm 
-	      += Model::CalcLogNorm(moments1[i],moments2[i]) * weights[i];
+	      += Model::CalcLogNorm(m1i,m2i) * wi;
 	  }
 	  return NP2Child;
 	}
@@ -214,7 +218,7 @@ namespace ICR{
 	{
 	  
 	  const size_t size = boost::mpl::size<typename parent2_t::type>::value;
-	  std::vector<moments_t > moments1, moments2;
+	  std::vector<const moments_t* > moments1, moments2;
 	  //reserve the space so that push_back is not expensive
 	  moments1.reserve(size);
 	  moments2.reserve(size);
@@ -227,7 +231,7 @@ namespace ICR{
 	  boost::fusion::for_each( m_parent2_nodes.data(), 
 				   GetMoments(moments2) );
 
-	  const moments_t child = m_child_node->GetMoments();
+	  const moments_t* child = m_child_node->GetMoments();
 	  for(size_t i=0;i<size;++i){
 	    NP2Weights[i] = Model::CalcAvLog(moments1[i], moments2[i],child);
 	  }
@@ -266,11 +270,24 @@ namespace ICR{
       
 	struct GetMoments
 	{
-	  GetMoments(std::vector<moments_t>& m) : m_moments(m) {}
+	  GetMoments(std::vector<const moments_t*>& m) : m_moments(m) {}
 	  template <class Node>
 	  void operator()(Node& node) const 
 	  {
 	    m_moments.push_back(node->GetMoments());
+	  }
+	private:
+	  std::vector<const moments_t*>& m_moments;
+	};
+	
+	//store as type rather than as pointer.
+	struct GetMomentsInit
+	{
+	  GetMomentsInit(std::vector< moments_t>& m) : m_moments(m) {}
+	  template <class Node>
+	  void operator()(Node& node) const 
+	  {
+	    m_moments.push_back(*(node->GetMoments()));
 	  }
 	private:
 	  std::vector<moments_t>& m_moments;

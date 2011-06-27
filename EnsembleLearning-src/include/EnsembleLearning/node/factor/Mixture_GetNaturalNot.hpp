@@ -29,20 +29,20 @@
       NaturalParameters<T>
       GetNaturalNot(typename boost::add_pointer<typename boost::mpl::at_c<typename parent1_t::type,n>::type>::type v) const
       { 
-        const weights_moments_t weights = m_weights_node->GetMoments();
-        const Moments<T> parent2 = m_parent2_nodes.template get<n>()->GetMoments();
-        const Moments<T> child = m_child_node->GetMoments();
-        return Model::CalcNP2Parent1(parent2,child)  * weights[n];
+        const weights_moments_t* weights = m_weights_node->GetMoments();
+        const Moments<T>* parent2 = m_parent2_nodes.template get<n>()->GetMoments();
+        const Moments<T>* child = m_child_node->GetMoments();
+        return Model::CalcNP2Parent1(parent2,child)  * weights->operator[](n);
       }
 
       inline
       NaturalParameters<T>
       GetNaturalNot(typename boost::add_pointer<typename boost::mpl::at_c<typename parent2_t::type,n>::type>::type v) const
       { 
-        const weights_moments_t weights = m_weights_node->GetMoments();
-        const Moments<T> parent1 = m_parent1_nodes.template get<n>()->GetMoments();
-        const Moments<T> child = m_child_node->GetMoments();
-        return Model::CalcNP2Parent2(parent1,child) * weights[n];
+        const weights_moments_t* weights = m_weights_node->GetMoments();
+        const Moments<T>* parent1 = m_parent1_nodes.template get<n>()->GetMoments();
+        const Moments<T>* child = m_child_node->GetMoments();
+        return Model::CalcNP2Parent2(parent1,child)* weights->operator[](n);
       }
 
 #undef n

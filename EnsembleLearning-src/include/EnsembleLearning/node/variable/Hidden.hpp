@@ -99,7 +99,7 @@ namespace ICR{
       }
 
 
-      const moments_t&
+      const moments_t*
       GetMoments() ;
 
       const std::vector<T>
@@ -181,14 +181,14 @@ ICR::EnsembleLearning::HiddenNode<Model,T,List,array_size,Enable>::AddChildFacto
 
 template<template<class> class Model,class T,class List,int array_size,class Enable>
 inline
-const typename ICR::EnsembleLearning::HiddenNode<Model,T,List,array_size,Enable>::moments_t&
+const typename ICR::EnsembleLearning::HiddenNode<Model,T,List,array_size,Enable>::moments_t*
 ICR::EnsembleLearning::HiddenNode<Model,T,List,array_size,Enable>::GetMoments() 
 {
   /*This value is update in Iterate and called to evaluate other Hidden Nodes
    * (also in iterate mode).  It therefore needs to be protected by a mutex.
    */
   //  Lock lock(m_mutex);
-  return *m_Moments;
+  return m_Moments;
 }
    
 template<template<class> class Model,class T,class List,int array_size,class Enable>

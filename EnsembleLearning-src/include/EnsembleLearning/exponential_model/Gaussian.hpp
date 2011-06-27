@@ -64,9 +64,9 @@ namespace ICR{
       typedef typename boost::call_traits< std::vector<Moments<T> > >::param_type
       moments_vector_parameter;
 
-      typedef typename boost::call_traits< Moments<T,ENSEMBLE_LEARNING_COMPONENTS> >::param_type
+      typedef typename boost::call_traits<const  Moments<T,ENSEMBLE_LEARNING_COMPONENTS> *>::param_type
       weights_moments_parameter;
-      typedef typename boost::call_traits< Moments<T> >::param_type
+      typedef typename boost::call_traits<const Moments<T>*>::param_type
       moments_parameter;
       typedef typename boost::call_traits< Moments<T> >::const_reference
       moments_const_reference;
@@ -296,7 +296,7 @@ typename ICR::EnsembleLearning::Gaussian<T>::data_t
 ICR::EnsembleLearning::Gaussian<T>::CalcLogNorm(moments_parameter Mean,
 				   moments_parameter Precision)  
 {
-  return  CalcLogNorm(Mean[0], Mean[1], Precision[0]);
+  return  CalcLogNorm(Mean->operator[](0), Mean->operator[](1), Precision->operator[](0));
 }
 
 template<class T>
@@ -321,7 +321,7 @@ ICR::EnsembleLearning::Gaussian<T>::CalcAvLog(moments_parameter Mean,
 {
   const NP_t NPData = CalcNP2Data(Mean, Precision);
   return 
-    NPData*Data + CalcLogNorm(Mean,Precision);
+    NPData*(*Data) + CalcLogNorm(Mean,Precision);
 }
     
 template<class T>
@@ -331,8 +331,8 @@ ICR::EnsembleLearning::Gaussian<T>::CalcSample(moments_parameter Mean,
 					       moments_parameter Precision) 
 {
   rng* random = Random::Instance();
-  const_data_t mean = Mean[0];
-  const_data_t prec = Precision[0];
+  const_data_t mean = Mean->operator[](0);
+  const_data_t prec = Precision->operator[](0);
   const_data_t x=  random->gaussian(1.0/std::sqrt(prec),mean);
   return moments_t(x, x*x +1.0/prec);
 }
@@ -344,9 +344,9 @@ ICR::EnsembleLearning::Gaussian<T>::CalcSample(moments_vector_parameter mean,
 				  weights_moments_parameter weights)
 {
   moments_t AvMean(0,0);
-  AvMean= PARALLEL_INNERPRODUCT(weights.begin(), weights.end(),mean.begin(), AvMean);
+  AvMean= PARALLEL_INNERPRODUCT(weights->begin(), weights->end(),mean.begin(), AvMean);
   moments_t AvPrec(0,0);
-  AvPrec = PARALLEL_INNERPRODUCT(weights.begin(), weights.end(),precision.begin(), AvPrec);
+  AvPrec = PARALLEL_INNERPRODUCT(weights->begin(), weights->end(),precision.begin(), AvPrec);
 
   rng* random = Random::Instance();
   const_data_t mean0 = AvMean[0];
@@ -408,8 +408,8 @@ ICR::EnsembleLearning::Gaussian<T>::CalcNP2Parent1(moments_parameter Precision,
 				      moments_parameter Data)
 {
   //Get the data from the moments.
-  const_data_t precision = Precision[0];
-  const_data_t data = Data[0];
+  const_data_t precision = Precision->operator[](0);
+  const_data_t data = Data->operator[](0);
   return NP_t(precision*data, -0.5*precision);
 }
 
@@ -420,10 +420,10 @@ typename ICR::EnsembleLearning::Gaussian<T>::NP_t
 ICR::EnsembleLearning::Gaussian<T>::CalcNP2Parent2(moments_parameter Mean,
 					   moments_parameter Data)
 {
-  const_data_t mean = Mean[0];
-  const_data_t mean_squared = Mean[1];
-  const_data_t data = Data[0];
-  const_data_t data_squared = Data[1];
+  const_data_t mean = Mean->operator[](0);
+  const_data_t mean_squared = Mean->operator[](1);
+  const_data_t data = Data->operator[](0);
+  const_data_t data_squared = Data->operator[](1);
   //This is going to the precision - therefore we know that:
   BOOST_ASSERT(data_squared - 2*data*mean + mean_squared > 0);
   //(This should be a guareentee (should not require run-time check)
@@ -438,8 +438,8 @@ ICR::EnsembleLearning::Gaussian<T>::CalcNP2Data(moments_parameter Mean,
 					moments_parameter Precision)
 {
   //Get the data from the moments.
-  const_data_t mean = Mean[0];
-  const_data_t precision = Precision[0];
+  const_data_t mean = Mean->operator[](0);
+  const_data_t precision = Precision->operator[](0);
   return NP_t(mean*precision, -0.5*precision);
 }
 

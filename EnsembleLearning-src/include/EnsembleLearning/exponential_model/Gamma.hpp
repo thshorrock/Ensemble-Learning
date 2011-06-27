@@ -61,7 +61,7 @@ namespace ICR{
       /** @name Useful typdefs for types that are exposed to the user.
        */
       ///@{
-      typedef typename boost::call_traits< Moments<T> >::param_type
+      typedef typename boost::call_traits< const Moments<T>* >::param_type
       moments_parameter;
       typedef typename boost::call_traits< Moments<T> >::const_reference
       moments_const_reference;
@@ -255,8 +255,8 @@ ICR::EnsembleLearning::Gamma<T>::CalcLogNorm(moments_parameter Shape,
 				     moments_parameter IScale)
 {
   //These must be greater than zero
-  BOOST_ASSERT(IScale[0]>0);
-  return CalcLogNorm(Shape[0], IScale[0]);
+  BOOST_ASSERT(IScale->operator[](0) > 0);
+  return CalcLogNorm(Shape->operator[](0), IScale->operator[](0));
 }
       
 template<class T>
@@ -278,7 +278,7 @@ ICR::EnsembleLearning::Gamma<T>::CalcAvLog(moments_parameter Shape,
 				   moments_parameter IScale,
 				   moments_parameter Data)
 {
-  return CalcNP2Data(Shape,IScale)*Data +CalcLogNorm(Shape,IScale);
+  return CalcNP2Data(Shape,IScale)*(*Data) +CalcLogNorm(Shape,IScale);
 }
 
 
@@ -289,8 +289,8 @@ ICR::EnsembleLearning::Gamma<T>::CalcSample(moments_parameter Shape,
 				    moments_parameter IScale) 
 {
   rng* random = Random::Instance();
-  const data_t shape  = Shape[0];
-  const data_t iscale = IScale[0];
+  const data_t shape  = Shape->operator[](0);
+  const data_t iscale = IScale->operator[](0);
 
   //cannot be zero so add something small incase of numerical error.
   const data_t x=  random->gamma(shape,1.0/iscale) + 1e-16; 
@@ -372,7 +372,7 @@ typename ICR::EnsembleLearning::Gamma<T>::NP_t
 ICR::EnsembleLearning::Gamma<T>::CalcNP2Parent2(moments_parameter Shape,
 					moments_parameter Data)
 {
-  return NP_t(-Data[0], Shape[0]);
+  return NP_t(-Data->operator[](0), Shape->operator[](0));
 }
 
 template<class T>
@@ -381,6 +381,6 @@ typename ICR::EnsembleLearning::Gamma<T>::NP_t
 ICR::EnsembleLearning::Gamma<T>::CalcNP2Data(moments_parameter Shape, 
 				     moments_parameter IScale)
 {
-  return  NP_t(-IScale[0], Shape[0] - 1);
+  return  NP_t(-IScale->operator[](0), Shape->operator[](0) - 1);
 }
 #endif  // guard for GAMMA_HPP
