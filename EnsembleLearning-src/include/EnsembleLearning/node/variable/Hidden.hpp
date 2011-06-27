@@ -130,7 +130,7 @@ namespace ICR{
       moments_t* m_Moments;
       //store the moments that might still being called by other threads after moments updated, deleted at the beginning of each iteration.
       moments_t* m_oldMoments; 
-      mutable Mutex m_mutex;
+      //mutable Mutex m_mutex;
     };
 
   }
@@ -187,7 +187,7 @@ ICR::EnsembleLearning::HiddenNode<Model,T,List,array_size,Enable>::GetMoments()
   /*This value is update in Iterate and called to evaluate other Hidden Nodes
    * (also in iterate mode).  It therefore needs to be protected by a mutex.
    */
-  Lock lock(m_mutex);
+  //  Lock lock(m_mutex);
   return *m_Moments;
 }
    
