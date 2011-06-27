@@ -427,9 +427,11 @@ template<class T,int array_size>
 typename ICR::EnsembleLearning::Moments<T,array_size>::reference  
 ICR::EnsembleLearning::Moments<T,array_size>::operator+=(parameter other)
 {
-  //This could be called by different threads, so lock
-  //  Lock lock(m_mutex);  
-  std::transform(m_data.begin(), m_data.end(), other.begin(), m_data.begin(), plus());
+  //more efficient than the std::transform
+  for(size_t i=0;i<array_size;++i){
+    m_data[i]+=other[i];
+  }
+  //std::transform(m_data.begin(), m_data.end(), other.begin(), m_data.begin(), plus());
   return *this;
 }
       
@@ -438,9 +440,11 @@ inline
 typename ICR::EnsembleLearning::Moments<T,array_size>::reference
 ICR::EnsembleLearning::Moments<T,array_size>::operator*=(parameter other)
 {
-  //This could be called by different threads, so lock
-  //Lock lock(m_mutex); 
-  std::transform(m_data.begin(), m_data.end(), other.begin(), m_data.begin(), times() );
+  //more efficient than the std::transform
+  for(size_t i=0;i<array_size;++i){
+    m_data[i]*=other[i];
+  }
+  //std::transform(m_data.begin(), m_data.end(), other.begin(), m_data.begin(), times() );
   return *this;
 }
 
@@ -449,9 +453,11 @@ inline
 typename ICR::EnsembleLearning::Moments<T,array_size>::reference
 ICR::EnsembleLearning::Moments<T,array_size>::operator*=(data_parameter d)
 {
-  //This could be called by different threads, so lock
-  //Lock lock(m_mutex); 
-  std::transform(m_data.begin(), m_data.end(),  m_data.begin(), times_by(d));
+  //more efficient than the std::transform
+  for(size_t i=0;i<array_size;++i){
+    m_data[i]*=other;
+  }
+  //std::transform(m_data.begin(), m_data.end(),  m_data.begin(), times_by(d));
   return *this;
 }
       

@@ -452,14 +452,11 @@ inline
 typename ICR::EnsembleLearning::NaturalParameters<T,array_size>::reference
 ICR::EnsembleLearning::NaturalParameters<T,array_size>::operator+=(parameter other)
 {
-  //This could be called by different threads, so lock
-  //  boost::lock_guard<boost::mutex> lock(*m_mutex_ptr);  //DO KEEP THIS ONE!
-  //  std::cout<<"size = "<<m_data.size()<<"other = "<<m_data.size<<std::endl;
-
-  std::transform(m_data.begin(), m_data.end(), other.begin(), m_data.begin(), plus());
-  // for(size_t i=0;i<other.size();++i){
-  //   m_data[i]+=other[i];
-  // }
+  //more efficient than the std::transform
+  for(size_t i=0;i<array_size;++i){
+    m_data[i]+=other[i];
+  }
+  //std::transform(m_data.begin(), m_data.end(), other.begin(), m_data.begin(), plus());
 
   return *this;
 }
@@ -470,9 +467,11 @@ inline
 typename ICR::EnsembleLearning::NaturalParameters<T,array_size>::reference
 ICR::EnsembleLearning::NaturalParameters<T,array_size>::operator-=(parameter other)
 {
-  //This could be called by different threads, so lock
-  //  boost::lock_guard<boost::mutex> lock(*m_mutex_ptr);  //DO KEEP THIS ONE!
-  std::transform(m_data.begin(), m_data.end(), other.begin(), m_data.begin(), minus());
+  //more efficient than the std::transform
+  for(size_t i=0;i<array_size;++i){
+    m_data[i]-=other[i];
+  }
+  //std::transform(m_data.begin(), m_data.end(), other.begin(), m_data.begin(), minus());
   return *this;
 }
   
@@ -482,7 +481,11 @@ typename ICR::EnsembleLearning::NaturalParameters<T,array_size>::reference
 ICR::EnsembleLearning::NaturalParameters<T,array_size>::operator*=(data_parameter other)
 {
   
-  std::transform(m_data.begin(), m_data.end(), m_data.begin(), times_by(other));
+  //more efficient than the std::transform
+  for(size_t i=0;i<array_size;++i){
+    m_data[i]*=other;
+  }
+  //std::transform(m_data.begin(), m_data.end(), m_data.begin(), times_by(other));
   return *this;
 }    
 
