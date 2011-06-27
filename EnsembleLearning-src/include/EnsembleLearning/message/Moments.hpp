@@ -36,6 +36,7 @@
 #include <boost/array.hpp>
 #include <iostream>
 #include <algorithm>
+#include <vector>
 
 namespace ICR{
   namespace EnsembleLearning{

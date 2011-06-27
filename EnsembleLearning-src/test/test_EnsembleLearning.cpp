@@ -144,7 +144,7 @@ BOOST_AUTO_TEST_SUITE( Moments_test )
 BOOST_AUTO_TEST_CASE( constr_test  )
 {
   Moments<double> M1;
-  Moments<double> M2(2);
+  Moments<double> M2;
   std::vector<double> v = boost::assign::list_of(2.0)(1.5)(4.0);
   Moments<double> M3(v);
   Moments<double> M4(2,2.5);
@@ -350,7 +350,7 @@ BOOST_AUTO_TEST_SUITE( NaturalParameters_test )
 BOOST_AUTO_TEST_CASE( constr_test  )
 {
   NaturalParameters<double> NP1;
-  NaturalParameters<double> NP2(2);
+  NaturalParameters<double> NP2;
   std::vector<double> v = boost::assign::list_of(2.0)(1.5)(4.0);
   NaturalParameters<double> NP3(v);
   NaturalParameters<double> NP4(2,2.5);
@@ -555,11 +555,15 @@ BOOST_AUTO_TEST_SUITE( ExpModels_test )
 BOOST_AUTO_TEST_CASE( Gaussian_test  )
 {
   //Initialise
-  Moments<double> Mean(2,5);
-  Moments<double> Precision(3,6);
-  Moments<double> Data(4,17);
+  Moments<double> MeanRef(2,5);
+  Moments<double> PrecisionRef(3,6);
+  Moments<double> DataRef(4,17);
   NaturalParameters<double> SumNP(6,-1.5);
 
+  const Moments<double>* Mean = &MeanRef;
+  const Moments<double>* Precision = &PrecisionRef;
+  const Moments<double>* Data = &DataRef;
+  NaturalParameters<double> SumNP(6,-1.5);
   //Collect
   NaturalParameters<double> NPMean
     = Gaussian<double>::CalcNP2Parent1(Precision,Data);
