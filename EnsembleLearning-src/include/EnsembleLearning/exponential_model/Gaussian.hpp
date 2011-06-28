@@ -256,8 +256,8 @@ namespace ICR{
       {
 	//The moments forwarded from the Deterministic node.
 	moments_const_reference FData = Data->GetForwardedMoments();
-	const_data_t fprec = -1.0/(FData[0]*FData[0]-FData[1]);
 	const_data_t fdata = FData[0];
+	const_data_t fprec = -1.0/(fdata*fdata-FData[1]);
   
 	//Need to invert the expression based on the context.
 
@@ -278,7 +278,7 @@ namespace ICR{
 
 	calculator_context<to_node> M0; // The average means (inverted): < expr^-1(x_i) >
 	calculator_context<to_node> M1; // The average of squares: < expr^-1(x_i)^2 >
-	calculator_context<0> result;   //The result node
+	//calculator_context<0> lhs;   //The result node
 	for(size_t i=0;i<M.size();++i){
 	  const moments_t tmp = *M[i]->GetMoments();
 	   // std::cout<<"tmp0 = "<<tmp[0]<<", tmp1 = "<<tmp[1]<<std::endl;
@@ -286,9 +286,9 @@ namespace ICR{
 	  const T tmp0 = tmp[0];
 	  M0.push_back(tmp[0]);
 	  M1.push_back(tmp[1]);
-	  result.push_back(tmp0);
+	  //	  lhs.push_back(tmp0);
 	}
-	const std::pair<T,T> result0      = proto::eval(Expr,result);
+	//	const std::pair<T,T> lhs0      = proto::eval(Expr,lhs);
 	const std::pair<T,T> inv_op_data0 = proto::eval(Expr,M0);
 	const std::pair<T,T> inv_op_data1 = proto::eval(Expr,M1);
 
@@ -300,7 +300,7 @@ namespace ICR{
 	
 	  //The data returns in two components:
 	  //  The subtraction of the all the sums from the forwarded Data.
-	const_data_t unsummed0 =result0.first-inv_op_data0.first;  
+	const_data_t unsummed0 =fdata-inv_op_data0.first;  //lhs.first
 	//  And the product thereafter
 	const_data_t factor0   =inv_op_data0.second;
 	const_data_t factor1   =inv_op_data1.second;

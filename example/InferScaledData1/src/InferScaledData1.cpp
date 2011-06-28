@@ -71,7 +71,7 @@ main  (int ac, char **av)
   //Model the data (each data point is modelled indepenantly)
   for(size_t i=0; i<data.size(); ++i)
     {
-      ResultNode result = build.calc_gaussian(g1+g2,context);  
+      ResultNode result = build.calc_gaussian(g1*g2,context);  
       build.join(result,precision, data[i]);  
     }
   
