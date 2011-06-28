@@ -41,6 +41,7 @@
 #include <boost/call_traits.hpp>
 #include<list>
 
+#include <boost/proto/proto.hpp>
 #include <boost/type_traits.hpp>
 #include <boost/mpl/vector.hpp>
 #include <boost/mpl/range_c.hpp>
@@ -61,7 +62,6 @@ namespace ICR{
   namespace EnsembleLearning{
 
 
-    
     /** @defgroup Calculation Evaluate the Calculation Nodes.
      *  
      */
@@ -108,6 +108,8 @@ namespace ICR{
       {};
     };
 
+  typedef PlaceholderFactory::make_c<-1> zero_t;
+    
 
     /** A Factory to help contruct expressions.
      *  This factory should be the user's sole interface with placeholders and mathmatical operations.
