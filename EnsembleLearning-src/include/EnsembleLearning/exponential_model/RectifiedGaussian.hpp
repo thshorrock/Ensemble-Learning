@@ -292,7 +292,7 @@ namespace ICR{
       NP_t
       CalcNP2Parent( Expression& Expr,
 		     const Context<T,fusion_t>& M,
-		     DeterministicNode<ICR::EnsembleLearning::RectifiedGaussian, T, List,ENSEMBLE_LEARNING_COMPONENTS,void>* const Data)
+		     DeterministicNode<ICR::EnsembleLearning::RectifiedGaussian, T, List>* const Data)
 
   {
 	//The moments forwarded from the Deterministic node.
