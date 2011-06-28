@@ -296,9 +296,9 @@ namespace ICR{
 
   {
 	//The moments forwarded from the Deterministic node.
-	moments_const_reference FData = Data->GetForwardedMoments();
-	const_data_t fdata = FData[0];
-	const_data_t fprec = -1.0/(fdata*fdata-FData[1]);
+	const moments_t& FData = Data->GetForwardedMoments();
+	const data_t fdata = FData[0];
+	const data_t fprec = -1.0/(fdata*fdata-FData[1]);
   
 	//Need to invert the expression based on the context.
 
@@ -341,10 +341,10 @@ namespace ICR{
 	
 	  //The data returns in two components:
 	  //  The subtraction of the all the sums from the forwarded Data.
-	const_data_t unsummed0 =fdata-inv_op_data0.first;  //lhs.first
+	const data_t unsummed0 =fdata-inv_op_data0.first;  //lhs.first
 	//  And the product thereafter
-	const_data_t factor0   =inv_op_data0.second;
-	const_data_t factor1   =inv_op_data1.second;
+	const data_t factor0   =inv_op_data0.second;
+	const data_t factor1   =inv_op_data1.second;
 
 	//The usual (mean*precision, -0.5*precision) (with a scale factor)
 	return NP_t(fprec*unsummed0*factor0, -0.5*factor1*fprec);
@@ -375,8 +375,21 @@ namespace ICR{
 	  M0.push_back(tmp[0]);
 	  M0_squared.push_back(tmp0*tmp0);
 	  M1.push_back(tmp[1]);
-    }
+	}
 
+	// std::cout<<"<x^2> = "<<proto::eval(Expr,M1).first<<std::endl;
+	// std::cout<<"<x>^2 = "<<proto::eval(Expr,M0_squared).first<<std::endl;
+	// std::cout<<"<x>   = "  <<proto::eval(Expr,M0).first<<std::endl;
+
+	//Precision is 1.0/ (<expr(x^2)> - <expr(x)>^2)
+	//The second value in the pair (the scale) is 1 for the results node.
+	const data_t prec = 1.0/(proto::eval(Expr,M1).first - proto::eval(Expr,M0_squared).first);
+	// std::cout<<"prec  = "  <<prec<<std::endl;
+
+	// NP = [<expr(x)> * prec, -0.5*prec]
+	return NP_t(  proto::eval(Expr,M0).first *prec  , -0.5*prec);
+  
+      }
   private:
       
     struct Erfcx
