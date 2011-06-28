@@ -552,6 +552,72 @@ namespace ICR{
       rectified_gaussian_mixture( vMean_t& vMean, 
 		        vPrec_t& vPrecision, 
 			WeightsNode Weights);
+
+
+      template<template<class> class Model,
+	       int size,
+	       class vmean_t , 
+	       class vprec_t,
+	       class vweight_t
+	        >
+      CalculationVector<Model,T,size>
+      calculation_mixture( std::vector< vmean_t > & vMean,  
+			   std::vector< vprec_t > & vPrecision, 
+			   vweight_t & Weights)
+      {
+
+	typedef  CalculationVector<Model,T, size>
+      	  CV_t;
+	
+	CV_t CV;
+
+	// typedef WeightsType prior_t;
+	// typedef ICR::EnsembleLearning::NoSecondParent blank;
+	// typedef CatagoryType catagory_t;
+	// typedef detail::Factor<Discrete,T,prior_t,blank,catagory_t,ENSEMBLE_LEARNING_COMPONENTS> Factor_t;
+
+	// const size_t number = Weights[0]->size();
+	// ItrMean itmean = vMeanBegin;
+	// ItrPrec itprec = vPrecisionBegin;
+	// ItrWeights itweight = WeightsBegin;
+  
+	boost::fusion::for_each(CV.data(),
+				MakeCalculationMixture<Model,vmean_t,vprec_t,vweight_t>
+				(m_Factors, m_Nodes,
+				 vMean,vPrecision,Weights
+				 
+				 ));
+	return CV;
+      }
+
+  // for(itmean; itmean!= vMeanEnd; ++itmean)
+  //   {
+  //     boost::shared_ptr<catagory_t>     Catagory(new catagory_t());
+  //     boost::shared_ptr<Factor_t >      CatagoryF(new Factor_t(*itweight, Catagory.get()));
+  //     m_Nodes.push_back(Catagory);
+  //     m_Factors.push_back(CatagoryF);
+	
+
+  //     boost::shared_ptr<GaussianType> Child(new GaussianType());
+
+  //     m_Nodes.push_back(Child);
+
+  //     typedef detail::Mixture<Gaussian<T>, T,vMean_t,  vPrec_t, GaussianType >     GaussianMixtureFactor;
+  
+  //     boost::shared_ptr<GaussianMixtureFactor> MixtureF(new GaussianMixtureFactor(*itmean, *itprecision, Catagory.get() , Child.get()));
+	
+  //     m_Factors.push_back(MixtureF);
+  //   }
+
+  // return Child.get();
+
+
+  //     }
+
+     
+
+
+      
 // =======
 //       template<class List>
 //       Variable
@@ -934,6 +1000,67 @@ namespace ICR{
 	const std::vector<U*>& m_vp;
       };
       
+      
+      template<template<class> class Model,
+	       class vmean_t, class vprec_t,class vweight_t
+	       >
+      struct MakeCalculationMixture
+      {
+	MakeCalculationMixture(std::vector<boost::shared_ptr<FactorNode_basic> >& F,
+			       std::vector<boost::shared_ptr<VariableNode_basic > >& N,
+			       std::vector< vmean_t > & vMean,  
+			       std::vector< vprec_t > & vPrecision, 
+			       vweight_t & Weights
+			       )
+	  : m_F(F), m_N(N), 
+	    m_vMean(vMean),
+	    m_vPrecision(vPrecision),
+	    m_Weights(Weights),
+	    index(0)
+	{
+	}
+	template <class Node>
+	void operator()(Node& node) const
+	{
+	  
+	  typedef typename boost::remove_pointer<typename boost::remove_reference<Node>::type>::type child_t;
+	  
+	  typedef WeightsType prior_t;
+	  typedef ICR::EnsembleLearning::NoSecondParent blank;
+	  typedef CatagoryType catagory_t;
+	  typedef detail::Factor<Discrete,T,prior_t,blank,catagory_t,ENSEMBLE_LEARNING_COMPONENTS> Factor_t;
+
+	  boost::shared_ptr<catagory_t>     Catagory(new catagory_t());
+	  boost::shared_ptr<Factor_t >      CatagoryF(new Factor_t(m_Weights[index], Catagory.get()));
+	  m_N.push_back(Catagory);
+	  m_F.push_back(CatagoryF);
+	
+
+	  boost::shared_ptr<child_t> Child(new child_t());
+
+	  m_N.push_back(Child);
+      
+	  typedef detail::Mixture<Gaussian<T>, T,vmean_t,  vprec_t, child_t >     MixtureFactor;
+  
+	  boost::shared_ptr<MixtureFactor> MixtureF(new MixtureFactor(m_vMean[index], m_vPrecision[index], Catagory.get() , Child.get()));
+	
+	  m_F.push_back(MixtureF);
+	  
+	  node = Child.get();
+
+	  ++index;
+      
+	}
+	mutable std::vector<boost::shared_ptr<FactorNode_basic> >& m_F;
+	mutable std::vector<boost::shared_ptr<VariableNode_basic > >& m_N;
+	std::vector< vmean_t > &     m_vMean; 
+	std::vector< vprec_t > &     m_vPrecision;
+	vweight_t & m_Weights;
+
+	mutable size_t index;
+      };
+
+
       template<template<class> class Model>
       struct MakeModel
       {
