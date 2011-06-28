@@ -76,16 +76,82 @@ public:
     
      
     //m_Build the source approximation
-    if (positive_sources) 
-      build_source_matrix(Int2Type<true>(),M,T, Components);
-    else
-      build_source_matrix(Int2Type<false>(),M,T, Components);
+
+    //build A weights component for each source
+    vector<WeightsNode> Weights(M);
+    build_vector(Weights, Components);
+    
+    //m_Build hyper mean and hyper precision for each source mixture component.
+    std::vector< MixtureVector<GaussianNode>::type > ShypMean(M);
+    std::vector< MixtureVector<GammaNode>::type > ShypPrec(M);
+    for(size_t m=0;m<M;++m){ 
+      
+      BOOST_AUTO( ShypMean(M), build.mixture_vector<Gaussian>(0.00,0.001) ); 
+      BOOST_AUTO( ShypPrec(M), build.mixture_vector<Gamma>   (1.00,0.01) ); 
+    }
+    
+    std::cout<<"built hyperparams - nodes = "<< m_Build.number_of_nodes() <<std::endl;
+    
+    std::vector< CalculationVector<Gaussian>::type > m_S(T);
+    std::vector< CalculationVector<RectifiedGaussian>::type > m_Sp(T);
+    
+    
+    for(size_t m=0;m<M;++m){
+      for(size_t t=0;t<T;++t){ 
+	if (positive_sources) 
+	  boost::fusion::for_each(m_S(t).data(),  
+				  MakeMixure<Gaussian>(
+				  boost::bind(&Binder<data_t>::rectified_gaussian_mixture, 
+					      m_Build, 
+					      ShypMean.begin(), 
+					      ShypPrec.begin(),
+					      Weights.begin()
+					      )
+	  m_Sp(t) = m_Build.calculation_vector<RectifiedGaussian>
+	    (boost::bind(&Binder<data_t>::rectified_gaussian_mixture, 
+			 m_Build, 
+			 ShypMean.begin(), 
+			 ShypPrec.begin(),
+			 Weights.begin()
+			 )
+			 
+			 
+								 
+	  m_Sp(t) = m_Build.rectified_gaussian_mixture(ShypMean[m],
+							ShypPrec[m],
+							Weights[m]);
+	else
+    
+	  m_S(m,t) = m_Build.gaussian_mixture(ShypMean[m],
+					      ShypPrec[m],
+					      Weights[m]);
+	}
+      }
+    
+
     
     //m_Build approximation to the mixing matrix
-    if (positive_mixing) 
-      build_mixing_matrix(Int2Type<true>(),N,M);
-    else
-      build_mixing_matrix(Int2Type<false>(),N,M);
+    vector<GaussianNode> AMean(M);
+    vector<GammaNode> APrecision(M);
+    build_vector(AMean);
+    build_vector(APrecision);
+    
+    for(size_t n=0;n<N;++n){
+      for(size_t m=0;m<M;++m){
+	if (positive_mixing) 
+	  m_A(n,m) = m_Build.rectified_gaussian(AMean[m], APrecision[m]);
+	else
+	  m_A(n,m) = m_Build.gaussian(AMean[m], APrecision[m]);
+	
+      }
+    }
+
+    std::cout<<"built mixing - nodes = "<< m_Build.number_of_nodes() <<std::endl;
+
+    // if (positive_mixing) 
+    //   build_mixing_matrix(Int2Type<true>(),N,M);
+    // else
+    //   build_mixing_matrix(Int2Type<false>(),N,M);
       
 
     //m_Build the noise mean approximation
@@ -114,8 +180,8 @@ public:
   typedef Placeholder::make_vector<M+1,2*M> AP;
   typedef Placeholder::make<2*M+1> NP;
   
-  std::cout<<"size vx = "<<mpl::size<vx>::value<<std::endl;
-  std::cout<<"size vy = "<<mpl::size<vy>::value<<std::endl;
+  std::cout<<"size SP = "<<mpl::size<SP>::value<<std::endl;
+  std::cout<<"size AP = "<<mpl::size<AP>::value<<std::endl;
 
   typedef mpl::transform<AP,SP,times_f>::type prod;
   mpl::accumulate<prod,zero_t,plus_f>::type dot_prod;
@@ -143,69 +209,110 @@ public:
 
   
     
-    // vector<ICR::EnsembleLearning::Placeholder<data_t>*> SP(M);
-    // vector<ICR::EnsembleLearning::Placeholder<data_t>*> AP(M);
-    // ICR::EnsembleLearning::Placeholder<data_t>* NP = m_Factory.placeholder();
-    // for(size_t m=0;m<M;++m){
-    //   SP[m] = m_Factory.placeholder();  
-    //   AP[m] = m_Factory.placeholder(); 
-    // }
-    // //The expression in terms of these placeholders
-    // ICR::EnsembleLearning::Expression<data_t>* Expr;
-    // {
-    //   BOOST_ASSERT(M!=0);
-    //   //First do the multiplication
-    //   std::deque<ICR::EnsembleLearning::Expression<data_t>*> prod(M);
-    //   for(size_t m=0;m<M;++m){
-    // 	prod[m] = m_Factory.Multiply(AP[m], SP[m]);
-    //   }
-    //   //then add them up
-    //   Expr = prod[0];
-    //   prod.pop_front();
-    //   while(prod.size()!=0)
-    // 	{
-    // 	  Expr = m_Factory.Add(Expr,prod[0]);
-    // 	  prod.pop_front();
-    // 	}
-    //   if (noise_offset) 
-    // 	//Finnaly add the Noise placeholder
-    // 	Expr = m_Factory.Add(Expr, NP);
+  // vector<ICR::EnsembleLearning::Placeholder<data_t>*> SP(M);
+  // vector<ICR::EnsembleLearning::Placeholder<data_t>*> AP(M);
+  // ICR::EnsembleLearning::Placeholder<data_t>* NP = m_Factory.placeholder();
+  // for(size_t m=0;m<M;++m){
+  //   SP[m] = m_Factory.placeholder();  
+  //   AP[m] = m_Factory.placeholder(); 
+  // }
+  // //The expression in terms of these placeholders
+  // ICR::EnsembleLearning::Expression<data_t>* Expr;
+  // {
+  //   BOOST_ASSERT(M!=0);
+  //   //First do the multiplication
+  //   std::deque<ICR::EnsembleLearning::Expression<data_t>*> prod(M);
+  //   for(size_t m=0;m<M;++m){
+  // 	prod[m] = m_Factory.Multiply(AP[m], SP[m]);
+  //   }
+  //   //then add them up
+  //   Expr = prod[0];
+  //   prod.pop_front();
+  //   while(prod.size()!=0)
+  // 	{
+  // 	  Expr = m_Factory.Add(Expr,prod[0]);
+  // 	  prod.pop_front();
+  // 	}
+  //   if (noise_offset) 
+  // 	//Finnaly add the Noise placeholder
+  // 	Expr = m_Factory.Add(Expr, NP);
       
-    // }
+  // }
     
     
-    matrix<ResultNode> AtimesSplusN(N,T);
-    for(size_t n=0;n<N;++n){ 
-      for(size_t t=0;t<T;++t){ 
-    	/**  Now need to replace the placeholders with given nodes 
-    	 *   I.e. set up a context to the expression
-    	 */
-	ICR::EnsembleLearning::Context<data_t> context;
-    	for(size_t m=0;m<M;++m){
-	  context.push_back(m_A(n,m))
-    	}
-    	for(size_t m=0;m<M;++m){
-	  context.push_back(m_S(n,m))
-    	}
-	if (noise_offset) 
-	  context.push_back(NP, m_noiseMean[n]);
+  //   //make vectors of size m.
+  //   BOOST_AUTO(AMean,(m_Build.calculation_vector<Gaussian,0>(0.0,0.001)));
+  //   BOOST_AUTO(APrec,(m_Build.calculation_vector<Gamma,0>(1.0,0.001)));
+  //   BOOST_AUTO(As,(m_Build.calculation_vector<Gaussian,0>(function,m_Build, boost:bind(AMean,APrec))));
+
+  //   contextAs = context(As)
+      
+  //   for(size_t t=0;t<T;++t){ 
 	
-    	AtimesSplusN(n,t) = m_Build.calc_gaussian(Expr,context);  
+  // 	WeightsNode Weights = m_Build.weights();
+  // 	BOOST_AUTO(ShypMean,(m_Build.mixture_vector<Gaussian,0>(0.0,0.001)));
+  // 	BOOST_AUTO(ShypPrec,(m_Build.mixture_vector<Gamma,0>(1.0,0.001)));
+  // 	BOOST_AUTO(Ss,(m_Build.calculation_vector<Gaussian,0>(function,m_Build,boost:bind(ShypMean,ShypPrec,weights))));
+
+  //   }
+      
+      
+  //   for(size_t i=0;i<10;++i){
+  // 	delete m_vec;
+  // 	m_vec =  new vector(make_vector(*m_vec_old, m_Build.gaussian(0,0.1)));
+  // 	delete m_vec_old;
+  // 	m_vec_old = new vector(m_vec);
+	  
+  // 	GaussianNode* A = new GaussianNode(m_Build.gaussian(0,0.1));
+	
+	
+  //   }
+
+
+  matrix<ResultNode> AtimesSplusN(N,T);
+  for(size_t n=0;n<N;++n){ 
+
+    // 	for(size_t m=0;m<M;++m){
+	  
+    // 	  context.push_back(m_A(n,m))
+    // 	}
+    for(size_t t=0;t<T;++t){ 
+      
+      /**  Now need to replace the placeholders with given nodes 
+       *   I.e. set up a context to the expression
+       */
+      typedef typename boost::mpl::vector< repeat<Gaussian, M> types
+      cA = m_Builder.calc_vector<boost::mpl::vector<,M,,M>;
+      cS = m_Builder.calc_vector<Gaussian>;
+      ICR::EnsembleLearning::Context<data_t> context(AMean,APrec);
+      for(size_t m=0;m<M;++m){
+	  
+	context.push_back(m_A(n,m));
       }
+	
+	
+      for(size_t m=0;m<M;++m){
+	context.push_back(m_S(n,m));
+      }
+      if (noise_offset) 
+	context.push_back(NP, m_noiseMean[n]);
+	
+      AtimesSplusN(n,t) = m_Build.calc_gaussian(Expr,context);  
     }
-    m_AtimesSplusN = AtimesSplusN;
+  }
+  m_AtimesSplusN = AtimesSplusN;
 
 
-    std::cout<<"built context - nodes = "<< m_Build.number_of_nodes() <<std::endl;
+  std::cout<<"built context - nodes = "<< m_Build.number_of_nodes() <<std::endl;
      
-    //join to the data
-    for(size_t n=0;n<N;++n){
-      for(size_t t=0;t<T;++t){
-    	m_Build.join(AtimesSplusN(n,t),m_noisePrecision(n), data(n,t));
-      }
+  //join to the data
+  for(size_t n=0;n<N;++n){
+    for(size_t t=0;t<T;++t){
+      m_Build.join(AtimesSplusN(n,t),m_noisePrecision(n), data(n,t));
     }
+  }
 
-    std::cout<<"built data - nodes = "<< m_Build.number_of_nodes() <<std::endl;
+  std::cout<<"built data - nodes = "<< m_Build.number_of_nodes() <<std::endl;
      
   }
   ICR::EnsembleLearning::Builder<data_t>& get_builder() {return m_Build;}
@@ -395,17 +502,22 @@ private:
   void
   build_mixing_matrix(Int2Type<false>, size_t N, size_t M)
   {
-    vector<GaussianNode> AMean(M);
-    vector<GammaNode> APrecision(M);
-    build_vector(AMean);
-    build_vector(APrecision);
+    GaussianNode AMean = m_Build.gaussian(0.0,m_GaussianPrecision);
+    GammaNode    APrecision = m_build.gamma(1.0,m_GammaVar);
+    return m_Build.gaussian(AMean,APrec);
     
-    for(size_t n=0;n<N;++n){
-      for(size_t m=0;m<M;++m){ 
-	m_A(n,m) = m_Build.gaussian(AMean[m], APrecision[m]);
-      }
-    }
-    std::cout<<"built mixing - nodes = "<< m_Build.number_of_nodes() <<std::endl;
+    
+    // vector<GaussianNode> AMean(M);
+    // vector<GammaNode> APrecision(M);
+    // build_vector(AMean);
+    // build_vector(APrecision);
+    
+    // for(size_t n=0;n<N;++n){
+    //   for(size_t m=0;m<M;++m){ 
+    // 	m_A(n,m) = m_Build.gaussian(AMean[m], APrecision[m]);
+    //   }
+    // }
+    // std::cout<<"built mixing - nodes = "<< m_Build.number_of_nodes() <<std::endl;
   };
 
   void

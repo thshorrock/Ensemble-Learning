@@ -25,6 +25,9 @@
  **                                                                               **
  ***********************************************************************************
  ***********************************************************************************/
+#include "EnsembleLearning/node/Node.hpp"
+#include "EnsembleLearning/node/variable/Hidden.hpp"
+
 // Include all of Proto
 #include <boost/proto/proto.hpp>
 #include <iostream>
@@ -73,7 +76,7 @@ namespace ICR{
     
     //Forward declaration.
     namespace detail{
-      template<template<class> class ,  class>
+      template<template<class> class ,  class, class, class>
       class Deterministic ;
     }
 
@@ -86,19 +89,24 @@ namespace ICR{
 	std::copy(a.begin(), a.end(), std::back_inserter(m_args));
       }
 
+      void push_back(const double a)
+      {
+	m_args.push_back(a);
+      }
+
       calculator_context() { m_args.push_back(0.0); } //m_args(0) is the result placeholder.
   
       template<typename Expr
 	       // defaulted template parameters, so we can
 	       // specialize on the expressions that need
 	       // special handling.
-	       , typename Tag = typename proto::tag_of<Expr>::type
-	       , typename Arg0 = typename proto::result_of::child_c<Expr, 0>::type
+	       , typename Tag = typename boost::proto::tag_of<Expr>::type
+	       , typename Arg0 = typename boost::proto::result_of::child_c<Expr, 0>::type
 	       > struct eval;
       
     // Handle placeholder terminals here...
     template<typename Expr, int I>
-    struct eval<Expr, proto::tag::terminal, placeholder<I> >
+    struct eval<Expr, boost::proto::tag::terminal, placeholder<I> >
     {
       typedef std::pair<double,double> result_type;
       
@@ -110,53 +118,53 @@ namespace ICR{
 
     // Handle other terminals here...
     template<typename Expr, typename Arg0>
-    struct eval<Expr, proto::tag::terminal, Arg0>
+    struct eval<Expr, boost::proto::tag::terminal, Arg0>
     {
       typedef std::pair<double,double> result_type;
 
       result_type operator()(Expr &expr, calculator_context &) const
       {
-	return result_type(proto::child(expr),1);
+	return result_type(boost::proto::child(expr),1);
       }
     };
 
     // Handle addition here...
     template<typename Expr, typename Arg0>
-    struct eval<Expr, proto::tag::plus, Arg0>
+    struct eval<Expr, boost::proto::tag::plus, Arg0>
     {
       typedef std::pair<double,double> result_type;
 
     
       result_type operator()(Expr &expr, calculator_context &ctx) const
       {
-	typedef typename proto::result_of::child_c<Expr, 0>::type ltype_tmp;
-	typedef typename proto::result_of::child_c<Expr, 1>::type rtype_tmp;
+	typedef typename boost::proto::result_of::child_c<Expr, 0>::type ltype_tmp;
+	typedef typename boost::proto::result_of::child_c<Expr, 1>::type rtype_tmp;
 
-	typedef typename proto::result_of::child_c<rtype_tmp, 0>::type rtype;
-	typedef typename proto::result_of::child_c<ltype_tmp, 0>::type ltype;
+	typedef typename boost::proto::result_of::child_c<rtype_tmp, 0>::type rtype;
+	typedef typename boost::proto::result_of::child_c<ltype_tmp, 0>::type ltype;
 
 
 	if (boost::is_base_of<mpl::int_<TerminalExpr>,ltype>::value) 
 	  {
 	    //lhs is equal to the special placeholder.
-	    const double rhs1 = proto::eval(proto::right(expr), ctx).first;
-	    const double rhs2 = proto::eval(proto::right(expr), ctx).second;
+	    const double rhs1 = boost::proto::eval(boost::proto::right(expr), ctx).first;
+	    const double rhs2 = boost::proto::eval(boost::proto::right(expr), ctx).second;
 	    return result_type(rhs1, rhs2);
 	  }
 	else if (boost::is_base_of<mpl::int_<TerminalExpr>,rtype>::value)
 	  {
 	    //rhs is equal to the special placeholder.
-	    const double lhs1 = proto::eval(proto::left(expr), ctx).first;
-	    const double lhs2 = proto::eval(proto::left(expr), ctx).second;
+	    const double lhs1 = boost::proto::eval(boost::proto::left(expr), ctx).first;
+	    const double lhs2 = boost::proto::eval(boost::proto::left(expr), ctx).second;
 	    return result_type(lhs1, lhs2);
 	  } 
 	else
 	  {
 	    //no special placeholder
-	    const double lhs1 = proto::eval(proto::left(expr), ctx).first;
-	    const double lhs2 = proto::eval(proto::left(expr), ctx).second;
-	    const double rhs1 = proto::eval(proto::right(expr), ctx).first;
-	    const double rhs2 = proto::eval(proto::right(expr), ctx).second;
+	    const double lhs1 = boost::proto::eval(boost::proto::left(expr), ctx).first;
+	    const double lhs2 = boost::proto::eval(boost::proto::left(expr), ctx).second;
+	    const double rhs1 = boost::proto::eval(boost::proto::right(expr), ctx).first;
+	    const double rhs2 = boost::proto::eval(boost::proto::right(expr), ctx).second;
 	    return result_type(lhs1+rhs1, lhs2*rhs2);
 	  }
       }
@@ -164,7 +172,7 @@ namespace ICR{
 
     // Handle multiplication here...
     template<typename Expr, typename Arg0>
-    struct eval<Expr, proto::tag::multiplies, Arg0>
+    struct eval<Expr, boost::proto::tag::multiplies, Arg0>
     {
       typedef std::pair<double,double> result_type;
 
@@ -173,54 +181,54 @@ namespace ICR{
       {
 
     
-	typedef typename proto::result_of::child_c<Expr, 0>::type ltype_tmp;
-	typedef typename proto::result_of::child_c<Expr, 1>::type rtype_tmp;
+	typedef typename boost::proto::result_of::child_c<Expr, 0>::type ltype_tmp;
+	typedef typename boost::proto::result_of::child_c<Expr, 1>::type rtype_tmp;
 
-	typedef typename proto::result_of::child_c<rtype_tmp, 0>::type rtype;
-	typedef typename proto::result_of::child_c<ltype_tmp, 0>::type ltype;
+	typedef typename boost::proto::result_of::child_c<rtype_tmp, 0>::type rtype;
+	typedef typename boost::proto::result_of::child_c<ltype_tmp, 0>::type ltype;
 
 
 	if (boost::is_same<mpl::int_<TerminalExpr>,mpl::int_<0> >::value) 
 	  {
 	    //special case for results expression.
-	    const double lhs1 = proto::eval(proto::left(expr), ctx).first;
-	    const double rhs1 = proto::eval(proto::right(expr), ctx).first;
+	    const double lhs1 = boost::proto::eval(boost::proto::left(expr), ctx).first;
+	    const double rhs1 = boost::proto::eval(boost::proto::right(expr), ctx).first;
 	    //no special placeholder
 	    return result_type(lhs1*rhs1,1);
 	  }
 	else if (boost::is_base_of<mpl::int_<TerminalExpr>,ltype>::value) 
 	  {
 	    //lhs is equal to the special placeholder.
-	    return result_type(0, proto::eval(proto::right(expr), ctx).first);
+	    return result_type(0, boost::proto::eval(boost::proto::right(expr), ctx).first);
 	  }
 	else if (boost::is_base_of<mpl::int_<TerminalExpr>,rtype>::value)
 	  {
 	    //rhs is equal to the special placeholder.
-	    return result_type(0, proto::eval(proto::left(expr), ctx).first);
+	    return result_type(0, boost::proto::eval(boost::proto::left(expr), ctx).first);
 	
 	  } 
-	else if (boost::is_same<proto::tag::terminal,
-		 typename proto::tag_of<ltype_tmp>::type>::value)
+	else if (boost::is_same<boost::proto::tag::terminal,
+		 typename boost::proto::tag_of<ltype_tmp>::type>::value)
 	  { //lhs is terminal but not special placeholder.
-	    const double lhs1 = proto::eval(proto::left(expr), ctx).first;
-	    const double rhs1 = proto::eval(proto::right(expr), ctx).first;
-	    const double rhs2 = proto::eval(proto::right(expr), ctx).second;
+	    const double lhs1 = boost::proto::eval(boost::proto::left(expr), ctx).first;
+	    const double rhs1 = boost::proto::eval(boost::proto::right(expr), ctx).first;
+	    const double rhs2 = boost::proto::eval(boost::proto::right(expr), ctx).second;
 	    return result_type(lhs1*rhs1,lhs1*rhs2);
 	  }
-	else if (boost::is_same<proto::tag::terminal,
-		 typename proto::tag_of<rtype_tmp>::type>::value)
+	else if (boost::is_same<boost::proto::tag::terminal,
+		 typename boost::proto::tag_of<rtype_tmp>::type>::value)
 	  { //rhs is terminal but not special placeholder.
-	    const double lhs1 = proto::eval(proto::left(expr), ctx).first;
-	    const double rhs1 = proto::eval(proto::right(expr), ctx).first;
-	    const double lhs2 = proto::eval(proto::left(expr), ctx).second;
+	    const double lhs1 = boost::proto::eval(boost::proto::left(expr), ctx).first;
+	    const double rhs1 = boost::proto::eval(boost::proto::right(expr), ctx).first;
+	    const double lhs2 = boost::proto::eval(boost::proto::left(expr), ctx).second;
 	    return result_type(lhs1*rhs1,lhs2*rhs1);
 	  }
 	else
 	  {
-	    const double lhs1 = proto::eval(proto::left(expr), ctx).first;
-	    const double rhs1 = proto::eval(proto::right(expr), ctx).first;
-	    const double lhs2 = proto::eval(proto::left(expr), ctx).second;
-	    const double rhs2 = proto::eval(proto::right(expr), ctx).second;
+	    const double lhs1 = boost::proto::eval(boost::proto::left(expr), ctx).first;
+	    const double rhs1 = boost::proto::eval(boost::proto::right(expr), ctx).first;
+	    const double lhs2 = boost::proto::eval(boost::proto::left(expr), ctx).second;
+	    const double rhs2 = boost::proto::eval(boost::proto::right(expr), ctx).second;
 	    //no special placeholder
 	    return result_type(lhs1*rhs1,lhs2*rhs2);
 	  }
@@ -230,7 +238,7 @@ namespace ICR{
 
       // Handle the placeholders:
       template<int I>
-      double operator()(proto::tag::terminal, placeholder<I>) const
+      double operator()(boost::proto::tag::terminal, placeholder<I>) const
       {
 	return this->m_args[I];
       }
@@ -239,12 +247,51 @@ private:
   std::vector<double> m_args;
     };
     
+// // Forward-declare an expression wrapper
+// template<typename Expr>
+// struct calculator;
+
+// // Define a calculator domain. Expression within
+// // the calculator domain will be wrapped in the
+// // calculator<> expression wrapper.
+// struct calculator_domain
+//   : boost::proto::domain< boost::proto::generator<calculator>, calculator_grammar >//, calculator_grammar 
+// {};
+// // Define a calculator expression wrapper. It behaves just like
+// // the expression it wraps, but with an extra operator() member
+// // function that evaluates the expression.    
+// template<typename Expr>
+// struct calculator
+// : boost::proto::extends<Expr, calculator<Expr>, calculator_domain>
+// {
+//     typedef
+//         boost::proto::extends<Expr, calculator<Expr>, calculator_domain>
+//     base_type;
+
+//     calculator(Expr const &expr = Expr())
+//       : base_type(expr)
+//     {}
+
+// // Use BOOST_PROTO_EXTENDS() instead of boost::proto::extends<> to
+//     // make this type a Proto expression extension.
+//     //BOOST_PROTO_BASIC_EXTENDS(Expr, calculator<Expr>, calculator_domain)
+
+//     // // Define operator[] to build expression templates:
+//     //BOOST_PROTO_EXTENDS_SUBSCRIPT()
+
+//     // // Define operator= to build expression templates:
+//     // BOOST_PROTO_EXTENDS_ASSIGN()
+
+//     typedef double result_type;
+
+// };
+
   // Define the grammar of calculator expressions
   struct calculator_grammar
-    : proto::or_<
-    proto::plus< calculator_grammar, calculator_grammar >
-    , proto::multiplies< calculator_grammar, calculator_grammar >
-    , proto::terminal< proto::_ >
+    : boost::proto::or_<
+    boost::proto::plus< calculator_grammar, calculator_grammar >
+    , boost::proto::multiplies< calculator_grammar, calculator_grammar >
+    , boost::proto::terminal< boost::proto::_ >
     >
   {};
 
@@ -256,17 +303,17 @@ private:
   // the calculator domain will be wrapped in the
   // calculator<> expression wrapper.
   struct calculator_domain
-    : proto::domain< proto::generator<calculator>, calculator_grammar >//, calculator_grammar 
+    : boost::proto::domain< boost::proto::generator<calculator>, calculator_grammar >//, calculator_grammar 
   {};
   // Define a calculator expression wrapper. It behaves just like
   // the expression it wraps, but with an extra operator() member
   // function that evaluates the expression.    
   template<typename Expr>
 struct calculator
-  : proto::extends<Expr, calculator<Expr>, calculator_domain>
+  : boost::proto::extends<Expr, calculator<Expr>, calculator_domain>
 {
   typedef
-  proto::extends<Expr, calculator<Expr>, calculator_domain>
+  boost::proto::extends<Expr, calculator<Expr>, calculator_domain>
   base_type;
 
   calculator(Expr const &expr = Expr())
@@ -313,19 +360,20 @@ struct calculator
      *  @endcode
      *
      */
-    template<class T>
+    template<class T, class vector_t>
     class Context{
-      typedef std::vector<VariableNode<T>* const  > DataContainer;
-      typedef VariableNode<T>* const  Datum;
+      typedef VariableNode<T>*   Datum;
+      typedef std::vector<Datum> DataContainer;
     public:
       /** @name Useful typdefs for types that are exposed to the user.
        */
       ///@{
+      typedef typename vector_t::type type;
       
       
-      typedef typename boost::call_traits< VariableNode<T>* const>::param_type
+      typedef typename boost::call_traits<  VariableNode<T>* const  >::param_type
       variable_parameter;
-      typedef typename boost::call_traits< VariableNode<T>* const>::value_type
+      typedef typename boost::call_traits<  VariableNode<T>* const  >::value_type
       variable_t;
 
       typedef typename boost::call_traits<size_t>::param_type
@@ -333,25 +381,44 @@ struct calculator
       
       ///@}
       
-      Context(const size_t size) : m_map(size) {}
+      Context(vector_t& v)
+	: m_data(),
+	  m_vector(v)
+      {
+	
+	m_data.resize(size() );
+	boost::fusion::for_each(v.data(),
+				Assign2stdVector<Datum>(m_data) );
+      }
       
-      /** Assign a placeholder a VariableNode.
-       *  @param i The Placeholder index.
-       *  @param V The VariableNode 
-       */
-      void 
-      Assign(size_t i, variable_parameter  V );
+      // /** Assign a placeholder a VariableNode.
+      //  *  @param i The Placeholder index.
+      //  *  @param V The VariableNode 
+      //  */
+      // template<class PH>
+      // void 
+      // Assign(PH i, variable_parameter  V );
 
+      // typedef typename boost::call_traits<FactorNode<T, HiddenNode, 2 >* >::param_type 
+      // F_parameter;
+      template<class Factor>
+      void 
+      AddChildFactor(Factor f)
+      {
+	boost::fusion::for_each(m_vector.data(),
+			 AddChild<Factor>(f));
+	//boost::bind(&HiddenNode<T>::AddChildFactor,this,f));
+      }
 
       variable_t
       operator[](size_parameter i) const
       {
-	return m_map[i];
+      	return m_data[i];
       }
       
       size_t
       size() const
-      { return m_map.size();}
+      { return boost::mpl::size<type>::type::value; }
       
       /** Output the Context to a stream. 
        *  @param c The context.
@@ -359,17 +426,46 @@ struct calculator
        *  @return A reference to the output stream.
        *  This function is thread safe.
        */
-      template<class U>
+      template<class U, class vector_t2>
       friend
       std::ostream&
-      operator<<(std::ostream& out, const Context<U>&  c);
+      operator<<(std::ostream& out, const Context<U,vector_t2>&  c);
 
     private:
+      
+      template<class U>
+      struct Assign2stdVector
+      {
+      	Assign2stdVector(std::vector<U>& vp) : m_index(0), m_vp(vp) {}
+      	template <class Node>
+      	void operator()(Node& node) const
+      	{
+      	  m_vp[m_index] = node;
+      	  ++m_index;
+      	}
+      	mutable size_t m_index;
+      	mutable std::vector<U>& m_vp;
+      };
 
+      template<class Factor>
+      struct AddChild
+      {
+	AddChild(Factor& f) : m_factor(f) {}
+	template <class Node>
+	void operator()(Node& node) const
+	{
+	  node->AddChildFactor(m_factor);
+	  // m_vp[m_index] = node;
+	  // ++m_index;
+	}
+	mutable Factor& m_factor;
+      };
+      
       template<template<class> class Model,  class U>
       friend class detail::Deterministic;
+       DataContainer m_data;
+      vector_t m_vector;
 
-      mutable DataContainer m_map;
     };
 
 
@@ -379,40 +475,40 @@ struct calculator
     **********************************************************
     **********************************************************/
 
-    template<class T>
-    std::ostream&
-    operator<<(std::ostream& out, 
-	       const SubContext<T>& c)
-    {
-      //lock
-#pragma omp critical
-      {
+//     template<class T>
+//     std::ostream&
+//     operator<<(std::ostream& out, 
+// 	       const SubContext<T>& c)
+//     {
+//       //lock
+// #pragma omp critical
+//       {
 	
-	typename std::map<const Placeholder<T>*,  T>::const_iterator it;
-	for(it = c.m_map.begin();
-	    it!= c.m_map.end();
-	    ++it)
-	  {
-	    out<<*it<<" ";
-	  }
-      }
-      return out;
-    }
+// 	typename std::map<const Placeholder<T>*,  T>::const_iterator it;
+// 	for(it = c.m_data.begin();
+// 	    it!= c.m_data.end();
+// 	    ++it)
+// 	  {
+// 	    out<<*it<<" ";
+// 	  }
+//       }
+//       return out;
+//     }
 
 
       
-    template<class T>
+    template<class T,class fusion_t2>
     std::ostream&
     operator<<(std::ostream& out, 
-	       const Context<T>&  c)
+	       const Context<T,fusion_t2>&  c)
     { 
 
 #pragma omp critical
       {
 	typedef std::map<VariableNode<T>* const ,const Placeholder<T>* > DataContainer;
 	typename DataContainer::const_iterator it;
-	for(it = c.m_map.begin();
-	    it!= c.m_map.end();
+	for(it = c.m_data.begin();
+	    it!= c.m_data.end();
 	    ++it)
 	  {
 	    out<<it->first<<" ";
@@ -432,28 +528,29 @@ struct calculator
 **********************************************************
 **********************************************************/
 
-template<class T>
-inline
-typename ICR::EnsembleLearning::Context<T>::placeholder_t
-ICR::EnsembleLearning::Context<T>::Lookup(variable_parameter V) const
-{
-  return
-    m_map.find(V)->second;
-}
+// template<class T, class fusion_t>
+// inline
+// typename ICR::EnsembleLearning::Context<T>::placeholder_t
+// ICR::EnsembleLearning::Context<T>::Lookup(variable_parameter V) const
+// {
+//   return
+//     m_data.find(V)->second;
+// }
 
 
-template<class T>
-void
-ICR::EnsembleLearning::Context<T>::Assign(size_t i, 
-			     variable_parameter  V )
-{
-  //make sure not trying to assign to things at once.
-#pragma omp critical
-  {
-    if (m_map.size()<=i) 
-      m_map.resize(i+1);
-    m_map[i] = V;
-  }
-}
+// template<class T, class fusion_t>
+// template<class PH>
+// void
+// ICR::EnsembleLearning::Context<T>::Assign(PH i, 
+// 			     variable_parameter  V )
+// {
+//   //make sure not trying to assign to things at once.
+// #pragma omp critical
+//   {
+//     if (m_data.size()<=i::value) 
+//       m_data.resize(i::value+1);
+//     m_data[i::value] = V;
+//   }
+// }
 
 #endif

@@ -101,8 +101,8 @@ main  (int ac, char **av)
   std::cout<<"\nInferred results:\n"<<std::endl;
   
   //first collect the learned nodes into std::vectors (which are more convenient to handle).
-  std::vector<Variable> means = Mixture2Vector(vmean);
-  std::vector<Variable> precs = Mixture2Vector(vprec);
+  std::vector<Variable> means = to_std_vector(vmean);
+  std::vector<Variable> precs = to_std_vector(vprec);
   
   //Then print.
   for(size_t i=0;i<ENSEMBLE_LEARNING_COMPONENTS;++i){

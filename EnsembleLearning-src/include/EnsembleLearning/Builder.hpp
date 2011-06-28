@@ -34,6 +34,7 @@
 
 #include "EnsembleLearning/node/factor/Factor.hpp"
 #include "EnsembleLearning/node/factor/Mixture.hpp"
+#include "EnsembleLearning/node/factor/Calculation.hpp"
 #include "EnsembleLearning/detail/MixtureVector.hpp"
 #include "EnsembleLearning/detail/TernaryOp.hpp"
 
@@ -75,7 +76,7 @@ namespace ICR{
       // template<class Model, class T
       // 	       //,class parent1_t, class parent2_t, class child_t
       // 	       > class Mixture;
-      template<template<class> class Model, class T> class Deterministic;
+      // template<template<class> class Model, class T,class context_t, class Expr_t> class Deterministic;
     }
 
     
@@ -83,7 +84,7 @@ namespace ICR{
 
     //forward declaration of Expressions
     template<class T> class Expression;
-    template<class T> class Context;
+    template<class T,class fusion_t> class Context;
     
 
     /** Build the components for ensemble learning.
@@ -159,7 +160,7 @@ namespace ICR{
       //typedef detail::Mixture<RectifiedGaussian<T>, T >     RectifiedGaussianMixtureFactor;
       //typedef detail::Mixture<Gaussian<T>, T >     GaussianMixtureFactor;
       
-      typedef detail::Deterministic<Gaussian, T >  DeterministicFactor;
+      // typedef detail::Deterministic<Gaussian, T >  DeterministicFactor;
 
       typedef HiddenNode<Gaussian, T >      GaussianType;
       typedef HiddenNode<RectifiedGaussian, T >      RectifiedGaussianType;
@@ -171,7 +172,7 @@ namespace ICR{
       typedef ObservedNode<Gamma, T, detail::TypeList::zeros,2 >    GammaConstType;
       typedef ObservedNode<Gaussian, T, detail::TypeList::zeros,2 >   NormalConstType;
       typedef ObservedNode<Dirichlet, T, detail::TypeList::zeros, ENSEMBLE_LEARNING_COMPONENTS>  DirichletConstType;
-      typedef DeterministicNode<Gaussian<T>, T>    GaussianResultType;
+      typedef DeterministicNode<Gaussian, T,detail::TypeList::zeros>    GaussianResultType;
 
       
       typedef HiddenNode<Dirichlet, T,detail::TypeList::zeros,ENSEMBLE_LEARNING_COMPONENTS >     WeightsType;
@@ -189,7 +190,7 @@ namespace ICR{
       typedef ObservedNode<Gamma, T, detail::TypeList::zeros,2 >*        GammaDataNode;
       typedef ObservedNode<Gaussian, T, detail::TypeList::zeros ,2>* GaussianConstNode;
       typedef ObservedNode<Gamma, T, detail::TypeList::zeros,2 >*    GammaConstNode;
-      typedef DeterministicNode<Gaussian<T>, T>*    GaussianResultNode;
+      typedef DeterministicNode<Gaussian, T,detail::TypeList::zeros>*    GaussianResultNode;
       
       typedef HiddenNode<Dirichlet, T,detail::TypeList::zeros,ENSEMBLE_LEARNING_COMPONENTS >*      WeightsNode;
       typedef HiddenNode<Discrete, T,detail::TypeList::zeros,ENSEMBLE_LEARNING_COMPONENTS >*       CatagoryNode;
@@ -359,8 +360,8 @@ namespace ICR{
        *  @param iscale The value of the inverse scale of the GammaNode.
        *  @return The GammaNode that stores the inferred moments to the Gamma Distribution.
        */
-      template<class List>
-      Variable
+      // template<class List>
+      GammaNode
       gamma(const T& shape, const T& iscale);
       ///@}
 
@@ -382,7 +383,7 @@ namespace ICR{
 	BOOST_MPL_ASSERT_RELATION(boost::fusion::result_of::size<p0_t>::type::value, ==,boost::fusion::result_of::size<p1_t>::type::value);
 	const size_t size = boost::fusion::result_of::size<p0_t>::type::value;
 	
-	detail::TernaryOp(v0,v1,MV.data(), MakeMixtureModel<Model>(m_Factors, m_Nodes));
+	detail::TernaryOp(v0,v1,MV.data(), MakeModel<Model>(m_Factors, m_Nodes));
 
 	return MV;
       }
@@ -438,6 +439,80 @@ namespace ICR{
       }
 
 
+      template<template<class> class Model, class fusion_vector1, class fusion_vector2>
+      CalculationVector<Model,T>
+      calculation_vector(
+			 const fusion_vector1& v0,
+			 const fusion_vector2& v1
+			 )
+      {
+	typedef  CalculationVector<Model,T>
+      	  CV_t;
+	
+	CV_t CV;
+
+	typedef fusion_vector1 p0_t;
+	typedef fusion_vector2 p1_t;
+	BOOST_MPL_ASSERT_RELATION(boost::fusion::result_of::size<p0_t>::type::value, ==,boost::fusion::result_of::size<p1_t>::type::value);
+	const size_t size = boost::fusion::result_of::size<p0_t>::type::value;
+	
+	detail::TernaryOp(v0,v1,CV.data(), MakeModel<Model>(m_Factors, m_Nodes));
+
+	return CV;
+      }
+
+
+      //Gaussian or Rectified Gaussian case.
+      template<template<class> class Model>
+      CalculationVector<Model,T> 
+      calculation_vector(const std::vector<T>& v1, 
+      		     const std::vector<T>& v2)
+      {
+
+	typedef ObservedNode<Gaussian, T, detail::TypeList::zeros,2> p0_t;
+	typedef ObservedNode<Gamma,    T, detail::TypeList::zeros,2> p1_t;
+	const size_t size = ENSEMBLE_LEARNING_PLACEHOLDERS;
+	
+	std::vector<p0_t*> p_0(size);
+	std::vector<p1_t*> p_1(size);
+	for(size_t i=0;i<size;++i){
+	  boost::shared_ptr<p0_t> tmp0(new p0_t(v1[i]));
+	  boost::shared_ptr<p1_t> tmp1(new p1_t(v2[i]));
+	  //store the reference so it doesn't get deleted till end of execution.
+	  m_Nodes.push_back(tmp0);
+	  m_Nodes.push_back(tmp1);
+	  
+
+	  //store so that references can be put easily into fusion vector
+	  p_0[i] = tmp0.get();
+	  p_1[i] = tmp1.get();
+	}
+	//The fusion vectors
+	Vector<ObservedNode,Gaussian,T,size> vt0;
+	Vector<ObservedNode,Gamma,T,size> vt1;
+	//Assign
+	boost::fusion::for_each(vt0.data(), AssignVector<p0_t>(p_0));
+	boost::fusion::for_each(vt1.data(), AssignVector<p1_t>(p_1));
+	
+	//pass on the pointers
+	return calculation_vector<Model>(vt0.data(),vt1.data());
+				
+      }
+
+      template<template<class> class Model>
+      CalculationVector<Model,T>
+      calculation_vector(const T d1, 
+      		     const T d2)
+      {
+	
+	std::vector<T> v1(ENSEMBLE_LEARNING_PLACEHOLDERS,d1);
+	std::vector<T> v2(ENSEMBLE_LEARNING_PLACEHOLDERS,d2);
+	
+	return calculation_vector<Model>(v1,v2);
+
+      }
+
+
       /** @name Create a Mixture Model.
        */
       ///@{
@@ -489,11 +564,11 @@ namespace ICR{
        *   and must be the same as the size of the Weights Node.
        * @return The GaussianNode that holds the inferred Rectified Gaussian Moments.
        */
-      template<class List>
-      Variable
-      rectified_gaussian_mixture( std::vector<Variable>& vMean, 
-				  std::vector<Variable>& vPrecision,
-				 WeightsNode Weights);
+      // template<class List>
+      // Variable
+      // rectified_gaussian_mixture( std::vector<Variable>& vMean, 
+      // 				  std::vector<Variable>& vPrecision,
+      // 				 WeightsNode Weights);
       
       /** Gaussian Mixture Model.
        *  @param MeanBegin The iterator at the beginning of the the container containing all the  variables representing the means.
@@ -527,11 +602,11 @@ namespace ICR{
        * @return The GaussianNode that holds the inferred Rectified Gaussian Moments.
        */
 // <<<<<<< HEAD
-      // template<class MeanIterator, class PrecIterator>
-      // RectifiedGaussianNode
-      // rectified_gaussian_mixture(const MeanIterator& MeanBegin, 
-      // 				 const PrecIterator& PrecisionBegin,
-      // 				 WeightsNode Weights);
+//       // template<class MeanIterator, class PrecIterator>
+//       // RectifiedGaussianNode
+//       // rectified_gaussian_mixture(const MeanIterator& MeanBegin, 
+//       // 				 const PrecIterator& PrecisionBegin,
+//       // 				 WeightsNode Weights);
 // =======
 //       template<class MeanIterator, class PrecIterator,class List>
 //       Variable
@@ -552,8 +627,8 @@ namespace ICR{
        *  @param value The constant value of the node.
        *  @return The GaussianConstNode that holds the constant value.
        */
-      template<class List>
-      Variable
+      //template<class List>
+      GaussianConstNode
       gaussian_const(const T value);
       
       /** Create a Gamma Constant.
@@ -562,8 +637,8 @@ namespace ICR{
        *  @param value The constant value of the node.
        *  @return The GammaConstNode that holds the constant value.
        */
-      template<class List>
-      Variable
+      //template<class List>
+      GammaConstNode
       gamma_const(const T value);
       
       /** Create a Gaussian Data Constant.
@@ -571,8 +646,8 @@ namespace ICR{
        *  @param data The value of the data.
        *  @return The GaussianDataNode that holds the data.
        */
-      template<class List>
-      Variable
+      //template<class List>
+      GaussianDataNode
       gaussian_data(const T data);
 
 
@@ -581,8 +656,8 @@ namespace ICR{
        *  @param data The value of the data.
        *  @return The GammaDataNode that holds the data.
        */
-      template<class List>
-      Variable
+      //template<class List>
+      GammaDataNode
       gamma_data(const T data);
 
       ///@}
@@ -601,9 +676,21 @@ namespace ICR{
        *  which the calculation takes place.
        *  @return The GaussianResultsNode that holds the calculated Moments.
        */
-      template<class List>
-      Variable
-      calc_gaussian(Expression<T>* Expr,  Context<T>& context);
+      template<class Expr_t, class fusion_t>
+      GaussianResultNode
+      calc_gaussian(Expr_t Expr,  Context<T,fusion_t>& context)
+      {
+	typedef GaussianResultType child_t;
+	typedef typename detail::Deterministic<Gaussian,T,Context<T,fusion_t>,Expr_t> Factor_t;
+
+	boost::shared_ptr<child_t > Child(new child_t ());
+	boost::shared_ptr<Factor_t> ChildF
+	  (new Factor_t(Expr, context,Child.get()));
+	
+	m_Nodes.push_back(Child);
+	m_Factors.push_back(ChildF);
+	return Child.get();
+      };
       ///@}
       
       /** @name Join Existing Nodes
@@ -615,8 +702,8 @@ namespace ICR{
        *  @param IScale The node that infers the inverse scale.
        *  @param data The value of the data 
        */
-      template<class List>
-      Variable
+      //template<class List>
+      void
       join(T& shape, GammaNode IScale ,  const T& data );
 
       /** Join Gamma Data with a shape and inverse scale.
@@ -624,8 +711,8 @@ namespace ICR{
        *  @param iscale The value of the inverse scale
        *  @param Data The Data node that holds the data.
        */
-      template<class List>
-      Variable
+      //template<class List>
+      void
       join(T& shape, T& iscale, GammaDataNode Data  );
 
       /** Join Gamma Data with a shape and inverse scale.
@@ -633,8 +720,8 @@ namespace ICR{
        *  @param IScale The node that infers the inverse scale.
        *  @param Data The Data node that holds the data.
        */
-      template<class List>
-      Variable
+      //template<class List>
+      void
       join(T& shape, GammaNode IScale, GammaDataNode Data  );
 
       /** Join Gaussian Data with the mean and precision.
@@ -730,6 +817,7 @@ namespace ICR{
 	       class PrecId, class PrecEnabler> 
       void 
       join(MeanType<RectifiedGaussian,T,MeanId,2,MeanEnabler>* Mean, PrecType<Gamma,T,PrecId,2,PrecEnabler>* Precision, const T data );
+
 
 
       /** Join Gaussian Modelled data to a mixture model.
@@ -841,9 +929,9 @@ namespace ICR{
       };
       
       template<template<class> class Model>
-      struct MakeMixtureModel
+      struct MakeModel
       {
-	MakeMixtureModel(std::vector<boost::shared_ptr<FactorNode_basic> >& F,
+	MakeModel(std::vector<boost::shared_ptr<FactorNode_basic> >& F,
 			 std::vector<boost::shared_ptr<VariableNode_basic > >& N)
 	  : m_F(F), m_N(N)
 	{}
@@ -867,11 +955,14 @@ namespace ICR{
 	  m_F.push_back(F);
 	  m_N.push_back(child);
 	  ch = child.get();
+	  std::cout<<"model = "<<ch<<std::endl;
+
+
 	}
 	mutable std::vector<boost::shared_ptr<FactorNode_basic> >& m_F;
 	mutable std::vector<boost::shared_ptr<VariableNode_basic > >& m_N;
       };
-      // MV_t& m_MV;
+      // CV_t& m_CV;
       //};
       
       double

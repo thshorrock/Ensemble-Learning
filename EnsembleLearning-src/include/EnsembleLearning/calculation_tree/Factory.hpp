@@ -35,13 +35,31 @@
 #include "Placeholder.hpp"
 #include "Functions.hpp"
 #include "Expression.hpp"
+#include "Context.hpp"
 
 #include <boost/smart_ptr.hpp>
 #include <boost/call_traits.hpp>
 #include<list>
 
+#include <boost/type_traits.hpp>
+#include <boost/mpl/vector.hpp>
+#include <boost/mpl/range_c.hpp>
+#include <boost/mpl/if.hpp>
+#include <boost/mpl/bool.hpp>
+#include <boost/mpl/placeholders.hpp>
+#include <boost/mpl/transform.hpp>
+#include <boost/mpl/accumulate.hpp>
+#include <boost/mpl/vector_c.hpp>
+#include <boost/mpl/plus.hpp>
+#include <boost/mpl/times.hpp>
+#include <boost/bind.hpp>
+#include <algorithm>
+
+#include <boost/fusion/include/transform.hpp>
+#include <boost/fusion/include/for_each.hpp>
 namespace ICR{
   namespace EnsembleLearning{
+
 
     
     /** @defgroup Calculation Evaluate the Calculation Nodes.
@@ -53,16 +71,16 @@ namespace ICR{
 
       template<int I>
       struct
-      make_placeholder_c :  public calculator<typename proto::terminal<placeholder<I> >::type>
+      make_c :  public calculator<typename boost::proto::terminal<placeholder<I> >::type>
       {
-	//typedef calculator<typename proto::terminal<placeholder<I> >::type> type;
+	//typedef calculator<typename boost::proto::terminal<placeholder<I> >::type> type;
       };
   
       template<class T>
       struct
-      make_placeholder
+      make
       {
-	typedef make_placeholder_c<T::value> type;
+	typedef make_c<T::value> type;
       };
   
   
@@ -70,22 +88,23 @@ namespace ICR{
   
       template<int from, int to>
       struct
-      make_vector : mpl::copy<
-	mpl::range_c<int,from,mpl::next<mpl::int_<to> >::type::value>, 
-	mpl::inserter< 
-	  mpl::vector<>,
-	  mpl::push_back<mpl::placeholders::_1,
-			 make_placeholder<mpl::placeholders::_2> 
+      make_vector : boost::mpl::copy<
+	boost::mpl::range_c<int,from,boost::mpl::next<boost::mpl::int_<to> >::type::value>, 
+	boost::mpl::inserter< 
+	  boost::mpl::vector<>,
+	  boost::mpl::push_back<boost::mpl::placeholders::_1,
+			 make<boost::mpl::placeholders::_2> 
 			 >
 	  > 
 	>::type
+      {};
+	
+	
+	
 
-  
-  
-
-	template<class T,int I>
-	struct
-	at : public mpl::at<T,mpl::int_<I> >::type
+      template<class T,int I>
+      struct
+      at : public boost::mpl::at<T,boost::mpl::int_<I> >::type
       {};
     };
 
@@ -119,146 +138,146 @@ namespace ICR{
      *  @ingroup UserInterface
      *  @ingroup Calculation
      */
-    template<class T>
-    class ExpressionFactory{
-    public:
+    // template<class T>
+    // class ExpressionFactory{
+    // public:
       
-      /** @name Useful typdefs for types that are exposed to the user.
-       */
-      ///@{
-      typedef typename boost::call_traits<Expression<T>*>::param_type
-      expression_parameter;
+    //   /** @name Useful typdefs for types that are exposed to the user.
+    //    */
+    //   ///@{
+    //   typedef typename boost::call_traits<Expression<T>*>::param_type
+    //   expression_parameter;
       
-      typedef typename boost::call_traits<Expression<T>*>::value_type
-      expression_t;
+    //   typedef typename boost::call_traits<Expression<T>*>::value_type
+    //   expression_t;
       
-      typedef typename boost::call_traits<Placeholder<T>*>::value_type
-      placeholder_t;
+    //   typedef typename boost::call_traits<Placeholder<T>*>::value_type
+    //   placeholder_t;
       
-      ///@}
+    //   ///@}
 
-      /** Create a placeholder
-       *  @return A pointer to a placeholder.
-       */
-      placeholder_t
-      placeholder();
+    //   /** Create a placeholder
+    //    *  @return A pointer to a placeholder.
+    //    */
+    //   placeholder_t
+    //   placeholder();
       
-      /** Add two sub expressions together.
-       *  @param a The first half of the expression.
-       *  @param b The second half of the expression.
-       *  @return The resultant sum.
-       */
-      expression_t
-      Add(expression_parameter a, 
-	  expression_parameter b);
+    //   /** Add two sub expressions together.
+    //    *  @param a The first half of the expression.
+    //    *  @param b The second half of the expression.
+    //    *  @return The resultant sum.
+    //    */
+    //   expression_t
+    //   Add(expression_parameter a, 
+    // 	  expression_parameter b);
       
-      /** Multiply two sub expressions together.
-       *  @param a The first half of the expression.
-       *  @param b The second half of the expression.
-       *  @return The resultant product.
-       */
-      expression_t
-      Multiply(expression_parameter a, 
-	       expression_parameter b);
+    //   /** Multiply two sub expressions together.
+    //    *  @param a The first half of the expression.
+    //    *  @param b The second half of the expression.
+    //    *  @return The resultant product.
+    //    */
+    //   expression_t
+    //   Multiply(expression_parameter a, 
+    // 	       expression_parameter b);
       
 
-    private:
-      //References to the expression - memory management hanled by the shared pointers.
-      std::list<boost::shared_ptr<Expression<T> > >  m_Expr;
-    };
+    // private:
+    //   //References to the expression - memory management hanled by the shared pointers.
+    //   std::list<boost::shared_ptr<Expression<T> > >  m_Expr;
+    // };
 
 
 
-struct 
-ContextFactory
-{
-
-  template<int I>
-  struct
-  make_c : public calculator_context<I>
-  {};
-  
-  template<class T>
-  struct
-  make : public calculator_context<T::value>
-  {};
-  
-  
-  template< int to>
-  struct
-  vector_t : mpl::copy<
-    mpl::range_c<int,0,mpl::next<mpl::int_<to> >::type::value>, 
-    mpl::inserter< 
-      mpl::vector<>,
-      mpl::push_back<mpl::placeholders::_1,
-		     make<mpl::placeholders::_2>
-		     >
-      > 
-    >::type
-  {};
-
-  // template< int to>
-  // vector_t<to>
-  // vector()
-  // {
-  //   return vector_t<to>();
-  // }
-  
-  template<class T,int I>
-  struct
-  at : public mpl::at<T,mpl::int_<I> >::type
-  {};
-  
-  
-  // struct push_bac
-  // {
-  //   template <typename T>
-  //   void operator()(T const& x) const
-  //   {
-  //     std::cout
-  // 	<< '<' << typeid(x).name() << '>'
-  // 	<< x
-  // 	<< "</" << typeid(x).name() << '>'
-  // 	;
-  //   }
-  // };
-
-  
-  // template<class T,int I>
-  // static
-  // void
-  // at(T vec)
-  // {
-  //   return spirit::at_c<I>(vec);
-  // }
-  
-
-  struct push_back
-  {
-    push_back(std::vector<double> const&  args) : m_args(args) {}
-    
-    template<class T>
-    void
-    operator()(T& t) const
+    struct 
+    ContextFactory
     {
-      t.push_back(m_args);
-    }
-  private:
-    std::vector<double> m_args;
-  };
 
-  template<class T>
-  static
-  void
-  assign( T& vec, std::vector<double> const & args)
-  {
-    fusion::transform(vec,vec, push_back(args) );
+      template<int I>
+      struct
+      make_c : public calculator_context<I>
+      {};
+  
+      template<class T>
+      struct
+      make : public calculator_context<T::value>
+      {};
+  
+  
+      template< int to>
+      struct
+      vector_t : boost::mpl::copy<
+	boost::mpl::range_c<int,0,boost::mpl::next<boost::mpl::int_<to> >::type::value>, 
+	boost::mpl::inserter< 
+	  boost::mpl::vector<>,
+	  boost::mpl::push_back<boost::mpl::placeholders::_1,
+				make<boost::mpl::placeholders::_2>
+				>
+	  > 
+	>::type
+      {};
+
+// template< int to>
+// vector_t<to>
+// vector()
+// {
+//   return vector_t<to>();
+// }
+  
+template<class T,int I>
+struct
+at : public boost::mpl::at<T,boost::mpl::int_<I> >::type
+{};
+  
+  
+// struct push_bac
+// {
+//   template <typename T>
+//   void operator()(T const& x) const
+//   {
+//     std::cout
+// 	<< '<' << typeid(x).name() << '>'
+// 	<< x
+// 	<< "</" << typeid(x).name() << '>'
+// 	;
+//   }
+// };
+
+  
+// template<class T,int I>
+// static
+// void
+// at(T vec)
+// {
+//   return spirit::at_c<I>(vec);
+// }
+  
+
+struct push_back
+{
+  push_back(std::vector<double> const&  args) : m_args(args) {}
     
+  template<class T>
+  void
+  operator()(T& t) const
+  {
+    t.push_back(m_args);
   }
+private:
+  std::vector<double> m_args;
+};
+
+template<class T>
+static
+void
+assign( T& vec, std::vector<double> const & args)
+{
+  fusion::transform(vec,vec, push_back(args) );
+    
+}
 
   
 };
-  }
+}
 }
 
 

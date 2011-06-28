@@ -53,6 +53,9 @@
 #ifndef ENSEMBLE_LEARNING_COMPONENTS
 #  define ENSEMBLE_LEARNING_COMPONENTS 5
 #endif
+#ifndef ENSEMBLE_LEARNING_PLACEHOLDERS
+#  define ENSEMBLE_LEARNING_PLACEHOLDERS 5
+#endif
 namespace ICR{
   namespace EnsembleLearning{
     /** Store a vector of components for a Mixture model.
@@ -91,16 +94,19 @@ namespace ICR{
       //Obtain the fusion vector class from the mpl vector: base.
       typedef typename boost::fusion::result_of::as_vector<typename pointer_t::type> data_base;
       //Apply the fusion vector type to our data_t
-      struct data_t : data_base::type
-      {  };
-      // The data.
-      data_t m_data;
+      // struct data_t : data_base::type
+      // {  };
+      // // The data.
+      // data_t 
+      typedef typename  data_base::type data_t;
+      typename data_base::type m_data;
     public:
 
       //@Convenient typedefs
       //@{
       typedef  base type;
       typedef  pointer_t pointer_type;
+      typedef  data_base data_type;
 
       //@}
       const data_t& 
@@ -202,6 +208,10 @@ namespace ICR{
     struct MixtureVector : public Vector_impl<HiddenNode,Model, T, size-1 ,detail::TypeList::incr_component,detail::TypeList::component>
     {};
 
+
+    template<template<class> class Model, class T, int size = ENSEMBLE_LEARNING_PLACEHOLDERS>
+    struct CalculationVector : public Vector_impl<HiddenNode,Model, T, size-1 ,detail::TypeList::incr_position,detail::TypeList::position>
+    {};
 
     template<template<template<class> class,class,class,int,class> class ModelType,
 	     template<class> class Model, 

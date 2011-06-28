@@ -80,13 +80,13 @@ namespace ICR{
       typedef typename boost::call_traits< Moments<T> >::value_type
       moments_t;
 
-      typedef typename boost::call_traits< DeterministicNode<RectifiedGaussian<T>, T>* >::param_type
-      deterministic_parameter;
-      typedef typename boost::call_traits< Expression<T>* >::param_type
-      expression_parameter;
-      typedef typename boost::call_traits<Context<T> >::param_type
-      context_parameter;
-      
+      // typedef typename boost::call_traits< DeterministicNode<RectifiedGaussian<T>, T>* >::param_type
+      // deterministic_parameter;
+      // typedef typename boost::call_traits< Expression<T>* >::param_type
+      // expression_parameter;
+      // typedef typename boost::call_traits<Context<T> >::param_type
+      // context_parameter;
+    
       typedef typename boost::call_traits< NaturalParameters<T> >::param_type
       NP_parameter;
       typedef typename boost::call_traits< NaturalParameters<T> >::value_type
@@ -249,6 +249,35 @@ namespace ICR{
 
 
 
+      //   //Deterministic to Stock
+      //   /** Calculate the Natural Parameters to go to
+      //    *  each of the Parent Variables in a calculation.
+      //    *  This is evaluated from all the other variables and the data.
+      //    *  @param Parent The Node that the messag is to go to.
+      //    *  @param Data The moments from the Child(or Data) Variable.
+      //    *  @param C The context (the parent variables are obtainable from this)
+      //    *  @return The calculated NaturalParameters.  
+      //    */
+      //   static
+      //   NP_t
+      //   CalcNP2Parent(variable_parameter Parent, 
+      // 		    deterministic_parameter Data, 
+      // 		    context_parameter C);
+
+
+      //   //Deterministic to Stock
+      //   /** Calculate the Natural Parameters to go to the Deterministic Variable
+      //    *   in a calculation.
+      //    *  This is evaluated from all the other variables and the data.
+      //    *  @param Expr The expression to evaluate 
+      //    *  @param C The context (the parent variables are obtainable from this)
+      //    *  @return The calculated NaturalParameters.  
+      //    */
+      //   static
+      //   NP_t
+      //   CalcNP2Deterministic(expression_parameter Expr,
+      // 			   context_parameter C);
+    
       //Deterministic to Stock
       /** Calculate the Natural Parameters to go to
        *  each of the Parent Variables in a calculation.
@@ -258,46 +287,117 @@ namespace ICR{
        *  @param C The context (the parent variables are obtainable from this)
        *  @return The calculated NaturalParameters.  
        */
+      template<int to_node,class Expression, class List, class fusion_t>
       static
       NP_t
-      CalcNP2Parent(variable_parameter Parent, 
-		    deterministic_parameter Data, 
-		    context_parameter C);
+      CalcNP2Parent( Expression& Expr,
+		     const Context<T,fusion_t>& M,
+		     DeterministicNode<ICR::EnsembleLearning::RectifiedGaussian, T, List,ENSEMBLE_LEARNING_COMPONENTS,void>* const Data)
+
+  {
+    //The moments forwarded from the Deterministic node.
+    const moments_t& FData = Data->GetForwardedMoments();
+    const data_t fprec = -1.0/(FData[0]*FData[0]-FData[1]);
+    const data_t fdata = FData[0];
+ 
+    //Need to invert the expression based on the context.
 
 
-      //Deterministic to Stock
-      /** Calculate the Natural Parameters to go to the Deterministic Variable
-       *   in a calculation.
-       *  This is evaluated from all the other variables and the data.
-       *  @param Expr The expression to evaluate 
-       *  @param C The context (the parent variables are obtainable from this)
-       *  @return The calculated NaturalParameters.  
-       */
-      static
-      NP_t
-      CalcNP2Deterministic(expression_parameter Expr,
-			   context_parameter C);
+    /* Example:  Three parents: X,Y,Z, and forwarded data D,
+     *           Expression XY + Z = D.
+     *
+     *  If ParentA = Z:
+     *      unsummed0 = D - XY; factor0 = 1;
+     *  If ParentA = Y
+     *      unsummed0 = D - Z;  factor0 = X;
+     *
+     *  That factor0 is X and not 1/X may seem surprising,
+     *     but is in result of Miskin's thesis.
+     *
+     */
 
-    private:
+
+    calculator_context<to_node> M0; // The average means (inverted): < expr^-1(x_i) >
+    calculator_context<to_node> M1; // The average of squares: < expr^-1(x_i)^2 >
+    calculator_context<0> result;   //The result node
+    for(size_t i=0;i<M.size();++i){
+      const moments_t tmp = M[i]->GetMoments();
+      const data_t tmp0 = tmp[0];
+      M0.push_back(tmp[0]);
+      M1.push_back(tmp[1]);
+      result.push_back(tmp0);
+    }
+    const std::pair<T,T> result0      = proto::eval(Expr,result);
+    const std::pair<T,T> inv_op_data0 = proto::eval(Expr,M0);
+    const std::pair<T,T> inv_op_data1 = proto::eval(Expr,M1);
+
+    //The data returns in two components:
+    //  The subtraction of the all the sums from the forwarded Data.
+    const data_t unsummed0 =result0-inv_op_data0.first;  
+    //  And the product thereafter
+    const data_t factor0   =inv_op_data0.second;
+    const data_t factor1   =inv_op_data1.second;
+
+    //The usual (mean*precision, -0.5*precision) (with a scale factor)
+    return NP_t(fprec*unsummed0*factor0, -0.5*factor1*fprec);
+  }		     
+
+    //Deterministic to Stock
+    /** Calculate the Natural Parameters to go to the Deterministic Variable
+     *   in a calculation.
+     *  This is evaluated from all the other variables and the data.
+     *  @param Expr The expression to evaluate 
+     *  @param C The context (the parent variables are obtainable from this)
+     *  @return The calculated NaturalParameters.  
+     */
+    template<class Expression, class fusion_t>
+    static
+    NP_t
+    CalcNP2Deterministic(Expression& Expr,
+			 const Context<T,fusion_t>& M)
+    {
+      //zero is the results node.
+      calculator_context<0> M0; //All the first moments  (the <x>'s of every element in expr)
+      calculator_context<0> M0_squared; //All the first moments  (the <x>^2's of every element in expr)
+      calculator_context<0> M1;//The second moment (the <x^2> of every element of expression)
+      for(size_t i=0;i<M.size();++i){
+	const Moments<T> tmp = M[i]->GetMoments();
+	const data_t tmp0 = tmp[0];
+	M0.push_back(tmp[0]);
+	M0_squared.push_back(tmp0*tmp0);
+	M1.push_back(tmp[1]);
+      }
+  
+      //Precision is 1.0/ (<expr(x^2)> - <expr(x)>^2)
+      //The second value in the pair (the scale) is 1 for the results node.
+      const data_t prec = 1.0/(proto::eval(Expr,M1).first - proto::eval(Expr,M0_squared).first);
+
+      // NP = [<expr(x)> * prec, -0.5*prec]
+      return NP_t(  proto::eval(Expr,M0).first *prec  , -0.5*prec);
+  
+    }
+
+  private:
       
-      struct Erfcx
-      {
-	data_t
-	operator()(data_parameter x)
-	{
-	  return std::exp(x*x)*gsl_sf_erfc(x);
-	}
-      }; 
-
-      static
+    struct Erfcx
+    {
       data_t
-      CalcLogNorm(data_parameter mean,
-		  data_parameter mean_squared,
-		  data_parameter precision);
-    };
+      operator()(data_parameter x)
+      {
+	return std::exp(x*x)*gsl_sf_erfc(x);
+      }
+    }; 
 
-  }
+    static
+    data_t
+    CalcLogNorm(data_parameter mean,
+		data_parameter mean_squared,
+		data_parameter precision);
+  };
+
 }
+}
+
 
 template<class T>
 inline
@@ -522,72 +622,72 @@ ICR::EnsembleLearning::RectifiedGaussian<T>::CalcNP2Data(moments_parameter Mean,
   return NP_t(mean*precision, -0.5*precision);
 }
 
-template<class T> 
-inline
-typename ICR::EnsembleLearning::RectifiedGaussian<T>::NP_t
-ICR::EnsembleLearning::RectifiedGaussian<T>::CalcNP2Parent(variable_parameter ParentA, 
-					  deterministic_parameter Data, 
-					  context_parameter C)
-{
-  //The moments forwarded from the Deterministic node.
-  const moments_parameter FData = Data->GetForwardedMoments();
-  const data_t fprec = -1.0/(FData[0]*FData[0]-FData[1]);
-  const data_t fdata = FData[0];
+// template<class T> 
+// inline
+// typename ICR::EnsembleLearning::RectifiedGaussian<T>::NP_t
+// ICR::EnsembleLearning::RectifiedGaussian<T>::CalcNP2Parent(variable_parameter ParentA, 
+// 					  deterministic_parameter Data, 
+// 					  context_parameter C)
+// {
+//   //The moments forwarded from the Deterministic node.
+//   const moments_parameter FData = Data->GetForwardedMoments();
+//   const data_t fprec = -1.0/(FData[0]*FData[0]-FData[1]);
+//   const data_t fdata = FData[0];
   
-  //Need to invert the expression based on the context.
-  const SubContext<T> C0 = C[0];// The average means: < expr(x_i) >
-  const SubContext<T> C1 = C[1];// The average of squares: < expr(x_i)^2 >
+//   //Need to invert the expression based on the context.
+//   const SubContext<T> C0 = C[0];// The average means: < expr(x_i) >
+//   const SubContext<T> C1 = C[1];// The average of squares: < expr(x_i)^2 >
 
-  //Find the placeholder associated with the parent that the message is to be sent to.
-  const Placeholder<T>* P= C.Lookup(ParentA);
+//   //Find the placeholder associated with the parent that the message is to be sent to.
+//   const Placeholder<T>* P= C.Lookup(ParentA);
   
-  //Invert the expression around P.
-  std::pair<T,T> inv_op_data0 = P->Invert(fdata, C0);
-  //The data returns in two components:
-  //  The subtraction of the all the sums from the forwarded Data.
-  const data_t unsummed0 =inv_op_data0.first;
-  //  And the product thereafter
-  const data_t factor0   =inv_op_data0.second;
+//   //Invert the expression around P.
+//   std::pair<T,T> inv_op_data0 = P->Invert(fdata, C0);
+//   //The data returns in two components:
+//   //  The subtraction of the all the sums from the forwarded Data.
+//   const data_t unsummed0 =inv_op_data0.first;
+//   //  And the product thereafter
+//   const data_t factor0   =inv_op_data0.second;
 
-  /* Example:  Three parents: X,Y,Z, and forwarded data D,
-   *           Expression XY + Z = D.
-   *
-   *  If ParentA = Z:
-   *      unsummed0 = D - XY; factor0 = 1;
-   *  If ParentA = Y
-   *      unsummed0 = D - Z;  factor0 = X;
-   *
-   *  That factor0 is X and not 1/X may seem surprising,
-   *     but is in result of Miskin's thesis.
-   *
-   */
+//   /* Example:  Three parents: X,Y,Z, and forwarded data D,
+//    *           Expression XY + Z = D.
+//    *
+//    *  If ParentA = Z:
+//    *      unsummed0 = D - XY; factor0 = 1;
+//    *  If ParentA = Y
+//    *      unsummed0 = D - Z;  factor0 = X;
+//    *
+//    *  That factor0 is X and not 1/X may seem surprising,
+//    *     but is in result of Miskin's thesis.
+//    *
+//    */
 
-  //Now do the same thing for the average of the squares
-  std::pair<T,T> inv_op_data1 = P->Invert(fdata, C1);
-  const data_t unsummed1 =inv_op_data1.first;
-  const data_t factor1   =inv_op_data1.second;
+//   //Now do the same thing for the average of the squares
+//   std::pair<T,T> inv_op_data1 = P->Invert(fdata, C1);
+//   const data_t unsummed1 =inv_op_data1.first;
+//   const data_t factor1   =inv_op_data1.second;
 
-  //The usual (mean*precision, -0.5*precision) (with a scale factor)
-  return NP_t(fprec*unsummed0*factor0, -0.5*factor1*fprec);
-}
+//   //The usual (mean*precision, -0.5*precision) (with a scale factor)
+//   return NP_t(fprec*unsummed0*factor0, -0.5*factor1*fprec);
+// }
 
 
-//Deterministic to Stock
-template<class T> 
-inline
-typename ICR::EnsembleLearning::RectifiedGaussian<T>::NP_t
-ICR::EnsembleLearning::RectifiedGaussian<T>::CalcNP2Deterministic(expression_parameter Expr,context_parameter C)
-{
-  //The context provides the Moments of every element in expression.
-  const SubContext<T> C0 = C[0];//All the first moments  (the <x>'s of every element in expr)
-  const SubContext<T> C1 = C[1];//The second moment (the <x^2> of every element of expression)
+// //Deterministic to Stock
+// template<class T> 
+// inline
+// typename ICR::EnsembleLearning::RectifiedGaussian<T>::NP_t
+// ICR::EnsembleLearning::RectifiedGaussian<T>::CalcNP2Deterministic(expression_parameter Expr,context_parameter C)
+// {
+//   //The context provides the Moments of every element in expression.
+//   const SubContext<T> C0 = C[0];//All the first moments  (the <x>'s of every element in expr)
+//   const SubContext<T> C1 = C[1];//The second moment (the <x^2> of every element of expression)
   
-  //Precision is 1.0/ (<expr(x^2)> - <expr(x)>^2)
-  const data_t prec = 1.0/(Expr->Evaluate(C1) - Expr->Evaluate(C0*C0) );
+//   //Precision is 1.0/ (<expr(x^2)> - <expr(x)>^2)
+//   const data_t prec = 1.0/(Expr->Evaluate(C1) - Expr->Evaluate(C0*C0) );
   
-  // NP = [<expr(x)> * prec, -0.5*prec]
-  return NP_t(  Expr->Evaluate(C0) *prec  , -0.5*prec);
+//   // NP = [<expr(x)> * prec, -0.5*prec]
+//   return NP_t(  Expr->Evaluate(C0) *prec  , -0.5*prec);
 
-}
+// }
 
 #endif  // guard for RECTIFIEDGAUSSIAN_HPP

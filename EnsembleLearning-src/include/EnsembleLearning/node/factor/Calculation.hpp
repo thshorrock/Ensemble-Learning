@@ -28,11 +28,19 @@
 
 
 #include "EnsembleLearning/node/Node.hpp"
+//#include "EnsembleLearning/node/variable/Calculation.hpp"
+#include "EnsembleLearning/detail/MixtureVector.hpp" //for ENSEMBLE_LEARNING_COMPONENTS
 #include "EnsembleLearning/calculation_tree/Context.hpp"
 #include "EnsembleLearning/detail/TypeList.hpp"
 
 #include <boost/call_traits.hpp> 
 
+#include <boost/shared_ptr.hpp>
+#include <boost/none.hpp>
+#include <boost/mpl/inherit_linearly.hpp>
+#include <boost/mpl/inherit.hpp>
+#include <boost/mpl/size.hpp>
+#include <boost/fusion/include/for_each.hpp>
 
 namespace ICR{
   namespace EnsembleLearning{
@@ -40,7 +48,7 @@ namespace ICR{
     template<class T, int array_size> class Moments;
     template<class T, int array_size> class NaturalParameters;
     template<class T> class Expression; //only used as a pointer here
-    template <class Model, class T,class List> class DeterministicNode; //only used as a pointer here
+    template <template<class> class Model, class T,class List,int array_size,class Enable> class DeterministicNode; //only used as a pointer here
     
     namespace detail{
     
@@ -49,8 +57,18 @@ namespace ICR{
        *  @tparam Model  The model to use for the data data.
        *  @tparam T The data type (float or double)
        */
-      template<template<class> class Model,  class T>
-      class Deterministic : public FactorNode_basic
+      // template<template<class> class Model, class T,
+      // 	       class child_t>
+      template<template<class> class Model,  class T, class context_t, class Expr_t>
+      class Deterministic : public FactorNode_basic,
+			    public boost::mpl::inherit_linearly<typename context_t::type,
+								typename boost::mpl::inherit<boost::mpl::_1,
+											     FactorNode<T,typename boost::mpl::_2> 
+											     >::type 
+			    >::type,				
+			    public ParentFactorNode<T,DeterministicNode<Model,T,detail::TypeList::zeros> >
+    
+	
       {
       public:
       
@@ -63,6 +81,10 @@ namespace ICR{
 	typedef typename boost::call_traits< VariableNode<T>* const>::value_type
 	variable_t;
 	
+	typedef typename boost::call_traits< DeterministicNode<Model,T,detail::TypeList::zeros>*  const>::param_type
+	deterministic_parameter;
+	typedef typename boost::call_traits< DeterministicNode<Model,T,detail::TypeList::zeros>*  const>::value_type
+	deterministic_t;
 	///@}
 
 	/** Create A Deterministic factor.
@@ -70,9 +92,9 @@ namespace ICR{
 	 *  @param context The Context (The actual parent nodes) for the expression in this node.
 	 *  @param Child The DeterministicNode That is the child to this factor.
 	 */
-	Deterministic( Expression<T>* Expr,  
-		       Context<T>& context,
-		       DeterministicNode<Model<T>,T>* Child)
+	Deterministic( Expr_t Expr,  
+		       context_t& context,
+		       deterministic_parameter Child)
 	  : m_expr(Expr),
 	    m_context(context),
 	    m_child_node(Child)
@@ -95,26 +117,37 @@ namespace ICR{
        *  The message is calculated from the moments of every node adjacent to the factor withe exception of v.
        * @return The natural parameter calculated for v.
        */
+	
 	NaturalParameters<T>
-	GetNaturalNot( variable_parameter v) const
+	GetNaturalNot(deterministic_parameter  v) const
 	{
-	  typedef variable_parameter::position id;
-	  if (v.node == m_child_node) 
-	    {
-	      return Model<T>::CalcNP2Deterministic(m_expr,m_context);
-	    }
-	  else
-	    {
-	      //parent node
-	      return Model<T>::CalcNP2Parent<id>(m_expr,m_context,m_child_node);
-	    }
+	  return Model<T>::CalcNP2Deterministic(m_expr,m_context);
 	}
+
+	/* Define GetNaturalNot for each of the parent nodes.
+	 * (Iterate with the preprocessor)
+	 * This is done with an ugly preprocessor hack since these functions
+	 * are overloads the base FactorNode class.
+	 * They therefore must really be "written down" rather than just templated,
+	 * which is where the preprocessor comes in.
+	 */
+#       include <boost/preprocessor/iteration/iterate.hpp>
+#       define BOOST_PP_ITERATION_LIMITS (0, ENSEMBLE_LEARNING_PLACEHOLDERS  - 1)
+#       define BOOST_PP_FILENAME_1       "EnsembleLearning/node/factor/Calculation_GetNaturalNot.hpp"
+#       include BOOST_PP_ITERATE()
+	/* End of pre-processor hack */
+	
+	// NaturalParameters<T>
+	// GetNaturalNot( variable_parameter v) const
+	// {
+	// }
+
 	T
 	CalcLogNorm() const {return 0;}
       private: 
-	Expression<T>* m_expr;
-	Context<T> m_context;
-	mutable DeterministicNode<Model<T>,T> *m_child_node;
+	context_t m_context;
+	Expr_t m_expr;
+	mutable deterministic_t m_child_node;
       
       };
     

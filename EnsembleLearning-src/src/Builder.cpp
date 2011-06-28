@@ -155,32 +155,32 @@ ICR::EnsembleLearning::Builder<T>::weights()
 	
 
 
-template<class T>	
-typename ICR::EnsembleLearning::Builder<T>::RectifiedGaussianNode
-ICR::EnsembleLearning::Builder<T>::rectified_gaussian_mixture(std::vector<Variable>& vMean, std::vector<Variable>& vPrecision, WeightsNode Weights)
-{
-  const size_t number = Weights->size();
+// template<class T>	
+// typename ICR::EnsembleLearning::Builder<T>::RectifiedGaussianNode
+// ICR::EnsembleLearning::Builder<T>::rectified_gaussian_mixture(std::vector<Variable>& vMean, std::vector<Variable>& vPrecision, WeightsNode Weights)
+// {
+//   const size_t number = Weights->size();
 	
-  typedef DirichletType prior_t;
-  typedef ICR::EnsembleLearning::NoSecondParent blank;
-  typedef CatagoryType child_t;
-  typedef detail::Factor<Discrete,T,prior_t,blank,child_t,ENSEMBLE_LEARNING_COMPONENTS> Factor_t;
+//   typedef DirichletType prior_t;
+//   typedef ICR::EnsembleLearning::NoSecondParent blank;
+//   typedef CatagoryType child_t;
+//   typedef detail::Factor<Discrete,T,prior_t,blank,child_t,ENSEMBLE_LEARNING_COMPONENTS> Factor_t;
 
-  boost::shared_ptr<CatagoryType>         Catagory(new CatagoryType());
-  boost::shared_ptr< Factor_t>      CatagoryF(new Factor_t(Weights, Catagory.get()));
-  m_Nodes.push_back(Catagory);
-  m_Factors.push_back(CatagoryF);
+//   boost::shared_ptr<CatagoryType>         Catagory(new CatagoryType());
+//   boost::shared_ptr< Factor_t>      CatagoryF(new Factor_t(Weights, Catagory.get()));
+//   m_Nodes.push_back(Catagory);
+//   m_Factors.push_back(CatagoryF);
 	
 
-  boost::shared_ptr<RectifiedGaussianType> Child(new RectifiedGaussianType());
+//   boost::shared_ptr<RectifiedGaussianType> Child(new RectifiedGaussianType());
 
-  m_Nodes.push_back(Child);
+//   m_Nodes.push_back(Child);
 	
-  // boost::shared_ptr<RectifiedGaussianMixtureFactor> MixtureF(new RectifiedGaussianMixtureFactor(vMean, vPrecision, Catagory.get() , Child.get()));
+//   // boost::shared_ptr<RectifiedGaussianMixtureFactor> MixtureF(new RectifiedGaussianMixtureFactor(vMean, vPrecision, Catagory.get() , Child.get()));
 	
-  // m_Factors.push_back(MixtureF);
-  return Child.get();
-}
+//   // m_Factors.push_back(MixtureF);
+//   return Child.get();
+// }
 
 template<class T>
 typename ICR::EnsembleLearning::Builder<T>::GammaNode
@@ -262,20 +262,20 @@ ICR::EnsembleLearning::Builder<T>::gamma_data(const T data)
   return Data.get();
 }
 
-template<class T>
-typename ICR::EnsembleLearning::Builder<T>::GaussianResultNode
-ICR::EnsembleLearning::Builder<T>::calc_gaussian(Expression<T>* Expr,  Context<T>& context)
-{
-  // typedef DeterministicNode<Gaussian<T>, T> child_t;
+// template<class T>
+// typename ICR::EnsembleLearning::Builder<T>::GaussianResultNode
+// ICR::EnsembleLearning::Builder<T>::calc_gaussian(Expression<T>* Expr,  Context<T>& context)
+// {
+//   // typedef DeterministicNode<Gaussian<T>, T> child_t;
 
-  // boost::shared_ptr<child_t > Child(new child_t ());
-  // boost::shared_ptr<DeterministicFactor> ChildF
-  //   (new DeterministicFactor(Expr, context,Child.get()));
+//   // boost::shared_ptr<child_t > Child(new child_t ());
+//   // boost::shared_ptr<DeterministicFactor> ChildF
+//   //   (new DeterministicFactor(Expr, context,Child.get()));
 	
-  // m_Nodes.push_back(Child);
-  // m_Factors.push_back(ChildF);
-  // return Child.get();
-}
+//   // m_Nodes.push_back(Child);
+//   // m_Factors.push_back(ChildF);
+//   // return Child.get();
+// }
 
 
 template<class T>

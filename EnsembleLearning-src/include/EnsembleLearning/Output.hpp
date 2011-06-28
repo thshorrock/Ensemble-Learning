@@ -54,9 +54,9 @@ namespace ICR{
 
     
 
-    template<template<class> class Model, class T>
+    template<template<template<class> class,class,int> class VectorType,template<class> class Model, class T,int array_size>
     std::vector<VariableNode<T>* >
-    Mixture2Vector(MixtureVector<Model,T> v)
+    to_std_vector(VectorType<Model,T,array_size> v)
     {
       std::vector<VariableNode<T>* > ret;
   
