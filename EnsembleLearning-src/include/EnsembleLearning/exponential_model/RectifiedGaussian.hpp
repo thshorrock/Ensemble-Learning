@@ -295,51 +295,59 @@ namespace ICR{
 		     DeterministicNode<ICR::EnsembleLearning::RectifiedGaussian, T, List,ENSEMBLE_LEARNING_COMPONENTS,void>* const Data)
 
   {
-    //The moments forwarded from the Deterministic node.
-    const moments_t& FData = Data->GetForwardedMoments();
-    const data_t fprec = -1.0/(FData[0]*FData[0]-FData[1]);
-    const data_t fdata = FData[0];
- 
-    //Need to invert the expression based on the context.
+	//The moments forwarded from the Deterministic node.
+	moments_const_reference FData = Data->GetForwardedMoments();
+	const_data_t fdata = FData[0];
+	const_data_t fprec = -1.0/(fdata*fdata-FData[1]);
+  
+	//Need to invert the expression based on the context.
 
 
-    /* Example:  Three parents: X,Y,Z, and forwarded data D,
-     *           Expression XY + Z = D.
-     *
-     *  If ParentA = Z:
-     *      unsummed0 = D - XY; factor0 = 1;
-     *  If ParentA = Y
-     *      unsummed0 = D - Z;  factor0 = X;
-     *
-     *  That factor0 is X and not 1/X may seem surprising,
-     *     but is in result of Miskin's thesis.
-     *
-     */
+	/* Example:  Three parents: X,Y,Z, and forwarded data D,
+	 *           Expression XY + Z = D.
+	 *
+	 *  If ParentA = Z:
+	 *      unsummed0 = D - XY; factor0 = 1;
+	 *  If ParentA = Y
+	 *      unsummed0 = D - Z;  factor0 = X;
+	 *
+	 *  That factor0 is X and not 1/X may seem surprising,
+	 *     but is in result of Miskin's thesis.
+	 *
+	 */
 
 
-    calculator_context<to_node> M0; // The average means (inverted): < expr^-1(x_i) >
-    calculator_context<to_node> M1; // The average of squares: < expr^-1(x_i)^2 >
-    calculator_context<0> result;   //The result node
-    for(size_t i=0;i<M.size();++i){
-      const moments_t tmp = M[i]->GetMoments();
-      const data_t tmp0 = tmp[0];
-      M0.push_back(tmp[0]);
-      M1.push_back(tmp[1]);
-      result.push_back(tmp0);
-    }
-    const std::pair<T,T> result0      = proto::eval(Expr,result);
-    const std::pair<T,T> inv_op_data0 = proto::eval(Expr,M0);
-    const std::pair<T,T> inv_op_data1 = proto::eval(Expr,M1);
+	calculator_context<to_node> M0; // The average means (inverted): < expr^-1(x_i) >
+	calculator_context<to_node> M1; // The average of squares: < expr^-1(x_i)^2 >
+	//calculator_context<0> lhs;   //The result node
+	for(size_t i=0;i<M.size();++i){
+	  const moments_t tmp = *M[i]->GetMoments();
+	   // std::cout<<"tmp0 = "<<tmp[0]<<", tmp1 = "<<tmp[1]<<std::endl;
 
-    //The data returns in two components:
-    //  The subtraction of the all the sums from the forwarded Data.
-    const data_t unsummed0 =result0-inv_op_data0.first;  
-    //  And the product thereafter
-    const data_t factor0   =inv_op_data0.second;
-    const data_t factor1   =inv_op_data1.second;
+	  const T tmp0 = tmp[0];
+	  M0.push_back(tmp[0]);
+	  M1.push_back(tmp[1]);
+	  //	  lhs.push_back(tmp0);
+	}
+	//	const std::pair<T,T> lhs0      = proto::eval(Expr,lhs);
+	const std::pair<T,T> inv_op_data0 = proto::eval(Expr,M0);
+	const std::pair<T,T> inv_op_data1 = proto::eval(Expr,M1);
 
-    //The usual (mean*precision, -0.5*precision) (with a scale factor)
-    return NP_t(fprec*unsummed0*factor0, -0.5*factor1*fprec);
+	// std::cout<<"to node= "<<to_node<<std::endl;
+	// std::cout<<"result = "<<result0.first<<", "<<result0.second<<std::endl;
+	// std::cout<<"iv0 = "<<inv_op_data0.first<<", "<<inv_op_data0.second<<std::endl;
+	// std::cout<<"iv1 = "<<inv_op_data1.first<<", "<<inv_op_data1.second<<std::endl;
+
+	
+	  //The data returns in two components:
+	  //  The subtraction of the all the sums from the forwarded Data.
+	const_data_t unsummed0 =fdata-inv_op_data0.first;  //lhs.first
+	//  And the product thereafter
+	const_data_t factor0   =inv_op_data0.second;
+	const_data_t factor1   =inv_op_data1.second;
+
+	//The usual (mean*precision, -0.5*precision) (with a scale factor)
+	return NP_t(fprec*unsummed0*factor0, -0.5*factor1*fprec);
   }		     
 
     //Deterministic to Stock
@@ -356,25 +364,17 @@ namespace ICR{
     CalcNP2Deterministic(Expression& Expr,
 			 const Context<T,fusion_t>& M)
     {
-      //zero is the results node.
-      calculator_context<0> M0; //All the first moments  (the <x>'s of every element in expr)
-      calculator_context<0> M0_squared; //All the first moments  (the <x>^2's of every element in expr)
-      calculator_context<0> M1;//The second moment (the <x^2> of every element of expression)
-      for(size_t i=0;i<M.size();++i){
-	const Moments<T> tmp = M[i]->GetMoments();
-	const data_t tmp0 = tmp[0];
-	M0.push_back(tmp[0]);
-	M0_squared.push_back(tmp0*tmp0);
-	M1.push_back(tmp[1]);
-      }
-  
-      //Precision is 1.0/ (<expr(x^2)> - <expr(x)>^2)
-      //The second value in the pair (the scale) is 1 for the results node.
-      const data_t prec = 1.0/(proto::eval(Expr,M1).first - proto::eval(Expr,M0_squared).first);
-
-      // NP = [<expr(x)> * prec, -0.5*prec]
-      return NP_t(  proto::eval(Expr,M0).first *prec  , -0.5*prec);
-  
+	//zero is the results node.
+	calculator_context<0> M0; //All the first moments  (the <x>'s of every element in expr)
+	calculator_context<0> M0_squared; //All the first moments  (the <x>^2's of every element in expr)
+	calculator_context<0> M1;//The second moment (the <x^2> of every element of expression)
+	for(size_t i=0;i<M.size();++i){
+	  const Moments<T> tmp = *M[i]->GetMoments();
+	   // std::cout<<"tmp0 = "<<tmp[0]<<", tmp1 = "<<tmp[1]<<std::endl;
+	  const T tmp0 = tmp[0];
+	  M0.push_back(tmp[0]);
+	  M0_squared.push_back(tmp0*tmp0);
+	  M1.push_back(tmp[1]);
     }
 
   private:
