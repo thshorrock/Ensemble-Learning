@@ -1404,12 +1404,8 @@ ICR::EnsembleLearning::Builder<T>::gaussian_mixture(
   boost::shared_ptr<GaussianType> Child(new GaussianType());
 
   m_Nodes.push_back(Child);
-	
-  typedef detail::Mixture<Gaussian<T>,
-    T,
-    typename vMean_t::type, 
-    typename vPrec_t::type,
-    GaussianType >     GaussianMixtureFactor;
+
+  typedef detail::Mixture<Gaussian<T>, T,vMean_t,  vPrec_t, GaussianType >     GaussianMixtureFactor;
   
   boost::shared_ptr<GaussianMixtureFactor> MixtureF(new GaussianMixtureFactor(vMean, vPrecision, Catagory.get() , Child.get()));
 	
