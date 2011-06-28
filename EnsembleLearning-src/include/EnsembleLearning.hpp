@@ -31,6 +31,8 @@
 #include "EnsembleLearning/Input.hpp"
 #include "EnsembleLearning/Builder.hpp"
 #include "EnsembleLearning/calculation_tree/Factory.hpp"
+#include "EnsembleLearning/detail/MixtureVector.hpp"
+//#include "EnsembleLearning/exponential_model/Gaussian.hpp"
 
 /** @defgroup UserInterface The user interface of the Ensemble Learning Library.
  */
