@@ -546,6 +546,12 @@ namespace ICR{
       gaussian_mixture( vMean_t& vMean, 
 		        vPrec_t& vPrecision, 
 			WeightsNode Weights);
+
+      template<class vMean_t, class vPrec_t>
+      RectifiedGaussianNode
+      rectified_gaussian_mixture( vMean_t& vMean, 
+		        vPrec_t& vPrecision, 
+			WeightsNode Weights);
 // =======
 //       template<class List>
 //       Variable
@@ -1413,6 +1419,41 @@ ICR::EnsembleLearning::Builder<T>::gaussian_mixture(
   return Child.get();
 }
    
+template<class T>
+template<class vMean_t, class vPrec_t>
+typename ICR::EnsembleLearning::Builder<T>::RectifiedGaussianNode
+ICR::EnsembleLearning::Builder<T>::rectified_gaussian_mixture(
+						    vMean_t& vMean, 
+						    vPrec_t& vPrecision,
+						    WeightsNode Weights)
+{
+  
+  typedef WeightsType prior_t;
+  typedef ICR::EnsembleLearning::NoSecondParent blank;
+  typedef CatagoryType catagory_t;
+  typedef detail::Factor<Discrete,T,prior_t,blank,catagory_t,ENSEMBLE_LEARNING_COMPONENTS> Factor_t;
+
+  const size_t number = Weights->size();
+	
+  boost::shared_ptr<catagory_t>     Catagory(new catagory_t());
+  boost::shared_ptr<Factor_t >      CatagoryF(new Factor_t(Weights, Catagory.get()));
+  m_Nodes.push_back(Catagory);
+  m_Factors.push_back(CatagoryF);
+	
+
+  boost::shared_ptr<RectifiedGaussianType> Child(new RectifiedGaussianType());
+
+  m_Nodes.push_back(Child);
+
+  typedef detail::Mixture<RectifiedGaussian<T>, T,vMean_t,  vPrec_t, RectifiedGaussianType >     RGaussianMixtureFactor;
+  
+  boost::shared_ptr<RGaussianMixtureFactor> MixtureF(new RGaussianMixtureFactor(vMean, vPrecision, Catagory.get() , Child.get()));
+	
+   m_Factors.push_back(MixtureF);
+  return Child.get();
+}
+
+
 template<class T>	
 template<class vMean_t, class vPrec_t>
 void

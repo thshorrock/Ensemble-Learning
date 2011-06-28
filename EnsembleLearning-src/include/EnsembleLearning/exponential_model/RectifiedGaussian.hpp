@@ -454,8 +454,8 @@ ICR::EnsembleLearning::RectifiedGaussian<T>::CalcAvLog(moments_parameter Mean,
 					  moments_parameter Data)
 {
   //These moments must have a size of 2
-  BOOST_ASSERT(Mean.size() == 2);
-  BOOST_ASSERT(Precision.size() == 2);
+  BOOST_ASSERT(Mean->size() == 2);
+  BOOST_ASSERT(Precision->size() == 2);
   const NP_t NPData = CalcNP2Data(Mean, Precision);
   return 
     NPData*(*Data) + CalcLogNorm(Mean,Precision);
