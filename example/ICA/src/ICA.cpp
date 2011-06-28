@@ -1,3 +1,11 @@
+
+
+#include <boost/preprocessor/arithmetic/add.hpp>
+#include <boost/preprocessor/arithmetic/mul.hpp>
+#  define ENSEMBLE_LEARNING_COMPONENTS 5
+#  define ENSEMBLE_LEARNING_SOURCES 5
+#  define ENSEMBLE_LEARNING_PLACEHOLDERS BOOST_PP_ADD(BOOST_PP_MUL(ENSEMBLE_LEARNING_SOURCES,2),1)
+
 #include "ExampleData.hpp"
 #include "BuildModel.hpp"
 
@@ -12,7 +20,6 @@ using namespace boost::numeric::ublas;
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;
 
-
 int
 main  (int ac, char **av)
 {
@@ -20,8 +27,9 @@ main  (int ac, char **av)
   //ICR::EnsembleLearning::Random::Instance(10);
   
   bool   use_float = false;
-  size_t assumed_sources;
-  size_t mixing_components;
+  const size_t assumed_sources   = ENSEMBLE_LEARNING_SOURCES;
+  const size_t mixing_components = ENSEMBLE_LEARNING_COMPONENTS;
+
   bool   positive_source = false;
   bool   positive_mixing = false;
   bool   model_noise_offset = false;
@@ -72,10 +80,10 @@ main  (int ac, char **av)
   
   po::options_description inference("Inference");
   inference.add_options()
-    ("sources,s", po::value<size_t>(&assumed_sources)->default_value(5), 
-     "The number of sources to infer (a guess)")
-    ("mixing,m",  po::value<size_t>(&mixing_components)->default_value(5), 
-     "The number of components to use in Mixture Models")
+    // ("sources,s", po::value<size_t>(&assumed_sources)->default_value(5), 
+    //  "The number of sources to infer (a guess)")
+    // ("mixing,m",  po::value<size_t>(&mixing_components)->default_value(5), 
+    //  "The number of components to use in Mixture Models")
     ("positive-source",  
      "Assume that the sources are strictly positive")
     ("positive-mixing",  
@@ -383,114 +391,119 @@ main  (int ac, char **av)
   
   
   
-  if (use_float) 
-    {
-      std::cout<<"Building Model"<<std::endl;
-      BuildModel<float> Model(Data, assumed_sources, mixing_components, 
-			      positive_source,
-			      positive_mixing,
-			      model_noise_offset,
-			      GaussianPrecision,
-			      GammaPrecision);
-      size_t size1 = Data.size1();
-      size_t size2 = Data.size2();
-      Data = matrix<float>(); //clear the memory (clear function doesn't do this)
+  // if (use_float) 
+  //   {
+  //     std::cout<<"Building Model"<<std::endl;
+  //     BuildModel<float> Model(Data, assumed_sources, mixing_components, 
+  // 			      positive_source,
+  // 			      positive_mixing,
+  // 			      model_noise_offset,
+  // 			      GaussianPrecision,
+  // 			      GammaPrecision);
+  //     size_t size1 = Data.size1();
+  //     size_t size2 = Data.size2();
+  //     Data = matrix<float>(); //clear the memory (clear function doesn't do this)
 
-      {
+  //     {
 	
-	std::ofstream sources(source_file.string().c_str());
-	std::ofstream mixing_matrix(mixing_file.string().c_str());
-	std::ofstream result_matrix(result_file.string().c_str());
-	std::ofstream result_matrix2(result_file2.string().c_str());
-	matrix<float> A(size1, assumed_sources);
-	matrix<float> S(assumed_sources,size2);
-	Model.get_normalised_means(A,S);
-	sources<<S;
-	mixing_matrix<< matrix<float>(trans(A));
-	result_matrix<<Model.get_results();
-	result_matrix2<< matrix<float>(prod(A,S));
-      }
+  // 	std::ofstream sources(source_file.string().c_str());
+  // 	std::ofstream mixing_matrix(mixing_file.string().c_str());
+  // 	std::ofstream result_matrix(result_file.string().c_str());
+  // 	std::ofstream result_matrix2(result_file2.string().c_str());
+  // 	matrix<float> A(size1, assumed_sources);
+  // 	matrix<float> S(assumed_sources,size2);
+  // 	Model.get_normalised_means(A,S);
+  // 	sources<<S;
+  // 	mixing_matrix<< matrix<float>(trans(A));
+  // 	result_matrix<<Model.get_results();
+  // 	result_matrix2<< matrix<float>(prod(A,S));
+  //     }
       
-      ICR::EnsembleLearning::Builder<float> Build = Model.get_builder();
-      Build.set_cost_file(cost_file.string());
-      std::cout<<"Running!"<<std::endl;
-      bool converged = false;
-      size_t count = 0;
-      while(!converged && count<100) {
-      	converged = Build.run(convergence_criterium,max_iterations);
+  //     ICR::EnsembleLearning::Builder<float> Build = Model.get_builder();
+  //     Build.set_cost_file(cost_file.string());
+  //     std::cout<<"Running!"<<std::endl;
+  //     bool converged = false;
+  //     size_t count = 0;
+  //     while(!converged && count<100) {
+  //     	converged = Build.run(convergence_criterium,max_iterations);
 
-	std::ofstream sources(source_file.string().c_str());
-	std::ofstream mixing_matrix(mixing_file.string().c_str());
-	std::ofstream result_matrix(result_file.string().c_str());
-	std::ofstream result_matrix2(result_file2.string().c_str());
+  // 	std::ofstream sources(source_file.string().c_str());
+  // 	std::ofstream mixing_matrix(mixing_file.string().c_str());
+  // 	std::ofstream result_matrix(result_file.string().c_str());
+  // 	std::ofstream result_matrix2(result_file2.string().c_str());
 
-	matrix<float> A(size1, assumed_sources);
-	matrix<float> S(assumed_sources,size2);
-      	Model.get_normalised_means(A,S);
-      	sources<<S;
-      	mixing_matrix<< matrix<float>(trans(A));
-      	result_matrix<<Model.get_results();
-      	result_matrix2<< matrix<float>(prod(A,S));
-      	++count;
-      }
-    }
-  else
-    {
+  // 	matrix<float> A(size1, assumed_sources);
+  // 	matrix<float> S(assumed_sources,size2);
+  //     	Model.get_normalised_means(A,S);
+  //     	sources<<S;
+  //     	mixing_matrix<< matrix<float>(trans(A));
+  //     	result_matrix<<Model.get_results();
+  //     	result_matrix2<< matrix<float>(prod(A,S));
+  //     	++count;
+  //     }
+  //   }
+  // else
+  //   {
       std::cout<<"Building Model"<<std::endl;
-      BuildModel<double> Model(Data, assumed_sources, mixing_components, 
-			       positive_source,
-			       positive_mixing,
-			       model_noise_offset,
-			       GaussianPrecision,
-			       GammaPrecision
-			       );
-      size_t size1 = Data.size1();
-      size_t size2 = Data.size2();
-      Data = matrix<double>(); //clear the memory (clear function doesn't do this)
-
-      if (mean_file !="") 
-	Model.set_means(Means);
-      if (sigma_file != "")
-	Model.set_sigmas(Sigmas);
-      if (mixing_mean_file != "")
-	Model.set_mixing_mean(MixingMean);
-      {
-
-	std::ofstream sources(source_file.string().c_str());
-	std::ofstream mixing_matrix(mixing_file.string().c_str());
-	std::ofstream result_matrix(result_file.string().c_str());
-	std::ofstream result_matrix2(result_file2.string().c_str());
-  
-	matrix<double> A(size1, assumed_sources);
-	matrix<double> S(assumed_sources,size2);
-	Model.get_normalised_means(A,S);
-	sources<<S;
-	mixing_matrix<< matrix<double>(trans(A));
-	result_matrix<<Model.get_results();
-	result_matrix2<< matrix<double>(prod(A,S));
-      }
+      BuildModel<double, assumed_sources, mixing_components> 
+	Model(Data, 
+	      positive_source,
+	      positive_mixing,
+	      model_noise_offset,
+	      GaussianPrecision,
+	      GammaPrecision
+	      );
       
-      ICR::EnsembleLearning::Builder<double> Build = Model.get_builder();
-      Build.set_cost_file(cost_file.string());
-      std::cout<<"Running!"<<std::endl;
-      bool converged = false;
-      size_t count = 0;
-      while(!converged && count<100) {
-      	converged = Build.run(convergence_criterium,max_iterations);
+  //     size_t size1 = Data.size1();
+  //     size_t size2 = Data.size2();
+  //     Data = matrix<double>(); //clear the memory (clear function doesn't do this)
 
-	std::ofstream sources(source_file.string().c_str());
-	std::ofstream mixing_matrix(mixing_file.string().c_str());
-	std::ofstream result_matrix(result_file.string().c_str());
-	std::ofstream result_matrix2(result_file2.string().c_str());
+  //     if (mean_file !="") 
+  // 	Model.set_means(Means);
+  //     if (sigma_file != "")
+  // 	Model.set_sigmas(Sigmas);
+  //     if (mixing_mean_file != "")
+  // 	Model.set_mixing_mean(MixingMean);
+  //     {
 
-	matrix<double> A(size1, assumed_sources);
-	matrix<double> S(assumed_sources,size2);
-      	Model.get_normalised_means(A,S);
-      	sources<<S;
-      	mixing_matrix<< matrix<double>(trans(A));
-      	result_matrix<<Model.get_results();
-      	result_matrix2<< matrix<double>(prod(A,S));
-      	++count;
-      }
-    }
+  // 	std::ofstream sources(source_file.string().c_str());
+  // 	std::ofstream mixing_matrix(mixing_file.string().c_str());
+  // 	std::ofstream result_matrix(result_file.string().c_str());
+  // 	std::ofstream result_matrix2(result_file2.string().c_str());
+  
+  // 	matrix<double> A(size1, assumed_sources);
+  // 	matrix<double> S(assumed_sources,size2);
+  // 	Model.get_normalised_means(A,S);
+  // 	sources<<S;
+  // 	mixing_matrix<< matrix<double>(trans(A));
+  // 	result_matrix<<Model.get_results();
+  // 	result_matrix2<< matrix<double>(prod(A,S));
+  //     }
+      
+  ICR::EnsembleLearning::Builder<double>& Build = Model.get_builder();
+  MixtureVector<Gaussian,double,mixing_components> vmean = Build.mixture_vector<Gaussian>(0.00,0.001) ;
+    //BOOST_AUTO( vmean, Build.mixture_vector<Gaussian>(0.00,0.001) ); 
+  
+  //     Build.set_cost_file(cost_file.string());
+  //     std::cout<<"Running!"<<std::endl;
+  //     bool converged = false;
+  //     size_t count = 0;
+  //     while(!converged && count<100) {
+  //     	converged = Build.run(convergence_criterium,max_iterations);
+
+  // 	std::ofstream sources(source_file.string().c_str());
+  // 	std::ofstream mixing_matrix(mixing_file.string().c_str());
+  // 	std::ofstream result_matrix(result_file.string().c_str());
+  // 	std::ofstream result_matrix2(result_file2.string().c_str());
+
+  // 	matrix<double> A(size1, assumed_sources);
+  // 	matrix<double> S(assumed_sources,size2);
+  //     	Model.get_normalised_means(A,S);
+  //     	sources<<S;
+  //     	mixing_matrix<< matrix<double>(trans(A));
+  //     	result_matrix<<Model.get_results();
+  //     	result_matrix2<< matrix<double>(prod(A,S));
+  //     	++count;
+  //     }
+  //   }
 }
