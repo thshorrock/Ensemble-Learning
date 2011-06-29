@@ -513,6 +513,40 @@ namespace ICR{
       }
 
 
+      template<template<class> class Model,int array_size, class Mean_t , class Prec_t >
+      CalculationVector<Model,T,array_size>
+      calculation( std::vector<Mean_t>& mean,
+		   std::vector<Prec_t>& prec
+		  )
+      {
+	typedef  CalculationVector<Model,T,array_size>
+      	  CV_t;
+	
+	CV_t CV;
+	
+	boost::fusion::for_each(CV.data(), 
+				MakeNode<Model, Mean_t, Prec_t>
+				(m_Factors, m_Nodes,
+				 mean,prec));
+	return CV;
+      }
+
+      // template<template<class> class Model,int array_size, class Mean_t , class Prec_t >
+      // CalculationVector<Model,T,array_size>
+      // calculation( boost::ublas::vector<Mean_t>& mean,
+      // 		   boost::ublas::vector<Prec_t>& prec
+      // 		  )
+      // {
+      // 	std::vector<Mean_t> stdmean(mean.size());
+      // 	std::vector<Prec_t> stdprec(prec.size());
+      // 	std::copy(mean.begin(), mean.end(), stdmean.begin());
+      // 	std::copy(prec.begin(), prec.end(), stdprec.begin());
+      // 	return calculation<Model,array_size>(stdmean, stdprec);
+      // }
+	
+
+
+
       /** @name Create a Mixture Model.
        */
       ///@{
@@ -1059,6 +1093,50 @@ namespace ICR{
 
 	mutable size_t index;
       };
+
+      template<template<class> class Model , class Mean_t , class Prec_t >
+      struct MakeNode
+      {
+	MakeNode(std::vector<boost::shared_ptr<FactorNode_basic> >& F,
+		  std::vector<boost::shared_ptr<VariableNode_basic > >& N,
+		  std::vector<Mean_t>& mean,
+		  std::vector<Prec_t>& prec
+		  )
+	  : m_F(F), m_N(N),m_mean(mean), m_prec(prec), index(0)
+	{}
+	
+	template <class Node>
+	void operator()(Node& node) const
+	//it0, Itr1 it1, ItrChild itC) const
+	{
+	  typedef typename boost::remove_pointer<typename boost::remove_reference<Mean_t>::type>::type n0_t;
+	  typedef typename boost::remove_pointer<typename boost::remove_reference<Prec_t>::type>::type n1_t;
+	  typedef typename boost::remove_pointer<typename boost::remove_reference<Node>::type>::type child_t;
+	  
+	  boost::shared_ptr<child_t> child( new child_t() );
+	  
+	  typedef detail::Factor<Model,T,n0_t,n1_t,child_t> Factor_t;
+	  boost::shared_ptr<Factor_t > F(new Factor_t(m_mean[index], 
+						      m_prec[index], 
+						      child.get()));
+
+	  m_F.push_back(F);
+	  m_N.push_back(child);
+	  node = child.get();
+	  //std::cout<<"model = "<<ch<<std::endl;
+	  
+	  ++index;
+
+
+	}
+	mutable std::vector<boost::shared_ptr<FactorNode_basic> >& m_F;
+	mutable std::vector<boost::shared_ptr<VariableNode_basic > >& m_N;
+	std::vector<Mean_t>& m_mean;
+	std::vector<Prec_t>& m_prec;
+	mutable size_t index;
+	
+      };
+
 
 
       template<template<class> class Model>

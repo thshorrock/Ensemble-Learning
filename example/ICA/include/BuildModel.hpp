@@ -92,8 +92,8 @@ public:
     std::vector< MixtureVector<Gamma,data_t,Components>    > ShypPrec(M);
     
     //A set of T calculation vectors
-    std::vector< CalculationVector<Gaussian,data_t,ENSEMBLE_LEARNING_SOURCES> > cv_Sg(T);
-    std::vector< CalculationVector<RectifiedGaussian,data_t,ENSEMBLE_LEARNING_SOURCES> > cv_Srg(T);
+    std::vector< CalculationVector<Gaussian,data_t,M> > cv_Sg(T);
+    std::vector< CalculationVector<RectifiedGaussian,data_t,M> > cv_Srg(T);
     
     //m_Build hyper mean and hyper precision for each source mixture component.
     for(size_t m=0;m<M;++m)
@@ -106,7 +106,7 @@ public:
     for(size_t t=0;t<T;++t){
       if (positive_sources) 
 	{
-	  cv_Srg[t]=m_Build.template calculation_mixture<RectifiedGaussian,ENSEMBLE_LEARNING_SOURCES>
+	  cv_Srg[t]=m_Build.template calculation_mixture<RectifiedGaussian,M>
 	    (ShypMean,
 	     ShypPrec,
 	     Weights );
@@ -118,7 +118,7 @@ public:
 	}
       else
 	{
-	  cv_Sg[t]=m_Build.template calculation_mixture<Gaussian,ENSEMBLE_LEARNING_SOURCES>
+	  cv_Sg[t]=m_Build.template calculation_mixture<Gaussian,M>
 	    (ShypMean, 
 	     ShypPrec,
 	     Weights );
@@ -143,29 +143,57 @@ public:
 
     //m_Build approximation to the mixing matrix
      
-    vector<Mean_t*> AMean(M);
-    vector<GammaNode> APrecision(M);
+    std::vector<Mean_t*> AMean(M);
+    std::vector<GammaNode> APrecision(M);
     build_vector<Mean_t>(AMean);
     build_vector(APrecision);
     
     
+    //A set of T calculation vectors
+    std::vector< CalculationVector<Gaussian,data_t,M> > cv_Ag(N);
+    std::vector< CalculationVector<RectifiedGaussian,data_t,M> > cv_Arg(N);
     
     for(size_t n=0;n<N;++n){
-      for(size_t m=0;m<M;++m){
-    	if (positive_mixing) 
-    	  m_A(n,m) = m_Build.rectified_gaussian(AMean[m], APrecision[m]);
-    	else
-    	  m_A(n,m) = m_Build.gaussian(AMean[m], APrecision[m]);
-	
-      }
+      if (positive_mixing) 
+	{
+	  cv_Arg[n] = m_Build.template calculation<RectifiedGaussian,M>(AMean, APrecision);
+	  std::vector<Variable> A_over_m = to_std_vector(cv_Arg[n]);
+	  for(size_t m=0;m<M;++m)
+	    m_A(n,m) = A_over_m[m];
+	}
+      else
+	{
+	  cv_Ag[n] = m_Build.template calculation<Gaussian,M>(AMean, APrecision);
+	  std::vector<Variable> A_over_m = to_std_vector(cv_Ag[n]);
+	  for(size_t m=0;m<M;++m)
+	    m_A(n,m) = A_over_m[m];
+	} 
     }
+    
+    //Build noise
+    vector<Mean_t*> m_noiseMean(N);
+    vector<GammaNode> m_noisePreceision(N);
+    build_vector<Mean_t>(m_noiseMean);
+    build_vector(APrecision);
+    // for(size_t n=0;n<N;++n){
+    //   m_noiseMean[n] = m_Build.gaussian(0.0,m_GaussianPrecision);
+    //   m_noisePrecision[n] = m_Build.gamma(1,m_GammaVar);
+    // }
+    //   for(size_t m=0;m<M;++m){
+    // 	if (positive_mixing) 
+    // 	  m_A(n,m) = m_Build.rectified_gaussian(AMean[m], APrecision[m]);
+    // 	else
+    // 	  m_A(n,m) = m_Build.gaussian(AMean[m], APrecision[m]);
+	
+    //   }
+    // }
     //m_Build the noise mean approximation
     // m_noiseMean(N);
     //  m_noisePrecision(N);
-    for(size_t n=0;n<N;++n){
-      m_noiseMean[n] = m_Build.gaussian(0.0,m_GaussianPrecision);
-      m_noisePrecision[n] = m_Build.gamma(1,m_GammaVar);
-    }
+    // for(size_t n=0;n<N;++n){
+    //   m_noiseMean[n] = m_Build.gaussian(0.0,m_GaussianPrecision);
+    //   m_noisePrecision[n] = m_Build.gamma(1,m_GammaVar);
+    // }
     
     //m_noisePrecision = m_Build.gamma(1.0,1.0);
       
@@ -578,16 +606,26 @@ private:
     for(size_t i=0;i<V.size();++i){
       V[i] = m_Build.gaussian(0.0,m_GaussianPrecision);
     }
-
-    // std::generate(V.begin(), V.end(), 
-    // 		  boost::bind(static_cast<GaussianNode (ICR::EnsembleLearning::Builder<data_t>::*)
-    // 			      (const data_t, const data_t)>
-    // 			      (&ICR::EnsembleLearning::Builder<data_t>::gaussian),
-    // 			      boost::ref(m_Build),
-    // 			      0.0, m_GaussianPrecision));
   }
+  template<class node>
+  void 
+  build_vector(std::vector<node*>& V)
+  {
+
+    for(size_t i=0;i<V.size();++i){
+      V[i] = m_Build.gaussian(0.0,m_GaussianPrecision);
+    }
+  }
+  
   void 
   build_vector(vector<GammaNode>& V)
+  {
+    std::generate(V.begin(), V.end(), boost::bind(&ICR::EnsembleLearning::Builder<data_t>::gamma,
+    						  boost::ref(m_Build),
+    						  1,m_GammaVar ));
+  }
+  void 
+  build_vector(std::vector<GammaNode>& V)
   {
     std::generate(V.begin(), V.end(), boost::bind(&ICR::EnsembleLearning::Builder<data_t>::gamma,
     						  boost::ref(m_Build),
