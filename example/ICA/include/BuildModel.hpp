@@ -92,7 +92,8 @@ public:
     std::vector< MixtureVector<Gamma,data_t,Components>    > ShypPrec(M);
     
     //A set of T calculation vectors
-    std::vector< CalculationVector<Gaussian,data_t,ENSEMBLE_LEARNING_SOURCES> > cv_S(T);
+    std::vector< CalculationVector<Gaussian,data_t,ENSEMBLE_LEARNING_SOURCES> > cv_Sg(T);
+    std::vector< CalculationVector<RectifiedGaussian,data_t,ENSEMBLE_LEARNING_SOURCES> > cv_Srg(T);
     
     //m_Build hyper mean and hyper precision for each source mixture component.
     for(size_t m=0;m<M;++m)
@@ -104,20 +105,29 @@ public:
     std::cout<<"built hyperparams - nodes = "<< m_Build.number_of_nodes() <<std::endl;
     for(size_t t=0;t<T;++t){
       if (positive_sources) 
-      	cv_S[t]=m_Build.template calculation_mixture<RectifiedGaussian,ENSEMBLE_LEARNING_SOURCES>
-	  (ShypMean,
-	   ShypPrec,
-      							       Weights );
+	{
+	  cv_Srg[t]=m_Build.template calculation_mixture<RectifiedGaussian,ENSEMBLE_LEARNING_SOURCES>
+	    (ShypMean,
+	     ShypPrec,
+	     Weights );
+
+	  std::vector<Variable> S_over_m = to_std_vector(cv_Srg[t]);
+	  for(size_t m=0;m<M;++m){
+	    m_S(m,t) = S_over_m[m];
+	  }
+	}
       else
-      cv_S[t]=m_Build.template calculation_mixture<Gaussian,ENSEMBLE_LEARNING_SOURCES>
-	(ShypMean, 
-	 ShypPrec,
-	 Weights );
-      std::vector<Variable> S_over_m = to_std_vector(cv_S[t]);
+	{
+	  cv_Sg[t]=m_Build.template calculation_mixture<Gaussian,ENSEMBLE_LEARNING_SOURCES>
+	    (ShypMean, 
+	     ShypPrec,
+	     Weights );
+	  std::vector<Variable> S_over_m = to_std_vector(cv_Sg[t]);
       
-      for(size_t m=0;m<M;++m){
-      	m_S(m,t) = S_over_m[m];
-      }
+	  for(size_t m=0;m<M;++m){
+	    m_S(m,t) = S_over_m[m];
+	  }
+	}
     }
 
 

@@ -1040,7 +1040,7 @@ namespace ICR{
 
 	  m_N.push_back(Child);
       
-	  typedef detail::Mixture<Gaussian<T>, T,vmean_t,  vprec_t, child_t >     MixtureFactor;
+	  typedef detail::Mixture<Model<T>, T,vmean_t,  vprec_t, child_t >     MixtureFactor;
   
 	  boost::shared_ptr<MixtureFactor> MixtureF(new MixtureFactor(m_vMean[index], m_vPrecision[index], Catagory.get() , Child.get()));
 	
