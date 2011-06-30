@@ -28,6 +28,7 @@
 #ifndef MIXTUREVECTOR_HPP
 #define MIXTUREVECTOR_HPP
 
+//#include "EnsembleLearning/node/variable/Observed.hpp"
 #include "EnsembleLearning/node/variable/Hidden.hpp"
 #include "EnsembleLearning/detail/TypeList.hpp"
 
@@ -59,6 +60,14 @@
 #endif
 namespace ICR{
   namespace EnsembleLearning{
+
+    template<template<class> class Model,
+	     class T,class List,int array_size
+	     ,class Enable 
+	     >
+    class ObservedNode ; //uninitialised
+    
+
     /** Store a vector of components for a Mixture model.
      *  The types of each of the component are different,
      *  (They have a different component id)
@@ -75,7 +84,8 @@ namespace ICR{
 	     class T, 
 	     int I, 
 	     template<class, int> class Op = detail::TypeList::Identity,
-	     class D = detail::TypeList::zeros>
+	     class D = detail::TypeList::zeros,
+	     class Enabler = void>
     class Vector_impl
     {
       //Make all other ector_impl friends.
@@ -84,11 +94,12 @@ namespace ICR{
 	     class T2, 
 	     int I2, 
 	     template<class, int> class Operation2,
-	       class D2>
+	       class D2,
+	       class Enabler2>
     friend class Vector_impl;
 
       //create an mpl vector that increments the component number for each type from 1 to #components.
-      typedef typename boost::mpl::push_back<typename Vector_impl<ModelType,Model,T,I-1,Op,D>::base::type, ModelType<Model,T,typename Op<D,I>::type,2,void > >::type base;
+      typedef typename boost::mpl::push_back<typename Vector_impl<ModelType,Model,T,I-1,Op,D,Enabler>::base::type, ModelType<Model,T,typename Op<D,I>::type,2,Enabler > >::type base;
       //Make the same vector but this time as pointers.
       typedef  boost::mpl::transform<typename base::type ,boost::add_pointer<boost::mpl::_1> > pointer_t;
       //The data is stored as a boost fusion vector. 
@@ -162,20 +173,22 @@ namespace ICR{
 	     template<class> class Model, 
 	     class T, 
 	     template<class, int> class Op,
-	     class D>
-    class Vector_impl<ModelType,Model,T,0,Op,D>
+	     class D,
+	     class Enabler>
+    class Vector_impl<ModelType,Model,T,0,Op,D,Enabler>
     {
       //Make all other ector_impl friends.
       template<template<template<class> class,class,class,int,class> class ModelType2,
-	     template<class> class Model2, 
-	     class T2, 
-	     int I2, 
-	     template<class, int> class Operation2,
-	     class D2>
-    friend class Vector_impl;
+	       template<class> class Model2, 
+	       class T2, 
+	       int I2, 
+	       template<class, int> class Operation2,
+	       class D2,
+	       class Enabler2>
+      friend class Vector_impl;
 
-      //create an mpl vector that increments the component number for each type from 1 to #components.
-      typedef  boost::mpl::vector<ModelType<Model,T,typename Op<D,0>::type,2,void> > base;
+//create an mpl vector that increments the component number for each type from 1 to #components.
+typedef  boost::mpl::vector<ModelType<Model,T,typename Op<D,0>::type,2,Enabler> > base;
       //Make the same vector but this time as pointers.
       typedef  boost::mpl::transform<typename base::type ,boost::add_pointer<boost::mpl::_1> > pointer_t;
       //The data is stored as a boost fusion vector. 
@@ -296,6 +309,11 @@ namespace ICR{
 
     template<template<class> class Model, class T, int size = ENSEMBLE_LEARNING_COMPONENTS>
     struct MixtureVector : public Vector_impl<HiddenNode,Model, T, size-1 ,detail::TypeList::incr_component,detail::TypeList::component>
+    {};
+
+    template<template<class> class Model, class T, int size = ENSEMBLE_LEARNING_COMPONENTS>
+    struct ObservedMixtureVector : public Vector_impl<ObservedNode    
+      ,Model, T, size-1 ,detail::TypeList::incr_component,detail::TypeList::component>
     {};
 
 

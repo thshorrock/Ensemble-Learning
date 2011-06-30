@@ -84,6 +84,7 @@ namespace ICR{
     class calculator_context
     {
     public:
+
       void push_back(const std::vector<double>& a)
       {
 	std::copy(a.begin(), a.end(), std::back_inserter(m_args));
@@ -94,7 +95,10 @@ namespace ICR{
 	m_args.push_back(a);
       }
 
-      calculator_context() { m_args.push_back(0.0); } //m_args(0) is the result placeholder.
+      calculator_context(const size_t size = 1) {
+	m_args.reserve(size);
+	m_args.push_back(0.0); 
+      } //m_args(0) is the result placeholder.
   
       template<typename Expr
 	       // defaulted template parameters, so we can

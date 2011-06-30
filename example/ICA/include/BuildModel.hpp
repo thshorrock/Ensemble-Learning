@@ -33,6 +33,8 @@ class size_exception{};
 template<class data_t, int assumed_sources, int mixing_components>
 class BuildModel //: public Model<data_t>
 {
+  typedef typename ICR::EnsembleLearning::Builder<data_t>::GaussianDataNode GaussianData;
+  typedef typename ICR::EnsembleLearning::Builder<data_t>::GammaDataNode GammaData;
   typedef typename ICR::EnsembleLearning::Builder<data_t>::GaussianNode GaussianNode;
   typedef typename ICR::EnsembleLearning::Builder<data_t>::RectifiedGaussianNode RectifiedGaussianNode;
   typedef typename ICR::EnsembleLearning::Builder<data_t>::WeightsNode WeightsNode;
@@ -69,7 +71,8 @@ public:
       m_A(data.size1(),assumed_sources),
       m_S(assumed_sources, data.size2()),
       m_noiseMean(data.size1()),
-      m_noisePrecision(data.size1()),
+      //m_noisePrecision(data.size1()), //N
+      m_noisePrecision(data.size2()),  //T
       m_positive_sources(positive_sources),
       m_positive_mixing(positive_mixing),
       m_GaussianPrecision(GaussianPrecision),
@@ -95,18 +98,25 @@ public:
     vector<WeightsNode> Weights(M);
     build_vector(Weights, Components);
     
-    std::vector< MixtureVector<Gaussian,data_t,Components> > ShypMean(M);
+    //std::vector< MixtureVector<Gaussian,data_t,Components> > ShypMean(M);
+    std::vector< ObservedMixtureVector<Gaussian,data_t,Components> > ShypMean(M);
     std::vector< MixtureVector<Gamma,data_t,Components>    > ShypPrec(M);
     
     
     std::vector< Sg_t > cv_Sg(T);
     std::vector< Srg_t > cv_Srg(T);
     
+    
+    std::vector<data_t> vSHypMean(Components,0.0);
+    ObservedMixtureVector<Gaussian,data_t,Components> SHypMean_node 
+      = m_Build.template observed_mixture_vector<Gaussian>(vSHypMean);
+    
+
     //m_Build hyper mean and hyper precision for each source mixture component.
     for(size_t m=0;m<M;++m)
       { 
-    	ShypMean[m] =  m_Build.template mixture_vector<Gaussian>(0.00,0.001); 
-    	ShypPrec[m] =  m_Build.template mixture_vector<Gamma> (1.00,0.01) ;
+    	ShypMean[m] =  SHypMean_node;//m_Build.template mixture_vector<Gaussian>(0.00,m_GaussianPrecision); 
+    	ShypPrec[m] =  m_Build.template mixture_vector<Gamma> (1.00,m_GammaVar) ;
       }
     
     std::cout<<"built hyperparams - nodes = "<< m_Build.number_of_nodes() <<std::endl;
@@ -300,185 +310,14 @@ public:
 
       // std::cout<<"join"<<std::endl;
 
-      m_Build.join(AtimesSplusN(n,t),m_noisePrecision[n], data(n,t));
+      //m_Build.join(AtimesSplusN(n,t),m_noisePrecision[n], data(n,t));
+      m_Build.join(AtimesSplusN(n,t),m_noisePrecision[t], data(n,t));
     }
   }
 
   std::cout<<"built data - nodes = "<< m_Build.number_of_nodes() <<std::endl;
      
 
-  // std::vector<double> d(11,3.0);
-  
-  // Context::vector_t<10> all_ctx;
-  // //Context::assign(all_ctx,d);
-  // Context::at<Context::vector_t<10>,0> ctx_0;
-  // //ctx_0.push_back(d);
-
-  // //Context::make<mpl::integral_c<int,0> > ctx_0 = 
-  // fusion::at_c<0>(all_ctx).push_back(d);
-  // Context::make<mpl::integral_c<int,0> > ctx_0 =  fusion::at_c<0>(all_ctx);
-    
-  //  Context::make_c<0> dotprod_ctx;
-  //  dotprod_ctx.args = d;
-
-  // std::pair<double,double>  pl= proto::eval(dot_prod,ctx_0);
-
-  // std::cout<<"pl = "<<pl.first<<std::endl;
-  // std::cout<<"pl = "<<pl.second<<std::endl;
-
-
-
-
-  //   std::vector< CalculationVector<Gaussian>::type > m_S(T);
-  //   std::vector< CalculationVector<RectifiedGaussian>::type > m_Sp(T);
-    
-    
-  //   for(size_t m=0;m<M;++m){
-  //     for(size_t t=0;t<T;++t){ 
-  // 	if (positive_sources) 
-  // 	  boost::fusion::for_each(m_S(t).data(),  
-  // 				  MakeMixure<Gaussian>(
-  // 				  boost::bind(&Binder<data_t>::rectified_gaussian_mixture, 
-  // 					      m_Build, 
-  // 					      ShypMean.begin(), 
-  // 					      ShypPrec.begin(),
-  // 					      Weights.begin()
-  // 					      )
-  // 	  m_Sp(t) = m_Build.calculation_vector<RectifiedGaussian>
-  // 	    (boost::bind(&Binder<data_t>::rectified_gaussian_mixture, 
-  // 			 m_Build, 
-  // 			 ShypMean.begin(), 
-  // 			 ShypPrec.begin(),
-  // 			 Weights.begin()
-  // 			 )
-			 
-			 
-								 
-  // 	  m_Sp(t) = m_Build.rectified_gaussian_mixture(ShypMean[m],
-  // 							ShypPrec[m],
-  // 							Weights[m]);
-  // 	else
-    
-  // 	  m_S(m,t) = m_Build.gaussian_mixture(ShypMean[m],
-  // 					      ShypPrec[m],
-  // 					      Weights[m]);
-  // 	}
-  //     }
-    
-
- 
-
-  //   std::cout<<"built mixing - nodes = "<< m_Build.number_of_nodes() <<std::endl;
-
-  //   // if (positive_mixing) 
-  //   //   build_mixing_matrix(Int2Type<true>(),N,M);
-  //   // else
-  //   //   build_mixing_matrix(Int2Type<false>(),N,M);
-      
-
-  //   //Deterministic Node.  Need to make the expression.
-  //   //The inner product plus noise
-  //   /** The inner product is summed over M.
-  //    *  Therefore there are 2M + 1 placeholders required
-  //    *  M for Anm, M for Smt and 1 for Noise
-  //    */
-  //   //Make a set of placeholders for all the elements in the expression.
-    
-    
-  // typedef Factory::make_vector<1,M>  v1;
-
-
-  // typedef Placeholder::make_vector<1,M>  SP;
-  // typedef Placeholder::make_vector<M+1,2*M> AP;
-  // typedef Placeholder::make<2*M+1> NP;
-  
-  // std::cout<<"size SP = "<<mpl::size<SP>::value<<std::endl;
-  // std::cout<<"size AP = "<<mpl::size<AP>::value<<std::endl;
-
-  // typedef mpl::transform<AP,SP,times_f>::type prod;
-  // mpl::accumulate<prod,zero_t,plus_f>::type dot_prod;
-  // mpl::accumulate<NP,dot_prod,plus_f>::type Expr;
-  
-
-  // // std::vector<double> d(11,3.0);
-  
-  // // Context::vector_t<10> all_ctx;
-  // // //Context::assign(all_ctx,d);
-  // // Context::at<Context::vector_t<10>,0> ctx_0;
-  // // //ctx_0.push_back(d);
-
-  // // //Context::make<mpl::integral_c<int,0> > ctx_0 = 
-  // // fusion::at_c<0>(all_ctx).push_back(d);
-  // // Context::make<mpl::integral_c<int,0> > ctx_0 =  fusion::at_c<0>(all_ctx);
-    
-  // //  Context::make_c<0> dotprod_ctx;
-  // //  dotprod_ctx.args = d;
-
-  // // std::pair<double,double>  pl= proto::eval(dot_prod,ctx_0);
-
-  // // std::cout<<"pl = "<<pl.first<<std::endl;
-  // // std::cout<<"pl = "<<pl.second<<std::endl;
-
-  
-    
-  // // vector<ICR::EnsembleLearning::Placeholder<data_t>*> SP(M);
-  // // vector<ICR::EnsembleLearning::Placeholder<data_t>*> AP(M);
-  // // ICR::EnsembleLearning::Placeholder<data_t>* NP = m_Factory.placeholder();
-  // // for(size_t m=0;m<M;++m){
-  // //   SP[m] = m_Factory.placeholder();  
-  // //   AP[m] = m_Factory.placeholder(); 
-  // // }
-  // // //The expression in terms of these placeholders
-  // // ICR::EnsembleLearning::Expression<data_t>* Expr;
-  // // {
-  // //   BOOST_ASSERT(M!=0);
-  // //   //First do the multiplication
-  // //   std::deque<ICR::EnsembleLearning::Expression<data_t>*> prod(M);
-  // //   for(size_t m=0;m<M;++m){
-  // // 	prod[m] = m_Factory.Multiply(AP[m], SP[m]);
-  // //   }
-  // //   //then add them up
-  // //   Expr = prod[0];
-  // //   prod.pop_front();
-  // //   while(prod.size()!=0)
-  // // 	{
-  // // 	  Expr = m_Factory.Add(Expr,prod[0]);
-  // // 	  prod.pop_front();
-  // // 	}
-  // //   if (noise_offset) 
-  // // 	//Finnaly add the Noise placeholder
-  // // 	Expr = m_Factory.Add(Expr, NP);
-      
-  // // }
-    
-    
-  // //   //make vectors of size m.
-  // //   BOOST_AUTO(AMean,(m_Build.calculation_vector<Gaussian,0>(0.0,0.001)));
-  // //   BOOST_AUTO(APrec,(m_Build.calculation_vector<Gamma,0>(1.0,0.001)));
-  // //   BOOST_AUTO(As,(m_Build.calculation_vector<Gaussian,0>(function,m_Build, boost:bind(AMean,APrec))));
-
-  // //   contextAs = context(As)
-      
-  // //   for(size_t t=0;t<T;++t){ 
-	
-  // // 	WeightsNode Weights = m_Build.weights();
-  // // 	BOOST_AUTO(ShypMean,(m_Build.mixture_vector<Gaussian,0>(0.0,0.001)));
-  // // 	BOOST_AUTO(ShypPrec,(m_Build.mixture_vector<Gamma,0>(1.0,0.001)));
-  // // 	BOOST_AUTO(Ss,(m_Build.calculation_vector<Gaussian,0>(function,m_Build,boost:bind(ShypMean,ShypPrec,weights))));
-
-  // //   }
-      
-      
-  // //   for(size_t i=0;i<10;++i){
-  // // 	delete m_vec;
-  // // 	m_vec =  new vector(make_vector(*m_vec_old, m_Build.gaussian(0,0.1)));
-  // // 	delete m_vec_old;
-  // // 	m_vec_old = new vector(m_vec);
-	  
-  // // 	GaussianNode* A = new GaussianNode(m_Build.gaussian(0,0.1));
-	
-	
-  // //   }
 
   }
   ICR::EnsembleLearning::Builder<data_t>& get_builder() {return m_Build;}
@@ -608,13 +447,13 @@ public:
 
     for(size_t i=0;i<m_A.size1();++i){
       for(size_t j=0; j<m_A.size2();++j){
-    	A(i,j)= (m_A(i,j)->GetMoments()->operator[](0));
+    	A(i,j)= Mean(m_A(i,j));
       }
     }
 
     for(size_t i=0;i<m_S.size1();++i){
       for(size_t j=0; j<m_S.size2();++j){
-    	S(i,j)= (m_S(i,j)->GetMoments()->operator[](0));
+    	S(i,j)= Mean(m_S(i,j));
       }
     }
 
@@ -634,8 +473,17 @@ public:
     matrix<data_t> r(m_AtimesSplusN.size1(), m_AtimesSplusN.size2());
     for(size_t i=0;i<m_AtimesSplusN.size1();++i){
       for(size_t j=0; j<m_AtimesSplusN.size2();++j){
-    	r(i,j)= (m_AtimesSplusN(i,j)->GetMoments()->operator[](0));
+    	r(i,j)= Mean(m_AtimesSplusN(i,j));
       }
+    }
+    return r;
+  }
+
+  vector<data_t> get_noise_precision() const
+  {
+    vector<data_t> r(m_noisePrecision.size());
+    for(size_t i=0;i<m_noisePrecision.size();++i){
+      r(i)= Mean(m_noisePrecision(i));
     }
     return r;
   }
@@ -682,106 +530,6 @@ private:
     						  ));
   }
   
-  void
-  build_mixing_matrix(Int2Type<false>, size_t N, size_t M)
-  {
-    // GaussianNode AMean = m_Build.gaussian(0.0,m_GaussianPrecision);
-    // GammaNode    APrecision = m_build.gamma(1.0,m_GammaVar);
-    // return m_Build.gaussian(AMean,APrec);
-    
-    
-    // // vector<GaussianNode> AMean(M);
-    // // vector<GammaNode> APrecision(M);
-    // // build_vector(AMean);
-    // // build_vector(APrecision);
-    
-    // // for(size_t n=0;n<N;++n){
-    // //   for(size_t m=0;m<M;++m){ 
-    // // 	m_A(n,m) = m_Build.gaussian(AMean[m], APrecision[m]);
-    // //   }
-    // // }
-    // // std::cout<<"built mixing - nodes = "<< m_Build.number_of_nodes() <<std::endl;
-  };
-
-  void
-  build_mixing_matrix(Int2Type<true>, size_t N, size_t M)
-  {
-    // vector<GaussianNode> AMean(M);
-    // vector<GammaNode> APrecision(M);
-    // build_vector(AMean);
-    // build_vector(APrecision);
-    
-    // for(size_t n=0;n<N;++n){
-    //   for(size_t m=0;m<M;++m){ 
-    // 	m_A(n,m) = m_Build.rectified_gaussian(AMean[m], APrecision[m]);
-    //   }
-    // }
-    // std::cout<<"built mixing (RG)- nodes = "<< m_Build.number_of_nodes() <<std::endl;
-  };
-
-
-  
-  void
-  build_source_matrix(Int2Type<false>, size_t M, size_t T, size_t Components)
-  {
-    
-    // //build A weights component for each source
-    // vector<WeightsNode> Weights(M);
-    // build_vector(Weights, Components);
-    
-    // //m_Build hyper mean and hyper precision for each source mixture component.
-    // std::vector< vector<GaussianNode> > ShypMean(M);
-    // std::vector< vector<GammaNode> > ShypPrec(M);
-    // for(size_t m=0;m<M;++m){ 
-    //   ShypMean[m].resize(Components);
-    //   ShypPrec[m].resize(Components);
-    //   build_vector(ShypMean[m]);
-    //   build_vector(ShypPrec[m]);
-    // }
-    // std::cout<<"built hyperparams - nodes = "<< m_Build.number_of_nodes() <<std::endl;
-    
-    // for(size_t m=0;m<M;++m){ 
-    //   for(size_t t=0;t<T;++t){ 
-    // 	m_S(m,t) = m_Build.gaussian_mixture(ShypMean[m].begin(),
-    // 					    ShypPrec[m].begin(),
-    // 					    Weights[m]);
-    //   }
-    // }
-    
-    // std::cout<<"built sources - nodes = "<< m_Build.number_of_nodes() <<std::endl;
-     
-  }
-  
-  void
-  build_source_matrix(Int2Type<true>, size_t M, size_t T, size_t Components)
-  {
-    
-    // //build A weights component for each source
-    // vector<WeightsNode> Weights(M);
-    // build_vector(Weights, Components);
-    
-    // //m_Build hyper mean and hyper precision for each source mixture component.
-    // std::vector< vector<GaussianNode> > ShypMean(M);
-    // std::vector< vector<GammaNode> > ShypPrec(M);
-    // for(size_t m=0;m<M;++m){ 
-    //   ShypMean[m].resize(Components);
-    //   ShypPrec[m].resize(Components);
-    //   build_vector(ShypMean[m]);
-    //   build_vector(ShypPrec[m]);
-    // }
-    // std::cout<<"built hyperparams - nodes = "<< m_Build.number_of_nodes() <<std::endl;
-    
-    // for(size_t m=0;m<M;++m){ 
-    //   for(size_t t=0;t<T;++t){ 
-    // 	m_S(m,t) = m_Build.rectified_gaussian_mixture(ShypMean[m].begin(),
-    // 						      ShypPrec[m].begin(),
-    // 			 			      Weights[m]);
-    //   }
-    // }
-    
-    // std::cout<<"built sources  (RG) - nodes = "<< m_Build.number_of_nodes() <<std::endl;
-     
-  }
   
 
 ICR::EnsembleLearning::Builder<data_t> m_Build;
@@ -810,3 +558,14 @@ data_t m_GammaVar;
     }
     return out;
   }
+
+template<class data_t>
+std::ofstream&
+operator<<(std::ofstream& out, const vector<data_t>& M)
+{
+  for(size_t i=0;i<M.size();++i){
+    out<< M(i) << "\t";
+  }
+  out<<"\n";
+  return out;
+}

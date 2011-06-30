@@ -3,9 +3,9 @@
 #include <boost/preprocessor/arithmetic/add.hpp>
 #include <boost/preprocessor/arithmetic/mul.hpp>
 #  define ENSEMBLE_LEARNING_COMPONENTS 5
-#  define ENSEMBLE_LEARNING_SOURCES 5
+#  define ENSEMBLE_LEARNING_SOURCES 10
 #  define ENSEMBLE_LEARNING_PLACEHOLDERS BOOST_PP_ADD(BOOST_PP_MUL(ENSEMBLE_LEARNING_SOURCES,2),1)
-
+#  define FUSION_MAX_VECTOR_SIZE 25
 #include "ExampleData.hpp"
 //#include "EnsembleLearning.hpp"
 #include "BuildModel.hpp"
@@ -390,6 +390,7 @@ main  (int ac, char **av)
   fs::path cost_file   = fs::path(output_directory)/fs::path("Cost.txt");
   fs::path result_file   = fs::path(output_directory)/fs::path("InferedResult.txt");
   fs::path result_file2   = fs::path(output_directory)/fs::path("InferedResult2.txt");
+  fs::path precisions_file   = fs::path(output_directory)/fs::path("InferedNoise.txt");
   
 
   //   const size_t Components = mixing_components;
@@ -546,6 +547,7 @@ main  (int ac, char **av)
     std::ofstream mixing_matrix(mixing_file.string().c_str());
     std::ofstream result_matrix(result_file.string().c_str());
     std::ofstream result_matrix2(result_file2.string().c_str());
+    std::ofstream precisions(precisions_file.string().c_str());
   
     matrix<double> A(size1, assumed_sources);
     matrix<double> S(assumed_sources,size2);
@@ -554,6 +556,7 @@ main  (int ac, char **av)
     mixing_matrix<< matrix<double>(trans(A));
     result_matrix<<Model.get_results();
     result_matrix2<< matrix<double>(prod(A,S));
+    precisions<<Model.get_noise_precision();
   }
       
   ICR::EnsembleLearning::Builder<double>& Build = Model.get_builder();
@@ -569,6 +572,7 @@ main  (int ac, char **av)
     std::ofstream mixing_matrix(mixing_file.string().c_str());
     std::ofstream result_matrix(result_file.string().c_str());
     std::ofstream result_matrix2(result_file2.string().c_str());
+    std::ofstream precisions(precisions_file.string().c_str());
 
     matrix<double> A(size1, assumed_sources);
     matrix<double> S(assumed_sources,size2);
@@ -577,6 +581,7 @@ main  (int ac, char **av)
     mixing_matrix<< matrix<double>(trans(A));
     result_matrix<<Model.get_results();
     result_matrix2<< matrix<double>(prod(A,S));
+    precisions<<Model.get_noise_precision();
     ++count;
   }
   //}

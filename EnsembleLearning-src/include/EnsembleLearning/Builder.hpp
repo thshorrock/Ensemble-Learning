@@ -366,6 +366,21 @@ namespace ICR{
       ///@}
 
       
+      
+      template<template<class> class Model>
+      ObservedMixtureVector<Model,T>
+      observed_mixture_vector(std::vector<T>& data)
+      {
+	typedef  ObservedMixtureVector<Model,T>
+      	  MV_t;
+	
+	MV_t MV;
+
+	boost::fusion::for_each(MV.data(),MakeObservedNode<Model>(m_Factors,m_Nodes,data));
+	
+	return MV;
+      }
+
       template<template<class> class Model, class fusion_vector1, class fusion_vector2>
       MixtureVector<Model,T>
       mixture_vector(
@@ -388,6 +403,7 @@ namespace ICR{
 	return MV;
       }
 
+      
 
       //Gaussian or Rectified Gaussian case.
       template<template<class> class Model>
@@ -1093,6 +1109,37 @@ namespace ICR{
 	vweight_t & m_Weights;
 
 	mutable size_t index;
+      };
+
+      template<template<class> class Model >
+      struct MakeObservedNode
+      {
+	MakeObservedNode(std::vector<boost::shared_ptr<FactorNode_basic> >& F,
+		  std::vector<boost::shared_ptr<VariableNode_basic > >& N,
+		  std::vector<T>& data
+		  )
+	  : m_F(F), m_N(N),m_data(data), index(0)
+	{}
+	
+	template <class Node>
+	void operator()(Node& node) const
+	//it0, Itr1 it1, ItrChild itC) const
+	{
+	  typedef typename boost::remove_pointer<typename boost::remove_reference<Node>::type>::type child_t;
+	  
+  
+	  boost::shared_ptr<child_t> child( new child_t(m_data[index]) );
+	  m_N.push_back(child);
+	  node = child.get();
+	  ++index;
+
+
+	}
+	mutable std::vector<boost::shared_ptr<FactorNode_basic> >& m_F;
+	mutable std::vector<boost::shared_ptr<VariableNode_basic > >& m_N;
+	std::vector<T>& m_data;
+	mutable size_t index;
+	
       };
 
       template<template<class> class Model , class Mean_t , class Prec_t >
