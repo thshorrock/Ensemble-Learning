@@ -467,59 +467,61 @@ main  (int ac, char **av)
 
   
 
-  // if (use_float) 
-  //   {
-  //     std::cout<<"Building Model"<<std::endl;
-  //     BuildModel<float> Model(Data, assumed_sources, mixing_components, 
-  // 			      positive_source,
-  // 			      positive_mixing,
-  // 			      model_noise_offset,
-  // 			      GaussianPrecision,
-  // 			      GammaPrecision);
-  //     size_t size1 = Data.size1();
-  //     size_t size2 = Data.size2();
-  //     Data = matrix<float>(); //clear the memory (clear function doesn't do this)
+  if (use_float) 
+    {
+      std::cout<<"Building Model"<<std::endl;
+      BuildModel<float, assumed_sources, mixing_components> 
+	Model(Data, 
+	      positive_source,
+	      positive_mixing,
+	      model_noise_offset,
+	      GaussianPrecision,
+	      GammaPrecision
+	      );
+      size_t size1 = Data.size1();
+      size_t size2 = Data.size2();
+      Data = matrix<float>(); //clear the memory (clear function doesn't do this)
 
-  //     {
+      {
 	
-  // 	std::ofstream sources(source_file.string().c_str());
-  // 	std::ofstream mixing_matrix(mixing_file.string().c_str());
-  // 	std::ofstream result_matrix(result_file.string().c_str());
-  // 	std::ofstream result_matrix2(result_file2.string().c_str());
-  // 	matrix<float> A(size1, assumed_sources);
-  // 	matrix<float> S(assumed_sources,size2);
-  // 	Model.get_normalised_means(A,S);
-  // 	sources<<S;
-  // 	mixing_matrix<< matrix<float>(trans(A));
-  // 	result_matrix<<Model.get_results();
-  // 	result_matrix2<< matrix<float>(prod(A,S));
-  //     }
+  	std::ofstream sources(source_file.string().c_str());
+  	std::ofstream mixing_matrix(mixing_file.string().c_str());
+  	std::ofstream result_matrix(result_file.string().c_str());
+  	std::ofstream result_matrix2(result_file2.string().c_str());
+  	matrix<float> A(size1, assumed_sources);
+  	matrix<float> S(assumed_sources,size2);
+  	Model.get_normalised_means(A,S);
+  	sources<<S;
+  	mixing_matrix<< matrix<float>(trans(A));
+  	result_matrix<<Model.get_results();
+  	result_matrix2<< matrix<float>(prod(A,S));
+      }
       
-  //     ICR::EnsembleLearning::Builder<float> Build = Model.get_builder();
-  //     Build.set_cost_file(cost_file.string());
-  //     std::cout<<"Running!"<<std::endl;
-  //     bool converged = false;
-  //     size_t count = 0;
-  //     while(!converged && count<100) {
-  //     	converged = Build.run(convergence_criterium,max_iterations);
+      ICR::EnsembleLearning::Builder<float> Build = Model.get_builder();
+      Build.set_cost_file(cost_file.string());
+      std::cout<<"Running!"<<std::endl;
+      bool converged = false;
+      size_t count = 0;
+      while(!converged && count<500) {
+      	converged = Build.run(convergence_criterium,max_iterations);
 
-  // 	std::ofstream sources(source_file.string().c_str());
-  // 	std::ofstream mixing_matrix(mixing_file.string().c_str());
-  // 	std::ofstream result_matrix(result_file.string().c_str());
-  // 	std::ofstream result_matrix2(result_file2.string().c_str());
+  	std::ofstream sources(source_file.string().c_str());
+  	std::ofstream mixing_matrix(mixing_file.string().c_str());
+  	std::ofstream result_matrix(result_file.string().c_str());
+  	std::ofstream result_matrix2(result_file2.string().c_str());
 
-  // 	matrix<float> A(size1, assumed_sources);
-  // 	matrix<float> S(assumed_sources,size2);
-  //     	Model.get_normalised_means(A,S);
-  //     	sources<<S;
-  //     	mixing_matrix<< matrix<float>(trans(A));
-  //     	result_matrix<<Model.get_results();
-  //     	result_matrix2<< matrix<float>(prod(A,S));
-  //     	++count;
-  //     }
-  //   }
-  // else
-  //   {
+  	matrix<float> A(size1, assumed_sources);
+  	matrix<float> S(assumed_sources,size2);
+      	Model.get_normalised_means(A,S);
+      	sources<<S;
+      	mixing_matrix<< matrix<float>(trans(A));
+      	result_matrix<<Model.get_results();
+      	result_matrix2<< matrix<float>(prod(A,S));
+      	++count;
+      }
+    }
+  else
+    {
 
   std::cout<<"Building Model"<<std::endl;
   BuildModel<double, assumed_sources, mixing_components> 
@@ -584,5 +586,5 @@ main  (int ac, char **av)
     precisions<<Model.get_noise_precision();
     ++count;
   }
-  //}
+  }
 }

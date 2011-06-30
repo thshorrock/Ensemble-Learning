@@ -277,8 +277,8 @@ namespace ICR{
 
 	// std::cout<<"to_node = "<<to_node<<std::endl;
 	
-	calculator_context<to_node> M0(M.size()+1); // The average means (inverted): < expr^-1(x_i) >
-	calculator_context<to_node> M1(M.size()+1); // The average of squares: < expr^-1(x_i)^2 >
+	calculator_context<T,to_node> M0(M.size()+1); // The average means (inverted): < expr^-1(x_i) >
+	calculator_context<T,to_node> M1(M.size()+1); // The average of squares: < expr^-1(x_i)^2 >
 	//calculator_context<0> lhs;   //The result node
 	for(size_t i=0;i<M.size();++i){
 	  const moments_t tmp = *M[i]->GetMoments();
@@ -328,9 +328,9 @@ namespace ICR{
 			   const Context<T,vector_t>& M)
       {
 	//zero is the results node.
-	calculator_context<0> M0(M.size()+1); //All the first moments  (the <x>'s of every element in expr)
-	calculator_context<0> M0_squared(M.size()+1); //All the first moments  (the <x>^2's of every element in expr)
-	calculator_context<0> M1(M.size()+1);//The second moment (the <x^2> of every element of expression)
+	calculator_context<T,0> M0(M.size()+1); //All the first moments  (the <x>'s of every element in expr)
+	calculator_context<T,0> M0_squared(M.size()+1); //All the first moments  (the <x>^2's of every element in expr)
+	calculator_context<T,0> M1(M.size()+1);//The second moment (the <x^2> of every element of expression)
 	for(size_t i=0;i<M.size();++i){
 	  const Moments<T> tmp = *M[i]->GetMoments();
 	  // std::cout<<"tmp0 = "<<tmp[0]<<", tmp1 = "<<tmp[1]<<std::endl;

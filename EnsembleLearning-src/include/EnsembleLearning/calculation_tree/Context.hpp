@@ -80,17 +80,17 @@ namespace ICR{
       class Deterministic ;
     }
 
-    template<int TerminalExpr>
+    template<class T, int TerminalExpr>
     class calculator_context
     {
     public:
 
-      void push_back(const std::vector<double>& a)
+      void push_back(const std::vector<T>& a)
       {
 	std::copy(a.begin(), a.end(), std::back_inserter(m_args));
       }
 
-      void push_back(const double a)
+      void push_back(const T a)
       {
 	m_args.push_back(a);
       }
@@ -112,7 +112,7 @@ namespace ICR{
     template<typename Expr, int I>
     struct eval<Expr, boost::proto::tag::terminal, placeholder<I> >
     {
-      typedef std::pair<double,double> result_type;
+      typedef std::pair<T,T> result_type;
       
       result_type operator()(Expr &, calculator_context &ctx) const
       {
@@ -126,7 +126,7 @@ namespace ICR{
     template<typename Expr, typename Arg0>
     struct eval<Expr, boost::proto::tag::terminal, Arg0>
     {
-      typedef std::pair<double,double> result_type;
+      typedef std::pair<T,T> result_type;
 
       result_type operator()(Expr &expr, calculator_context &) const
       {
@@ -138,7 +138,7 @@ namespace ICR{
     template<typename Expr, typename Arg0>
     struct eval<Expr, boost::proto::tag::plus, Arg0>
     {
-      typedef std::pair<double,double> result_type;
+      typedef std::pair<T,T> result_type;
 
     
       result_type operator()(Expr &expr, calculator_context &ctx) const
@@ -154,8 +154,8 @@ namespace ICR{
 	if (boost::is_base_of<mpl::int_<TerminalExpr>,ltype>::value) 
 	  {
 	    //lhs is equal to the special placeholder.
-	    const double rhs1 = boost::proto::eval(boost::proto::right(expr), ctx).first;
-	    const double rhs2 = boost::proto::eval(boost::proto::right(expr), ctx).second;
+	    const T rhs1 = boost::proto::eval(boost::proto::right(expr), ctx).first;
+	    const T rhs2 = boost::proto::eval(boost::proto::right(expr), ctx).second;
 	    //	    std::cout<<"lhs*+ r = "<<rhs1<<", "<<rhs2<<std::endl;
 
 	    return result_type(rhs1, rhs2);
@@ -163,18 +163,18 @@ namespace ICR{
 	else if (boost::is_base_of<mpl::int_<TerminalExpr>,rtype>::value)
 	  {
 	    //rhs is equal to the special placeholder.
-	    const double lhs1 = boost::proto::eval(boost::proto::left(expr), ctx).first;
-	    const double lhs2 = boost::proto::eval(boost::proto::left(expr), ctx).second;
+	    const T lhs1 = boost::proto::eval(boost::proto::left(expr), ctx).first;
+	    const T lhs2 = boost::proto::eval(boost::proto::left(expr), ctx).second;
 	    //	    std::cout<<"rhs*+ r = "<<lhs1<<", "<<lhs2<<std::endl;
 	    return result_type(lhs1, lhs2);
 	  } 
 	else
 	  {
 	    //no special placeholder
-	    const double lhs1 = boost::proto::eval(boost::proto::left(expr), ctx).first;
-	    const double lhs2 = boost::proto::eval(boost::proto::left(expr), ctx).second;
-	    const double rhs1 = boost::proto::eval(boost::proto::right(expr), ctx).first;
-	    const double rhs2 = boost::proto::eval(boost::proto::right(expr), ctx).second;
+	    const T lhs1 = boost::proto::eval(boost::proto::left(expr), ctx).first;
+	    const T lhs2 = boost::proto::eval(boost::proto::left(expr), ctx).second;
+	    const T rhs1 = boost::proto::eval(boost::proto::right(expr), ctx).first;
+	    const T rhs2 = boost::proto::eval(boost::proto::right(expr), ctx).second;
 	    //	    std::cout<<"r+      = "<<lhs1+rhs1<<", "<<lhs2*rhs2<<std::endl;
 	    return result_type(lhs1+rhs1, lhs2*rhs2);
 	  }
@@ -185,7 +185,7 @@ namespace ICR{
     template<typename Expr, typename Arg0>
     struct eval<Expr, boost::proto::tag::multiplies, Arg0>
     {
-      typedef std::pair<double,double> result_type;
+      typedef std::pair<T,T> result_type;
 
       result_type 
       operator()(Expr &expr, calculator_context &ctx) const
@@ -203,8 +203,8 @@ namespace ICR{
 	if (boost::is_same<mpl::int_<TerminalExpr>,mpl::int_<0> >::value) 
 	  {
 	    //special case for results expression.
-	    const double lhs1 = boost::proto::eval(boost::proto::left(expr), ctx).first;
-	    const double rhs1 = boost::proto::eval(boost::proto::right(expr), ctx).first;
+	    const T lhs1 = boost::proto::eval(boost::proto::left(expr), ctx).first;
+	    const T rhs1 = boost::proto::eval(boost::proto::right(expr), ctx).first;
 	    //no special placeholder
 	    return result_type(lhs1*rhs1,1);
 	  }
@@ -230,9 +230,9 @@ namespace ICR{
 	  { //lhs is terminal but not special placeholder.
 	    //& rhs is not terminal
 	    //by implication special placeholder on the rhs
-	    const double lhs1 = boost::proto::eval(boost::proto::left(expr), ctx).first;
-	    const double rhs1 = boost::proto::eval(boost::proto::right(expr), ctx).first;
-	    const double rhs2 = boost::proto::eval(boost::proto::right(expr), ctx).second;
+	    const T lhs1 = boost::proto::eval(boost::proto::left(expr), ctx).first;
+	    const T rhs1 = boost::proto::eval(boost::proto::right(expr), ctx).first;
+	    const T rhs2 = boost::proto::eval(boost::proto::right(expr), ctx).second;
 	    //	    std::cout<<"    * r = "<<lhs1*rhs1<<", "<<lhs1*rhs2<<std::endl;
 
 	    return result_type(lhs1*rhs1,lhs1*rhs2);
@@ -245,18 +245,18 @@ namespace ICR{
 	  { //rhs is terminal but not special placeholder.
 	    //& lhs is not terminal
 	    //by implication special placeholder on the lhs
-	    const double lhs1 = boost::proto::eval(boost::proto::left(expr), ctx).first;
-	    const double rhs1 = boost::proto::eval(boost::proto::right(expr), ctx).first;
-	    const double lhs2 = boost::proto::eval(boost::proto::left(expr), ctx).second;
+	    const T lhs1 = boost::proto::eval(boost::proto::left(expr), ctx).first;
+	    const T rhs1 = boost::proto::eval(boost::proto::right(expr), ctx).first;
+	    const T lhs2 = boost::proto::eval(boost::proto::left(expr), ctx).second;
 	    //	    std::cout<<"    * r = "<<lhs1*rhs1<<", "<<lhs2*rhs1<<std::endl;
 	    return result_type(lhs1*rhs1,lhs2*rhs1);
 	  }
 	else
 	  {
-	    const double lhs1 = boost::proto::eval(boost::proto::left(expr), ctx).first;
-	    const double rhs1 = boost::proto::eval(boost::proto::right(expr), ctx).first;
-	    const double lhs2 = boost::proto::eval(boost::proto::left(expr), ctx).second;
-	    const double rhs2 = boost::proto::eval(boost::proto::right(expr), ctx).second;
+	    const T lhs1 = boost::proto::eval(boost::proto::left(expr), ctx).first;
+	    const T rhs1 = boost::proto::eval(boost::proto::right(expr), ctx).first;
+	    const T lhs2 = boost::proto::eval(boost::proto::left(expr), ctx).second;
+	    const T rhs2 = boost::proto::eval(boost::proto::right(expr), ctx).second;
 	    //no special placeholder
 	    //	    std::cout<<"    * r = "<<lhs1*rhs1<<", "<<lhs2*rhs2<<std::endl;
 	    return result_type(lhs1*rhs1,lhs2*rhs2);
@@ -267,13 +267,13 @@ namespace ICR{
 
       // Handle the placeholders:
       template<int I>
-      double operator()(boost::proto::tag::terminal, placeholder<I>) const
+      T operator()(boost::proto::tag::terminal, placeholder<I>) const
       {
 	return this->m_args[I];
       }
 private:
   // The values with which we'll replace the placeholders
-  std::vector<double> m_args;
+  std::vector<T> m_args;
     };
     
 // // Forward-declare an expression wrapper

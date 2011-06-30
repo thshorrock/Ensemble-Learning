@@ -116,7 +116,7 @@ public:
     for(size_t m=0;m<M;++m)
       { 
     	ShypMean[m] =  SHypMean_node;//m_Build.template mixture_vector<Gaussian>(0.00,m_GaussianPrecision); 
-    	ShypPrec[m] =  m_Build.template mixture_vector<Gamma> (1.00,m_GammaVar) ;
+    	ShypPrec[m] =  m_Build.template mixture_vector<Gamma> (data_t(1.00),data_t(m_GammaVar)) ;
       }
     
     std::cout<<"built hyperparams - nodes = "<< m_Build.number_of_nodes() <<std::endl;
@@ -481,7 +481,9 @@ public:
 
   vector<data_t> get_noise_precision() const
   {
+
     vector<data_t> r(m_noisePrecision.size());
+    std::cout<<"noise precision size = "<<r.size()<<std::endl;
     for(size_t i=0;i<m_noisePrecision.size();++i){
       r(i)= Mean(m_noisePrecision(i));
     }

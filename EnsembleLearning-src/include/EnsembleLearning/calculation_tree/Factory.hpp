@@ -190,95 +190,95 @@ namespace ICR{
 
 
 
-    struct 
-    ContextFactory
-    {
+//     struct 
+//     ContextFactory
+//     {
 
-      template<int I>
-      struct
-      make_c : public calculator_context<I>
-      {};
+//       template<int I>
+//       struct
+//       make_c : public calculator_context<I>
+//       {};
   
-      template<class T>
-      struct
-      make : public calculator_context<T::value>
-      {};
+//       template<class T>
+//       struct
+//       make : public calculator_context<T::value>
+//       {};
   
   
-      template< int to>
-      struct
-      vector_t : boost::mpl::copy<
-	boost::mpl::range_c<int,0,boost::mpl::next<boost::mpl::int_<to> >::type::value>, 
-	boost::mpl::inserter< 
-	  boost::mpl::vector<>,
-	  boost::mpl::push_back<boost::mpl::placeholders::_1,
-				make<boost::mpl::placeholders::_2>
-				>
-	  > 
-	>::type
-      {};
+//       template< int to>
+//       struct
+//       vector_t : boost::mpl::copy<
+// 	boost::mpl::range_c<int,0,boost::mpl::next<boost::mpl::int_<to> >::type::value>, 
+// 	boost::mpl::inserter< 
+// 	  boost::mpl::vector<>,
+// 	  boost::mpl::push_back<boost::mpl::placeholders::_1,
+// 				make<boost::mpl::placeholders::_2>
+// 				>
+// 	  > 
+// 	>::type
+//       {};
 
-// template< int to>
-// vector_t<to>
-// vector()
-// {
-//   return vector_t<to>();
-// }
-  
-template<class T,int I>
-struct
-at : public boost::mpl::at<T,boost::mpl::int_<I> >::type
-{};
-  
-  
-// struct push_bac
-// {
-//   template <typename T>
-//   void operator()(T const& x) const
-//   {
-//     std::cout
-// 	<< '<' << typeid(x).name() << '>'
-// 	<< x
-// 	<< "</" << typeid(x).name() << '>'
-// 	;
-//   }
-// };
-
+// // template< int to>
+// // vector_t<to>
+// // vector()
+// // {
+// //   return vector_t<to>();
+// // }
   
 // template<class T,int I>
+// struct
+// at : public boost::mpl::at<T,boost::mpl::int_<I> >::type
+// {};
+  
+  
+// // struct push_bac
+// // {
+// //   template <typename T>
+// //   void operator()(T const& x) const
+// //   {
+// //     std::cout
+// // 	<< '<' << typeid(x).name() << '>'
+// // 	<< x
+// // 	<< "</" << typeid(x).name() << '>'
+// // 	;
+// //   }
+// // };
+
+  
+// // template<class T,int I>
+// // static
+// // void
+// // at(T vec)
+// // {
+// //   return spirit::at_c<I>(vec);
+// // }
+  
+
+// struct push_back
+// {
+//   push_back(std::vector<double> const&  args) : m_args(args) {}
+    
+//   template<class T>
+//   void
+//   operator()(T& t) const
+//   {
+//     t.push_back(m_args);
+//   }
+// private:
+//   std::vector<double> m_args;
+// };
+
+// template<class T>
 // static
 // void
-// at(T vec)
+// assign( T& vec, std::vector<double> const & args)
 // {
-//   return spirit::at_c<I>(vec);
+//   fusion::transform(vec,vec, push_back(args) );
+    
 // }
-  
-
-struct push_back
-{
-  push_back(std::vector<double> const&  args) : m_args(args) {}
-    
-  template<class T>
-  void
-  operator()(T& t) const
-  {
-    t.push_back(m_args);
-  }
-private:
-  std::vector<double> m_args;
-};
-
-template<class T>
-static
-void
-assign( T& vec, std::vector<double> const & args)
-{
-  fusion::transform(vec,vec, push_back(args) );
-    
-}
 
   
-};
+// };
 }
 }
 
