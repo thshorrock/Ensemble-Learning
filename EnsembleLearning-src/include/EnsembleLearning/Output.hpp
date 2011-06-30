@@ -68,6 +68,22 @@ namespace ICR{
       return ret;
 			  
     }
+    
+
+    template<template<template<class> class,class,int,int> class VectorType,template<class> class Model, class T,int from, int array_size>
+    std::vector<VariableNode<T>* >
+    to_std_vector(VectorType<Model,T,from,array_size> v)
+    {
+      std::vector<VariableNode<T>* > ret;
+  
+      boost::fusion::for_each(v.data(), 
+			      boost::bind(&std::vector<VariableNode<T>* >::push_back,
+					  boost::ref(ret),
+					  (_1) 
+					  ));
+      return ret;
+			  
+    }
     /** Evaluate the standard deviation of a variable node. 
      * @param node A pointer to the VariableNode to evaluate.
      * @param index The index of the mean to return.

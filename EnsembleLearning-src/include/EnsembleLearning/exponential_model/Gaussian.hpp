@@ -275,13 +275,14 @@ namespace ICR{
 	 *
 	 */
 
+	// std::cout<<"to_node = "<<to_node<<std::endl;
 
 	calculator_context<to_node> M0; // The average means (inverted): < expr^-1(x_i) >
 	calculator_context<to_node> M1; // The average of squares: < expr^-1(x_i)^2 >
 	//calculator_context<0> lhs;   //The result node
 	for(size_t i=0;i<M.size();++i){
 	  const moments_t tmp = *M[i]->GetMoments();
-	   // std::cout<<"tmp0 = "<<tmp[0]<<", tmp1 = "<<tmp[1]<<std::endl;
+	  // std::cout<<"tmp0 = "<<tmp[0]<<", tmp1 = "<<tmp[1]<<std::endl;
 
 	  const T tmp0 = tmp[0];
 	  M0.push_back(tmp[0]);
@@ -293,9 +294,11 @@ namespace ICR{
 	const std::pair<T,T> inv_op_data1 = proto::eval(Expr,M1);
 
 	// std::cout<<"to node= "<<to_node<<std::endl;
-	// std::cout<<"result = "<<result0.first<<", "<<result0.second<<std::endl;
+	// // std::cout<<"result = "<<result0.first<<", "<<result0.second<<std::endl;
 	// std::cout<<"iv0 = "<<inv_op_data0.first<<", "<<inv_op_data0.second<<std::endl;
 	// std::cout<<"iv1 = "<<inv_op_data1.first<<", "<<inv_op_data1.second<<std::endl;
+	// std::cout<<"fdata = "<<fdata<<std::endl;
+	// std::cout<<"unsummed0 = "<<fdata-inv_op_data0.first<<std::endl;
 
 	
 	  //The data returns in two components:
@@ -330,7 +333,7 @@ namespace ICR{
 	calculator_context<0> M1;//The second moment (the <x^2> of every element of expression)
 	for(size_t i=0;i<M.size();++i){
 	  const Moments<T> tmp = *M[i]->GetMoments();
-	   // std::cout<<"tmp0 = "<<tmp[0]<<", tmp1 = "<<tmp[1]<<std::endl;
+	  // std::cout<<"tmp0 = "<<tmp[0]<<", tmp1 = "<<tmp[1]<<std::endl;
 	  const T tmp0 = tmp[0];
 	  M0.push_back(tmp[0]);
 	  M0_squared.push_back(tmp0*tmp0);

@@ -439,14 +439,14 @@ namespace ICR{
       }
 
 
-      template<template<class> class Model, class fusion_vector1, class fusion_vector2>
-      CalculationVector<Model,T>
+      template<template<class> class Model,int from, int array_size, class fusion_vector1, class fusion_vector2>
+      CalculationVector<Model,T,from,array_size>
       calculation_vector(
 			 const fusion_vector1& v0,
 			 const fusion_vector2& v1
 			 )
       {
-	typedef  CalculationVector<Model,T>
+	typedef  CalculationVector<Model,T,from,array_size>
       	  CV_t;
 	
 	CV_t CV;
@@ -463,19 +463,18 @@ namespace ICR{
 
 
       //Gaussian or Rectified Gaussian case.
-      template<template<class> class Model>
-      CalculationVector<Model,T> 
+      template<template<class> class Model,int from, int array_size>
+      CalculationVector<Model,T,from,array_size> 
       calculation_vector(const std::vector<T>& v1, 
       		     const std::vector<T>& v2)
       {
 
 	typedef ObservedNode<Gaussian, T, detail::TypeList::zeros,2> p0_t;
 	typedef ObservedNode<Gamma,    T, detail::TypeList::zeros,2> p1_t;
-	const size_t size = ENSEMBLE_LEARNING_PLACEHOLDERS;
 	
-	std::vector<p0_t*> p_0(size);
-	std::vector<p1_t*> p_1(size);
-	for(size_t i=0;i<size;++i){
+	std::vector<p0_t*> p_0(array_size);
+	std::vector<p1_t*> p_1(array_size);
+	for(size_t i=0;i<array_size;++i){
 	  boost::shared_ptr<p0_t> tmp0(new p0_t(v1[i]));
 	  boost::shared_ptr<p1_t> tmp1(new p1_t(v2[i]));
 	  //store the reference so it doesn't get deleted till end of execution.
@@ -488,38 +487,39 @@ namespace ICR{
 	  p_1[i] = tmp1.get();
 	}
 	//The fusion vectors
-	Vector<ObservedNode,Gaussian,T,size> vt0;
-	Vector<ObservedNode,Gamma,T,size> vt1;
+	Vector<ObservedNode,Gaussian,T,array_size> vt0;
+	Vector<ObservedNode,Gamma,T,array_size> vt1;
 	//Assign
 	boost::fusion::for_each(vt0.data(), AssignVector<p0_t>(p_0));
 	boost::fusion::for_each(vt1.data(), AssignVector<p1_t>(p_1));
 	
 	//pass on the pointers
-	return calculation_vector<Model>(vt0.data(),vt1.data());
+	return calculation_vector<Model,from,array_size>(vt0.data(),vt1.data());
 				
       }
 
-      template<template<class> class Model>
-      CalculationVector<Model,T>
+      template<template<class> class Model,int from, int array_size>
+      CalculationVector<Model,T,from,array_size>
       calculation_vector(const T d1, 
-      		     const T d2)
+			 const T d2)
       {
 	
-	std::vector<T> v1(ENSEMBLE_LEARNING_PLACEHOLDERS,d1);
-	std::vector<T> v2(ENSEMBLE_LEARNING_PLACEHOLDERS,d2);
+	std::vector<T> v1(array_size,d1);
+	std::vector<T> v2(array_size,d2);
 	
-	return calculation_vector<Model>(v1,v2);
+	return calculation_vector<Model,from,array_size>(v1,v2);
 
       }
 
 
-      template<template<class> class Model,int array_size, class Mean_t , class Prec_t >
-      CalculationVector<Model,T,array_size>
+      template<template<class> class Model,
+	       int from, int array_size, class Mean_t , class Prec_t >
+      CalculationVector<Model,T,from,array_size>
       calculation( std::vector<Mean_t>& mean,
 		   std::vector<Prec_t>& prec
 		  )
       {
-	typedef  CalculationVector<Model,T,array_size>
+	typedef  CalculationVector<Model,T,from,array_size>
       	  CV_t;
 	
 	CV_t CV;
@@ -589,18 +589,19 @@ namespace ICR{
 
 
       template<template<class> class Model,
+	       int from,
 	       int size,
 	       class vmean_t , 
 	       class vprec_t,
 	       class vweight_t
 	        >
-      CalculationVector<Model,T,size>
+      CalculationVector<Model,T,from,size>
       calculation_mixture( std::vector< vmean_t > & vMean,  
 			   std::vector< vprec_t > & vPrecision, 
 			   vweight_t & Weights)
       {
 
-	typedef  CalculationVector<Model,T, size>
+	typedef  CalculationVector<Model,T,from, size>
       	  CV_t;
 	
 	CV_t CV;
@@ -1166,7 +1167,7 @@ namespace ICR{
 	  m_F.push_back(F);
 	  m_N.push_back(child);
 	  ch = child.get();
-	  std::cout<<"model = "<<ch<<std::endl;
+	  //std::cout<<"model = "<<ch<<std::endl;
 
 
 	}

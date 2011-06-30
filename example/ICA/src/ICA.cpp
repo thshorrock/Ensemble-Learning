@@ -7,6 +7,7 @@
 #  define ENSEMBLE_LEARNING_PLACEHOLDERS BOOST_PP_ADD(BOOST_PP_MUL(ENSEMBLE_LEARNING_SOURCES,2),1)
 
 #include "ExampleData.hpp"
+//#include "EnsembleLearning.hpp"
 #include "BuildModel.hpp"
 
 #include <boost/program_options.hpp>
@@ -16,6 +17,7 @@
 #include <fstream>
 #include <string>
 
+using namespace ICR::EnsembleLearning;
 using namespace boost::numeric::ublas;
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;
@@ -24,7 +26,7 @@ int
 main  (int ac, char **av)
 {
   //start the Random number generator with fixed seed so model reproducable
-  //ICR::EnsembleLearning::Random::Instance(10);
+  ICR::EnsembleLearning::Random::Instance(10);
   
   bool   use_float = false;
   const size_t assumed_sources   = ENSEMBLE_LEARNING_SOURCES;
@@ -389,8 +391,81 @@ main  (int ac, char **av)
   fs::path result_file   = fs::path(output_directory)/fs::path("InferedResult.txt");
   fs::path result_file2   = fs::path(output_directory)/fs::path("InferedResult2.txt");
   
+
+  //   const size_t Components = mixing_components;
+  //   const size_t M = assumed_sources; //assumed sources
+  //   const size_t N = 5; //DataSources
+  //   typedef double data_t;
+    
+  //   Builder<data_t> m_Build;
+    
+  // typedef CalculationVector<Gaussian,data_t,1,assumed_sources> Ag_t;
+  // typedef CalculationVector<Gaussian,data_t,assumed_sources+1,assumed_sources> Sg_t;
+  // typedef  ICR::EnsembleLearning::Builder<data_t>::Variable    Variable;
   
+  // typedef PlaceholderFactory::make_vector<1,M> AP;
+  // typedef PlaceholderFactory::make_vector<M+1,2*M>  SP;
+
+  // std::cout<<"size SP = "<<boost::mpl::size<SP>::value<<std::endl;
+  // std::cout<<"size AP = "<<boost::mpl::size<AP>::value<<std::endl;
+
+  // typedef  boost::mpl::transform<AP,SP,Times>::type the_product;
+  // typedef  boost::mpl::accumulate<the_product,zero_t,Plus>::type the_inner_product;
+  // the_inner_product Expr;
   
+  // std::vector<Sg_t> cv_Sg(1);
+  // std::vector<Ag_t> cv_Ag(1);
+
+  // cv_Sg[0]=m_Build.calculation_vector<Gaussian,M+1,M>
+  //   (0.0,0.1 );
+
+  // std::vector<Variable> S_over_m = to_std_vector(cv_Sg[0]);
+  // for(size_t m=0;m<M;++m){
+  //   std::cout<<"S["<<m<<"] = "<<S_over_m[m]<<std::endl;
+  //   std::cout<<"S["<<m<<"] = "<<Mean(S_over_m[m])<<std::endl;
+
+  // }
+
+  // cv_Ag[0] = m_Build.calculation_vector<Gaussian,1,M>(0.0,0.1);
+  // std::vector<Variable> A_over_m = to_std_vector(cv_Ag[0]);
+  // for(size_t m=0;m<M;++m){
+  //   std::cout<<"A["<<m<<"] = "<<A_over_m[m]<<std::endl;
+  //   std::cout<<"A["<<m<<"] = "<<Mean(A_over_m[m])<<std::endl;
+  // }
+  
+  // typedef fuse<Ag_t,Sg_t> AS_t;
+  // AS_t AS(cv_Ag[0],cv_Sg[0] );
+  
+  // Context<data_t,AS_t> context(AS);
+  // Builder<data_t>::GaussianResultNode  AtimesSplusN = m_Build.calc_gaussian(Expr,context); 
+  // Builder<data_t>::GammaNode  Prec = m_Build.gamma(1.0,0.1); 
+  
+  // m_Build.join(AtimesSplusN,Prec, 0.1);
+      
+  // //std::cout<<"R = "<<AtimesSplusN->GetMoments()->operator[](0)<<std::endl;
+  // std::cout<<"R calc = "<<
+  //   S_over_m[0]->GetMoments()->operator[](0)*A_over_m[0]->GetMoments()->operator[](0)
+  //   +
+  //   S_over_m[1]->GetMoments()->operator[](0)*A_over_m[1]->GetMoments()->operator[](0)
+  //    +
+  //    S_over_m[2]->GetMoments()->operator[](0)*A_over_m[2]->GetMoments()->operator[](0)
+  //    +
+  //    S_over_m[3]->GetMoments()->operator[](0)*A_over_m[3]->GetMoments()->operator[](0)
+  //    +
+  //    S_over_m[4]->GetMoments()->operator[](0)*A_over_m[4]->GetMoments()->operator[](0)
+  // 	   <<std::endl;
+
+  // std::cout<<"R = "<<Mean(AtimesSplusN)<<std::endl;
+  // Coster dummy;
+  // S_over_m[0]->Iterate(dummy);
+  // S_over_m[1]->Iterate(dummy);
+  // S_over_m[2]->Iterate(dummy);
+  // S_over_m[3]->Iterate(dummy);
+  // S_over_m[4]->Iterate(dummy);
+  // std::cout<<S_over_m[0]<<std::endl;
+
+  
+
   // if (use_float) 
   //   {
   //     std::cout<<"Building Model"<<std::endl;
@@ -444,66 +519,65 @@ main  (int ac, char **av)
   //   }
   // else
   //   {
-      std::cout<<"Building Model"<<std::endl;
-      BuildModel<double, assumed_sources, mixing_components> 
-	Model(Data, 
-	      positive_source,
-	      positive_mixing,
-	      model_noise_offset,
-	      GaussianPrecision,
-	      GammaPrecision
-	      );
+
+  std::cout<<"Building Model"<<std::endl;
+  BuildModel<double, assumed_sources, mixing_components> 
+    Model(Data, 
+  	  positive_source,
+  	  positive_mixing,
+  	  model_noise_offset,
+  	  GaussianPrecision,
+  	  GammaPrecision
+  	  );
       
-  //     size_t size1 = Data.size1();
-  //     size_t size2 = Data.size2();
-  //     Data = matrix<double>(); //clear the memory (clear function doesn't do this)
+  size_t size1 = Data.size1();
+  size_t size2 = Data.size2();
+  Data = matrix<double>(); //clear the memory (clear function doesn't do this)
 
-  //     if (mean_file !="") 
-  // 	Model.set_means(Means);
-  //     if (sigma_file != "")
-  // 	Model.set_sigmas(Sigmas);
-  //     if (mixing_mean_file != "")
-  // 	Model.set_mixing_mean(MixingMean);
-  //     {
+  if (mean_file !="") 
+    Model.set_means(Means);
+  if (sigma_file != "")
+    Model.set_sigmas(Sigmas);
+  if (mixing_mean_file != "")
+    Model.set_mixing_mean(MixingMean);
+  {
 
-  // 	std::ofstream sources(source_file.string().c_str());
-  // 	std::ofstream mixing_matrix(mixing_file.string().c_str());
-  // 	std::ofstream result_matrix(result_file.string().c_str());
-  // 	std::ofstream result_matrix2(result_file2.string().c_str());
+    std::ofstream sources(source_file.string().c_str());
+    std::ofstream mixing_matrix(mixing_file.string().c_str());
+    std::ofstream result_matrix(result_file.string().c_str());
+    std::ofstream result_matrix2(result_file2.string().c_str());
   
-  // 	matrix<double> A(size1, assumed_sources);
-  // 	matrix<double> S(assumed_sources,size2);
-  // 	Model.get_normalised_means(A,S);
-  // 	sources<<S;
-  // 	mixing_matrix<< matrix<double>(trans(A));
-  // 	result_matrix<<Model.get_results();
-  // 	result_matrix2<< matrix<double>(prod(A,S));
-  //     }
+    matrix<double> A(size1, assumed_sources);
+    matrix<double> S(assumed_sources,size2);
+    Model.get_normalised_means(A,S);
+    sources<<S;
+    mixing_matrix<< matrix<double>(trans(A));
+    result_matrix<<Model.get_results();
+    result_matrix2<< matrix<double>(prod(A,S));
+  }
       
   ICR::EnsembleLearning::Builder<double>& Build = Model.get_builder();
-  MixtureVector<Gaussian,double,mixing_components> vmean = Build.mixture_vector<Gaussian>(0.00,0.001) ;
-    //BOOST_AUTO( vmean, Build.mixture_vector<Gaussian>(0.00,0.001) ); 
   
-  //     Build.set_cost_file(cost_file.string());
-  //     std::cout<<"Running!"<<std::endl;
-  //     bool converged = false;
-  //     size_t count = 0;
-  //     while(!converged && count<100) {
-  //     	converged = Build.run(convergence_criterium,max_iterations);
+  Build.set_cost_file(cost_file.string());
+  std::cout<<"Running!"<<std::endl;
+  bool converged = false;
+  size_t count = 0;
+  while(!converged && count<500) {
+    converged = Build.run(convergence_criterium,max_iterations);
 
-  // 	std::ofstream sources(source_file.string().c_str());
-  // 	std::ofstream mixing_matrix(mixing_file.string().c_str());
-  // 	std::ofstream result_matrix(result_file.string().c_str());
-  // 	std::ofstream result_matrix2(result_file2.string().c_str());
+    std::ofstream sources(source_file.string().c_str());
+    std::ofstream mixing_matrix(mixing_file.string().c_str());
+    std::ofstream result_matrix(result_file.string().c_str());
+    std::ofstream result_matrix2(result_file2.string().c_str());
 
-  // 	matrix<double> A(size1, assumed_sources);
-  // 	matrix<double> S(assumed_sources,size2);
-  //     	Model.get_normalised_means(A,S);
-  //     	sources<<S;
-  //     	mixing_matrix<< matrix<double>(trans(A));
-  //     	result_matrix<<Model.get_results();
-  //     	result_matrix2<< matrix<double>(prod(A,S));
-  //     	++count;
-  //     }
-  //   }
+    matrix<double> A(size1, assumed_sources);
+    matrix<double> S(assumed_sources,size2);
+    Model.get_normalised_means(A,S);
+    sources<<S;
+    mixing_matrix<< matrix<double>(trans(A));
+    result_matrix<<Model.get_results();
+    result_matrix2<< matrix<double>(prod(A,S));
+    ++count;
+  }
+  //}
 }

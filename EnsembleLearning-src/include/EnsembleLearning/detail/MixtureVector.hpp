@@ -44,6 +44,7 @@
 #include <boost/fusion/include/as_vector.hpp>
 #include <boost/fusion/adapted/mpl.hpp>
 #include <boost/fusion/include/mpl.hpp>
+#include <boost/fusion/include/insert_range.hpp>
 
 //The maximum number of components is given by FUSION_MAX_VECTOR_SIZE (default is 20)
 //If we want to increase the number of componets beyond this, then need to increase this size.
@@ -202,15 +203,112 @@ namespace ICR{
 	typedef typename   boost::mpl::at<typename base::type,typename boost::mpl::int_<index>::type >::type type;
       };
     };
+
+    template<class v1_t, class v2_t>
+    class fuse
+    {
+      typedef typename boost::mpl::copy<
+	typename v2_t::type
+	,boost::mpl::back_inserter<typename v1_t::type>
+	>::type base;
     
+    typedef  boost::mpl::transform<typename base::type ,boost::add_pointer<boost::mpl::_1> > pointer_t;
+    
+      //The data is stored as a boost fusion vector. 
+      //Obtain the fusion vector class from the mpl vector: base.
+      typedef typename boost::fusion::result_of::as_vector<typename pointer_t::type> data_base;
+    
+      typedef typename  data_base::type data_t;
+      typename data_base::type m_data;
+    public:
+
+      fuse(v1_t& v1, v2_t& v2) : m_data(boost::fusion::insert_range(v1.data(), boost::fusion::end(v1.data()), v2.data()))
+      { 
+	// std::cout<<"  v1[0].id = "<<v1.get<0>()<<std::endl;
+	// std::cout<<"fuse[0].id = "<<this->get<0>()<<std::endl;
+	// std::cout<<"  v1[1].id = "<<v1.get<1>()<<std::endl;
+	// std::cout<<"fuse[1].id = "<<this->get<1>()<<std::endl;
+	// std::cout<<"  v1[2].id = "<<v1.get<2>()<<std::endl;
+	// std::cout<<"fuse[2].id = "<<this->get<2>()<<std::endl;
+	// std::cout<<"  v2[0].id = "<<v2.get<0>()<<std::endl;
+	// std::cout<<"fuse[3].id = "<<this->get<3>()<<std::endl;
+	// std::cout<<"  v2[1].id = "<<v2.get<1>()<<std::endl;
+	// std::cout<<"fuse[4].id = "<<this->get<4>()<<std::endl;
+	// std::cout<<"  v2[2].id = "<<v2.get<2>()<<std::endl;
+	// std::cout<<"fuse[5].id = "<<this->get<5>()<<std::endl;
+
+
+	// boost::fusion::insert_range(v1.data(), boost::fusion::end(v1.data()), v2.data());
+	  
+      }
+      
+      //@Convenient typedefs
+      //@{
+      typedef  base type;
+      typedef  pointer_t pointer_type;
+      typedef  data_base data_type;
+
+      //@}
+      const data_t& 
+      data() const {return m_data;}
+      data_t& 
+      data() {return m_data;}
+
+      //conversion operator
+      operator const data_t &() const  { return m_data;}
+      operator data_t& () {return m_data;}
+      
+
+      /** Get the type for the object stored at the given index.
+       *  @tparam index The index of the object whose type you want.
+       */
+      template<int index>
+      struct
+      get_t 
+      {
+	typedef typename  boost::mpl::at<typename base::type,typename boost::mpl::int_<index>::type >::type type;
+      };
+
+      /** Get the object stored at the given index.
+       *  @tparam index The index of the object whose type you want.
+       *  @return The object stored at the given index.
+       */
+      template<int index>
+      typename boost::add_pointer<typename get_t<index>::type>::type&
+      get()
+      {
+	return boost::fusion::at_c<index>(m_data);
+      }
+      
+      /** Get the object stored at the given index.
+       *  @tparam index The index of the object whose type you want.
+       *  @return The object stored at the given index.
+       */
+      template<int index>
+      const typename  boost::add_pointer<typename get_t<index>::type>::type& 
+      get() const
+      {
+	return boost::fusion::at_c<index>(m_data);
+      }
+    };
+
+  
 
     template<template<class> class Model, class T, int size = ENSEMBLE_LEARNING_COMPONENTS>
     struct MixtureVector : public Vector_impl<HiddenNode,Model, T, size-1 ,detail::TypeList::incr_component,detail::TypeList::component>
     {};
 
 
-    template<template<class> class Model, class T, int size = ENSEMBLE_LEARNING_PLACEHOLDERS>
-    struct CalculationVector : public Vector_impl<HiddenNode,Model, T, size-1 ,detail::TypeList::incr_position,detail::TypeList::position>
+    template<template<class> class Model, class T, 
+	     int from = 1 , int size = ENSEMBLE_LEARNING_PLACEHOLDERS>
+    struct CalculationVector : public Vector_impl<HiddenNode,
+						  Model, 
+						  T, 
+						  size-1 ,
+						  detail::TypeList::incr_position,
+						  typename boost::mpl::apply_wrap2<detail::TypeList::scale,
+										   detail::TypeList::position,
+										   typename boost::mpl::int_<from>::type>::type>
     {};
 
     template<template<template<class> class,class,class,int,class> class ModelType,
