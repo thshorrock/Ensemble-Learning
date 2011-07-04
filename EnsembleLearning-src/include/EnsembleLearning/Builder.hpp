@@ -510,7 +510,7 @@ namespace ICR{
 	boost::fusion::for_each(vt1.data(), AssignVector<p1_t>(p_1));
 	
 	//pass on the pointers
-	return calculation_vector<Model,from,array_size>(vt0.data(),vt1.data());
+	return this->template calculation_vector<Model,from,array_size>(vt0.data(),vt1.data());
 				
       }
 
@@ -523,7 +523,7 @@ namespace ICR{
 	std::vector<T> v1(array_size,d1);
 	std::vector<T> v2(array_size,d2);
 	
-	return calculation_vector<Model,from,array_size>(v1,v2);
+	return this->template calculation_vector<Model,from,array_size>(v1,v2);
 
       }
 

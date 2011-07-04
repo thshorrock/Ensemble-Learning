@@ -67,7 +67,15 @@ namespace ICR{
 	     >
     class ObservedNode ; //uninitialised
     
+    /** A vector of repeated types */
+    template<int i, typename T>
+    struct vector_r : boost::mpl::push_back<typename vector_r<i-1,T>::type, T>::type
+    {
+      // typedef typename push_back<typename vector_r<i-1,T>::type, T>::type type;
+    };
 
+    template<typename T>
+    struct vector_r<0,T> :  boost::mpl::vector<> {};
     /** Store a vector of components for a Mixture model.
      *  The types of each of the component are different,
      *  (They have a different component id)
@@ -195,15 +203,26 @@ typedef  boost::mpl::vector<ModelType<Model,T,typename Op<D,0>::type,2,Enabler> 
       //Obtain the fusion vector class from the mpl vector: base.
       typedef typename boost::fusion::result_of::as_vector<typename pointer_t::type> data_base;
       //Apply the fusion vector type to our data_t
-      struct data_t : data_base::type 
-      { };  
       
+      typedef typename  data_base::type data_t;
+      typename data_base::type m_data;
     public:
       //@Convenient typedefs
       //@{
       typedef  base type;
       typedef  pointer_t pointer_type;
+      typedef  data_base data_type;
+
       //@}
+      const data_t& 
+      data() const {return m_data;}
+      data_t& 
+      data() {return m_data;}
+
+      //conversion operator
+      operator const data_t &() const  { return m_data;}
+      operator data_t& () {return m_data;}
+      
 
       /** Get the type for the object stored at the given index.
        *  @tparam index The index of the object whose type you want.
@@ -212,9 +231,31 @@ typedef  boost::mpl::vector<ModelType<Model,T,typename Op<D,0>::type,2,Enabler> 
       struct
       get_t 
       {
-	/** The type. */
-	typedef typename   boost::mpl::at<typename base::type,typename boost::mpl::int_<index>::type >::type type;
+	typedef typename  boost::mpl::at<typename base::type,typename boost::mpl::int_<index>::type >::type type;
       };
+
+      /** Get the object stored at the given index.
+       *  @tparam index The index of the object whose type you want.
+       *  @return The object stored at the given index.
+       */
+      template<int index>
+      typename boost::add_pointer<typename get_t<index>::type>::type&
+      get()
+      {
+	return boost::fusion::at_c<index>(m_data);
+      }
+      
+      /** Get the object stored at the given index.
+       *  @tparam index The index of the object whose type you want.
+       *  @return The object stored at the given index.
+       */
+      template<int index>
+      const typename  boost::add_pointer<typename get_t<index>::type>::type& 
+      get() const
+      {
+	return boost::fusion::at_c<index>(m_data);
+      }
+
     };
 
     template<class v1_t, class v2_t>
