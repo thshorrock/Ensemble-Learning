@@ -4,7 +4,7 @@ project (EnsembleLearningProject)
 
 # The version number.
 set (EnsembleLearning_VERSION_MAJOR 0)
-set (EnsembleLearning_VERSION_MINOR 1)
+set (EnsembleLearning_VERSION_MINOR 2)
 set (EnsembleLearning_PATCH_LEVEL 0 )
 
 # project options
