@@ -5,7 +5,7 @@ project (EnsembleLearningProject)
 # The version number.
 set (EnsembleLearning_VERSION_MAJOR 0)
 set (EnsembleLearning_VERSION_MINOR 1)
-set (EnsembleLearning_PATCH_LEVEL 0 )
+set (EnsembleLearning_PATCH_LEVEL 3 )
 
 # project options
 OPTION( BUILD_SHARED_LIBS "Set to OFF to build static libraries" ON )
@@ -179,10 +179,10 @@ IF( BUILD_EXAMPLES )
 
 
 
-  add_subdirectory(example/InferData1)
-  add_subdirectory(example/InferMixtureData1)
-  add_subdirectory(example/InferScaledData1)
-  add_subdirectory(example/ICA/build)
+  #add_subdirectory(example/InferData1)
+  #add_subdirectory(example/InferMixtureData1)
+  #add_subdirectory(example/InferScaledData1)
+  #add_subdirectory(example/ICA/build)
   
 
 ENDIF( BUILD_EXAMPLES )
