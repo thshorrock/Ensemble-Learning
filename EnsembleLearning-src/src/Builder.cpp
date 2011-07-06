@@ -78,32 +78,6 @@ ICR::EnsembleLearning::Builder<T>::~Builder()
 {
 }
 
-template<class T>
-typename ICR::EnsembleLearning::Builder<T>::WeightsNode
-ICR::EnsembleLearning::Builder<T>::weights()
-{
-  typedef DirichletConstType prior_t;
-  typedef ICR::EnsembleLearning::NoSecondParent blank;
-  typedef DirichletType child_t;
-  typedef detail::Factor<Dirichlet,T,prior_t,blank,child_t,ENSEMBLE_LEARNING_COMPONENTS> Factor_t;
-  
-
-  boost::shared_ptr<DirichletConstType > nDirichletPrior(new DirichletConstType(1.0));
-  boost::shared_ptr<DirichletType >      nDirichlet(new DirichletType());
-  
-  boost::shared_ptr<Factor_t>    
-    DirichletF(new Factor_t(nDirichletPrior.get(), nDirichlet.get()));
-  
-  m_Nodes.push_back(nDirichletPrior);
-  m_Nodes.push_back(nDirichlet);
-  
-  m_Factors.push_back(DirichletF);
-
-  return nDirichlet.get();
-
-	
-}
-
 // template<class T>
 // typename ICR::EnsembleLearning::Builder<T>::RectifiedGaussianNode
 // ICR::EnsembleLearning::Builder<T>::rectified_gaussian(Variable Mean,Variable  Precision)

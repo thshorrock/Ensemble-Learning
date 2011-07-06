@@ -1639,6 +1639,37 @@ ICR::EnsembleLearning::Builder<T>::join(MeanType<RectifiedGaussian,T,MeanId,2,Me
 //Mixture
 
 template<class T>
+typename ICR::EnsembleLearning::Builder<T>::WeightsNode
+ICR::EnsembleLearning::Builder<T>::weights()
+{
+  typedef DirichletConstType prior_t;
+  typedef ICR::EnsembleLearning::NoSecondParent blank;
+  typedef DirichletType child_t;
+  typedef detail::Factor<Dirichlet,T,prior_t,blank,child_t,ENSEMBLE_LEARNING_COMPONENTS> Factor_t;
+  
+  //std::cout<<"COMP = "<<ENSEMBLE_LEARNING_COMPONENTS<<std::endl;
+
+
+  boost::shared_ptr<DirichletConstType > nDirichletPrior(new DirichletConstType(1.0));
+  boost::shared_ptr<DirichletType >      nDirichlet(new DirichletType());
+  
+  //std::cout<<"DIRICHLET = "<<nDirichlet.get()<<std::endl;
+
+
+  boost::shared_ptr<Factor_t>    
+    DirichletF(new Factor_t(nDirichletPrior.get(), nDirichlet.get()));
+  
+  m_Nodes.push_back(nDirichletPrior);
+  m_Nodes.push_back(nDirichlet);
+  
+  m_Factors.push_back(DirichletF);
+
+  return nDirichlet.get();
+
+	
+}
+
+template<class T>
 template<class vMean_t, class vPrec_t>
 typename ICR::EnsembleLearning::Builder<T>::GaussianNode
 ICR::EnsembleLearning::Builder<T>::gaussian_mixture(
@@ -1720,10 +1751,17 @@ ICR::EnsembleLearning::Builder<T>::join( vMean_t& vMean, vPrec_t& vPrecision, We
   boost::shared_ptr<GaussianDataType > Data(new GaussianDataType(data));
   ++m_data_nodes;
 
+  //std::cout<<"***DAT = "<<Data.get()<<std::endl;
+
   const size_t number = Weights->size();
+  //std::cout<<"Weights size = "<<Weights->size()<<std::endl;
+
 	
   boost::shared_ptr<catagory_t>         Catagory(new catagory_t());
+  //std::cout<<"***CAT = "<<Catagory.get()<<std::endl;
   boost::shared_ptr< Factor_t>      CatagoryF(new Factor_t(Weights, Catagory.get()));
+  // std::cout<<"***FACTOR = "<<CatagoryF.get()<<std::endl;
+
   m_Nodes.push_back(Catagory);
   m_Factors.push_back(CatagoryF);
   //make the vector of precision nodes and CatagoryNodes
