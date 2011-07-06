@@ -31,7 +31,7 @@
 
 #include "Random.hpp"
 #include "EnsembleLearning/detail/parallel_algorithms.hpp"
-#include "EnsembleLearning/detail/MixtureVector.hpp" //for ENSEMBLE_LEARNING_COMPONENTS
+#include "EnsembleLearning/detail/MACRO_defaults.hpp"//for ENSEMBLE_LEARNING_COMPONENTS
 #include "EnsembleLearning/message/Moments.hpp"
 #include "EnsembleLearning/message/NaturalParameters.hpp"
 #include "EnsembleLearning/node/Node.hpp"

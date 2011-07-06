@@ -28,7 +28,9 @@
 #ifndef MIXTUREVECTOR_HPP
 #define MIXTUREVECTOR_HPP
 
-//#include "EnsembleLearning/node/variable/Observed.hpp"
+#include "MACRO_defaults.hpp"
+
+#include "EnsembleLearning/node/variable/Observed.hpp"
 #include "EnsembleLearning/node/variable/Hidden.hpp"
 #include "EnsembleLearning/detail/TypeList.hpp"
 
@@ -47,25 +49,14 @@
 #include <boost/fusion/include/mpl.hpp>
 #include <boost/fusion/include/insert_range.hpp>
 
-//The maximum number of components is given by FUSION_MAX_VECTOR_SIZE (default is 20)
-//If we want to increase the number of componets beyond this, then need to increase this size.
-#ifdef ENSEMBLE_LEARNING_MAX_COMPONENTS
-#  define FUSION_MAX_VECTOR_SIZE ENSEMBLE_LEARNING_MAX_COMPONENTS
-#endif
-#ifndef ENSEMBLE_LEARNING_COMPONENTS
-#  define ENSEMBLE_LEARNING_COMPONENTS 5
-#endif
-#ifndef ENSEMBLE_LEARNING_PLACEHOLDERS
-#  define ENSEMBLE_LEARNING_PLACEHOLDERS 5
-#endif
 namespace ICR{
   namespace EnsembleLearning{
 
-    template<template<class> class Model,
-	     class T,class List,int array_size
-	     ,class Enable 
-	     >
-    class ObservedNode ; //uninitialised
+    // template<template<class> class Model,
+    // 	     class T,class List,int array_size
+    // 	     ,class Enable 
+    // 	     >
+    // class ObservedNode ; //uninitialised
     
     /** A vector of repeated types */
     template<int i, typename T>
@@ -368,6 +359,18 @@ typedef  boost::mpl::vector<ModelType<Model,T,typename Op<D,0>::type,2,Enabler> 
 						  typename boost::mpl::apply_wrap2<detail::TypeList::scale,
 										   detail::TypeList::position,
 										   typename boost::mpl::int_<from>::type>::type>
+    {};
+
+    template<template<class> class Model, class T, 
+	     int from = 1 , int size = ENSEMBLE_LEARNING_PLACEHOLDERS>
+    struct ObservedCalculationVector : public Vector_impl<ObservedNode,
+							  Model, 
+							  T, 
+							  size-1 ,
+							  detail::TypeList::incr_position,
+							  typename boost::mpl::apply_wrap2<detail::TypeList::scale,
+											   detail::TypeList::position,
+											   typename boost::mpl::int_<from>::type>::type>
     {};
 
     template<template<template<class> class,class,class,int,class> class ModelType,

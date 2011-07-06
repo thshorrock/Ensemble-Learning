@@ -547,6 +547,24 @@ namespace ICR{
 	return CV;
       }
 
+
+      template<template<class> class Model,
+	       int from, int array_size>
+      ObservedCalculationVector<Model,T,from,array_size>
+      observed_calculation(const std::vector<T>& vals )
+      {
+	typedef  ObservedCalculationVector<Model,T,from,array_size>
+      	  CV_t;
+	
+	CV_t CV;
+	
+	boost::fusion::for_each(CV.data(), 
+				MakeObsNode<Model>
+				(m_Factors, m_Nodes,
+				 vals));
+	return CV;
+      }
+
       // template<template<class> class Model,int array_size, class Mean_t , class Prec_t >
       // CalculationVector<Model,T,array_size>
       // calculation( boost::ublas::vector<Mean_t>& mean,
@@ -1186,6 +1204,38 @@ namespace ICR{
       };
 
 
+      template<template<class> class Model>
+      struct MakeObsNode
+      {
+	MakeObsNode(std::vector<boost::shared_ptr<FactorNode_basic> >& F,
+		  std::vector<boost::shared_ptr<VariableNode_basic > >& N,
+		 const  std::vector<T>& vals
+		  )
+	  : m_F(F), m_N(N),m_vals(vals),index(0)
+	{}
+	
+	template <class Node>
+	void operator()(Node& node) const
+	//it0, Itr1 it1, ItrChild itC) const
+	{
+	  typedef typename boost::remove_pointer<typename boost::remove_reference<Node>::type>::type child_t;
+	  
+	  boost::shared_ptr<child_t> child( new child_t(m_vals[index]) );
+	  
+	  m_N.push_back(child);
+	  node = child.get();
+	  //std::cout<<"model = "<<ch<<std::endl;
+	  
+	  ++index;
+
+
+	}
+	mutable std::vector<boost::shared_ptr<FactorNode_basic> >& m_F;
+	mutable std::vector<boost::shared_ptr<VariableNode_basic > >& m_N;
+	const std::vector<T>& m_vals;
+	mutable size_t index;
+	
+      };
 
       template<template<class> class Model>
       struct MakeModel

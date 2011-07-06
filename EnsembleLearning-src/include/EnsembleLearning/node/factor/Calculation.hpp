@@ -29,7 +29,7 @@
 
 #include "EnsembleLearning/node/Node.hpp"
 //#include "EnsembleLearning/node/variable/Calculation.hpp"
-#include "EnsembleLearning/detail/MixtureVector.hpp" //for ENSEMBLE_LEARNING_COMPONENTS
+#include "EnsembleLearning/detail/MACRO_defaults.hpp"//for ENSEMBLE_LEARNING_COMPONENTS
 #include "EnsembleLearning/calculation_tree/Context.hpp"
 #include "EnsembleLearning/detail/TypeList.hpp"
 
